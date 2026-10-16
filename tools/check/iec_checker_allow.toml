@@ -161,3 +161,29 @@ id = "UnusedVariable"
 file = "tests/POUs/Suites/FB_Runtime_Test/FB_Runtime_Test.decl.st"
 match = "variable: (RT_SAMPLES|UIRTCOUNT|ALTRTSTAMP)$"
 reason = "Артефакт понижения: состояние многоциклового теста используют методы-тесты набора (вынесены сборкой iec-checker в функции)"
+
+# =====================================================================================================
+# Семейство арматуры: FB_Valve, FB_ControlValve и их тесты
+# =====================================================================================================
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Devices/FB_Valve/*"
+reason = "Классическая цикломатическая сложность (решений IF/ELSIF/WHILE + 1): тело 10, DriveToTarget 20, HandleCommands 15, TrackPosition 14, RunTravelTimers 12, SelectTarget 10, ResetFaults и CheckConfig по 8, остальные методы 3–5; тело разбито на шаги цикла по контракту 9.4. iec_checker 0.4 считает завышенно (docs/fb/FB_Valve.md, «Статанализ»)"
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Devices/FB_ControlValve/*"
+reason = "Классическая цикломатическая сложность (решений IF/ELSIF/WHILE + 1): тело 16, SelectOutput 12, CheckConfig 8, OnModeChanged 2; выбор выхода по таблице 16.3 контракта вынесен в шаг SelectOutput. iec_checker 0.4 считает завышенно (docs/fb/FB_ControlValve.md, «Статанализ»)"
+
+[[allow]]
+id = "UnusedVariable"
+file = "src/POUs/Devices/FB_Valve/FB_Valve.decl.st"
+match = "variable: (XAUTOOPEN|XEXTFAULT|XQOPEN|XQCLOSE|XQCOIL|EMANTARGET|ESOLCMD|ELASTEND|XENDBYLS|XRESETWIN|WILKPREV|XACTPREV|LTACTACCUM|XSUPERVISE|XPOSSUP|XMAYOPEN|XMAYCLOSE|XDRIVE|XENTERMOVE)$"
+reason = "Артефакт понижения: эти входы, выходы и переменные используют только методы-шаги тела (ResetFaults, HandleCommands, SelectTarget, SuperviseLimits, TrackPosition, DriveToTarget, RunTravelTimers, SetOutputs, CountOperations, OnModeChanged), которые сборка iec-checker выносит в отдельные функции"
+
+[[allow]]
+id = "UnusedVariable"
+file = "src/POUs/Devices/FB_ControlValve/FB_ControlValve.decl.st"
+match = "variable: RPOSSPAUTO_PCT$"
+reason = "Артефакт понижения: вход использует только метод SelectOutput, который сборка iec-checker выносит в отдельную функцию"

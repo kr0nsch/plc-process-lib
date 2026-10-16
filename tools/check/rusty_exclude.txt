@@ -23,3 +23,11 @@ FB_Alarm_Test.st  # приёмник событий FB_TestSink исключён
 FB_DeviceBase_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036
 FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036, E034
 GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
+#
+# Семейство арматуры: stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT (контракт, раздел 0), объявление
+# даёт E034, каждый вызов устройства — E036. Логику проверяют тесты coUnit в CODESYS и iec_checker.
+FB_Valve.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036 (CheckAlarmCfg)
+FB_ControlValve.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036 (CheckAlarmCfg)
+FB_Valve_Test.st  # вызовы FB_Valve со stCfg (VAR_IN_OUT CONSTANT): E036; FB_Valve исключён выше
+FB_ControlValve_Test.st  # вызовы FB_ControlValve со stCfg (VAR_IN_OUT CONSTANT): E036; ФБ исключён выше
+GVL_TestsValve.st  # экземпляры наборов арматуры, исключённых выше
