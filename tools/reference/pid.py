@@ -642,6 +642,33 @@ def scenario_track() -> Result:
     return res
 
 
+def scenario_track_d() -> Result:
+    """Pid_Track_PvMoving_NoDerivativeKickAtRelease: слежение за 30 %, PV падает 2,5 %/с, Td = 1 с.
+
+    Kp = 2, Ti = 10 с, Td = 1 с, N = 10 (Tf = 0,1 с); PV — шагами 0,25 (точно в REAL). За 2 с слежения
+    D выходит на 5 %; предустановка I := u − P − D держит v = u, поэтому снятие слежения даёт выход
+    30 % плюс изменение P и D за один шаг, а не скачок на D (без −D в предустановке — около +5 %).
+    """
+    sim = PidSim(PidCfg(kp=2.0, ti_s=10.0, td_s=1.0), remote_mode=Mode.AUTO)
+    sim.cmd_sp = 50.0
+    sim.pv = 50.0
+    sim.pv_valid = True
+    sim.track = True
+    sim.track_value = 30.0
+    sim.call()
+    for _ in range(20):
+        sim.pv = sim.pv - 0.25
+        sim.advance_ms(100)
+        sim.call()
+    res = {"d_track": sim.d, "i_track": sim.i, "out_track": sim.out}
+    sim.track = False
+    sim.pv = sim.pv - 0.25
+    sim.advance_ms(100)
+    sim.call()
+    res |= {"out_release": sim.out, "d_release": sim.d}
+    return res
+
+
 def scenario_real_dt() -> Result:
     """Pid_RealDt_SameResultFor10msAnd100msSteps: тот же интеграл за 5 с при шаге 10 и 100 мс."""
     res: Result = {}
@@ -977,6 +1004,46 @@ def scenario_sp_ramp_pv_fail() -> Result:
     return res
 
 
+def scenario_outact_nan() -> Result:
+    """Pid_AntiWindup_OutActNaN_UsesOwnOutput: xUseOutAct, а rOutAct_pct не конечен (обрыв связи с ПЧ).
+
+    Последовательность сценария integral (Kp = 2, Ti = 10 с, e = 4 %): обратный расчёт идёт по
+    собственному выходу, без насыщения член u − v равен нулю — числа совпадают с integral.
+    """
+    sim = PidSim(PidCfg(kp=2.0, ti_s=10.0, use_out_act=True))
+    sim.cmd_manual_out = 30.0
+    sim.cmd_sp = 50.0
+    sim.pv = 50.0
+    sim.pv_valid = True
+    sim.out_act = math.nan  # с первого вызова
+    sim.call()
+    _to_auto(sim)
+    sim.pv = 46.0
+    _run(sim, 1)
+    out_1 = sim.out
+    _run(sim, 50)
+    return {"out_first": out_1, "out_after_5s": sim.out, "i_after_5s": sim.i}
+
+
+def scenario_dt_zero() -> Result:
+    """Pid_SameTimestamp_NoCalc_HoldsOutput: второй вызов в тот же момент (dt = 0) не считает.
+
+    Kp = 1, Ti = 10 с, Td = 2 с (Tf = 0,2 с). PV меняется 50 -> 49 в вызове с тем же временем: выход
+    и D прежние; следующий шаг 100 мс учитывает изменение PV один раз. С расчётом при dt = 0 D
+    получил бы всплеск Kp·Td/Tf·ΔPV = 10 %.
+    """
+    sim = _start(PidCfg(kp=1.0, ti_s=10.0, td_s=2.0), manual_out=40.0, sp=50.0, pv=50.0)
+    _to_auto(sim)
+    _run(sim, 5)
+    res = {"out_before": sim.out, "d_before": sim.d}
+    sim.pv = 49.0
+    sim.call()  # то же время
+    res |= {"out_same": sim.out, "d_same": sim.d}
+    _run(sim, 1)
+    res |= {"out_next": sim.out, "d_next": sim.d, "dt_ms_next": sim.dt_ms}
+    return res
+
+
 def scenario_fopdt_open() -> Result:
     """FopdtModel_OpenLoopStep_MatchesPythonReference: u = 10 % с t = 0, K = 2, T = 20 с, L = 4 с."""
     plant = Fopdt()
@@ -1001,6 +1068,7 @@ SCENARIOS: dict[str, Callable[[], Result]] = {
     "rate_limit": scenario_rate_limit,
     "manual_to_auto": scenario_manual_to_auto,
     "track": scenario_track,
+    "track_d": scenario_track_d,
     "real_dt": scenario_real_dt,
     "sample": scenario_sample,
     "dt_gap": scenario_dt_gap,
@@ -1019,6 +1087,8 @@ SCENARIOS: dict[str, Callable[[], Result]] = {
     "start_outact": scenario_start_outact,
     "dt_boundary": scenario_dt_boundary,
     "sp_ramp_pv_fail": scenario_sp_ramp_pv_fail,
+    "outact_nan": scenario_outact_nan,
+    "dt_zero": scenario_dt_zero,
 }
 
 _CACHE: dict[str, Result] = {}
