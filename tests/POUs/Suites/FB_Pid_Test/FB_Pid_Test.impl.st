@@ -42,3 +42,5 @@ AntiWindupTtBelowDtGainClampedToOne();
 StartupOutActInitialisesOutput();
 DtGapBoundaryAtTDtMax();
 SetpointRampResumesAfterPvFailure();
+PvFailShedToManualAlarmStaysActive();
+SetpointNaNHeldTargetWithinSpLimits();

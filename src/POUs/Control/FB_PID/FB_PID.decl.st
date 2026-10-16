@@ -57,6 +57,7 @@ VAR
     xInDeadband   : BOOL;            // ошибка в зоне нечувствительности (последний расчёт)
     xOutRateLim   : BOOL;            // выход ограничен по скорости (последний расчёт в Auto)
     xTrackAct     : BOOL;            // выход следует за rTrack_pct
+    xPvShed       : BOOL;            // ФБ сам перевёл контур в Manual по отказу PV (ShedToManual)
 END_VAR
 VAR_TEMP
     xAutoReq      : BOOL;            // в этом вызове запрошен Auto

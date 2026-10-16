@@ -314,9 +314,11 @@ class PidSim:
             sp_raw = f32(self.cmd_sp)
         self.sp_invalid = not is_finite_real(sp_raw)
         if not self.sp_invalid:
-            self.lr_sp_target = limit(cfg.sp_min, sp_raw, cfg.sp_max)
+            self.lr_sp_target = sp_raw
             if self.sp_ext or sp_track:
                 self.cmd_sp = sp_raw
+        # пределы и для удерживаемой цели (NaN с первого вызова, смена пределов при NaN; P-16)
+        self.lr_sp_target = limit(cfg.sp_min, self.lr_sp_target, cfg.sp_max)
         # 6.2 Нужен ли расчёт
         calc = False
         init_step = False

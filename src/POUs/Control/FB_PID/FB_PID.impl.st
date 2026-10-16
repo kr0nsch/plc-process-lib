@@ -56,16 +56,23 @@ IF eRes <> E_CmdResult.None THEN
 END_IF
 
 // 5. Переходы логики: PV негодна в Auto без слежения и реакция ShedToManual — в Manual с
-//    текущим выходом (stCmd.rManualOut_pct уже равен выходу: слежение в Auto)
+//    текущим выходом (stCmd.rManualOut_pct уже равен выходу: слежение в Auto). Признак
+//    сброса держит тревогу PvInvalid в Manual, пока PV негодна; снимают его годная PV и
+//    выбор оператором OutOfService (docs/fb/FB_PID.md, P-15)
 IF xCfgEverOk AND eMode = E_DeviceMode.Auto AND NOT xPvOk AND NOT xTrack
    AND stCfgLkg.ePvFailAction = E_PidPvFailAction.ShedToManual
 THEN
     SwitchRemoteMode(eNew := E_DeviceMode.Manual, stRetain := stRetain);
+    xPvShed := TRUE;
+END_IF
+IF xPvOk OR eMode <> E_DeviceMode.Manual THEN
+    xPvShed := FALSE;
 END_IF
 
 // 6. Логика по stCfgLkg
 // 6.1 Задание: цель (внешнее, PV при слежении задания в Manual или операторское), пределы.
-//     Неконечная цель — прежняя цель и предупреждение. Внешнее задание и PV пишутся в
+//     Неконечная цель — прежняя цель и предупреждение; пределы действуют и на неё (NaN с
+//     первого вызова, смена пределов при NaN; P-16). Внешнее задание и PV пишутся в
 //     stCmd.rSp_eu: переход на операторское задание без рывка
 xSpTrack := eMode = E_DeviceMode.Manual AND stCfgLkg.xSpTrackPv AND NOT xSpExt AND xPvOk;
 IF xSpExt THEN
@@ -77,12 +84,12 @@ ELSE
 END_IF
 xSpInvalid := NOT F_IsFinite(rIn := rSpRaw_eu);
 IF NOT xSpInvalid THEN
-    lrSpTarget_eu := LIMIT(REAL_TO_LREAL(stCfgLkg.rSpMin_eu), REAL_TO_LREAL(rSpRaw_eu),
-                           REAL_TO_LREAL(stCfgLkg.rSpMax_eu));
+    lrSpTarget_eu := REAL_TO_LREAL(rSpRaw_eu);
     IF xCfgEverOk AND (xSpExt OR xSpTrack) THEN
         stCmd.rSp_eu := rSpRaw_eu;
     END_IF
 END_IF
+lrSpTarget_eu := LIMIT(REAL_TO_LREAL(stCfgLkg.rSpMin_eu), lrSpTarget_eu, REAL_TO_LREAL(stCfgLkg.rSpMax_eu));
 
 // 6.2 Нужен ли расчёт. Без корректной Cfg и при негодной PV расчёта нет, следующий — шаг
 //     инициализации; в OutOfService расчёта нет (выход из OOS ставит инициализацию в хуке).
@@ -129,8 +136,8 @@ IF xCfgEverOk AND (eMode <> E_DeviceMode.Manual OR xTrackAct) THEN
     stCmd.rManualOut_pct := LREAL_TO_REAL(lrOut_pct);
 END_IF
 
-// 7. Тревоги: слот 0 PvInvalid — PV негодна в Auto
-axAlmCond[E_PidAlarm.PvInvalid] := NOT xPvOk AND eMode = E_DeviceMode.Auto;
+// 7. Тревоги: слот 0 PvInvalid — PV негодна в Auto или после сброса в Manual по отказу PV
+axAlmCond[E_PidAlarm.PvInvalid] := NOT xPvOk AND (eMode = E_DeviceMode.Auto OR xPvShed);
 axAlmSuppress[E_PidAlarm.PvInvalid] := FALSE;
 arAlmValue[E_PidAlarm.PvInvalid] := rPv_eu;
 RunAlarms(udiIdBase := stCfgLkg.udiAlarmIdBase, stCmd := stCmd.stCommon, astCfg := stCfgLkg.astAlarm);
