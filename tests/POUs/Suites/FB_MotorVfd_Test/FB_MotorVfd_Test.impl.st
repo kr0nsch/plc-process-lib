@@ -22,3 +22,7 @@ LocalModeRefTracksActualSpeed();
 PlcRestartFbFromDiAdoptedWithoutFault();
 PlcRestartCommLaterAdoptedWithoutFault();
 SpeedDeviationDuringRampIgnored();
+CommLostStatusWordIgnored();
+CommLossInOosNoFaultNoWarning();
+StartWithNaNTargetRefStartsAtMin();
+CommLossWhileStoppingHoldsStopping();

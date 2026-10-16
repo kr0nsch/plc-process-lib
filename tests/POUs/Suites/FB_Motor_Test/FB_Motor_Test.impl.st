@@ -49,3 +49,5 @@ PowerDipFeedbackStaysStoppingWithoutUncommandedRun();
 FeedbackStaysAfterTripRaisesFailToStop();
 FeedbackDropoutWithinFilterNotCountedAsStart();
 ReadyToStartFalseWhileStarting();
+OosRequestWhileRunningByFeedbackRejected();
+ResetFailToStopClearedOnlyAfterMotorStops();

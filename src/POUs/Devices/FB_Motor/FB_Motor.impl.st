@@ -73,10 +73,11 @@ IF xResetWindow THEN
     END_IF
 END_IF
 
-// 4. Режим: Local поддерживается; вывод из работы — только когда механизм стоит
+// 4. Режим: Local поддерживается; вывод из работы — только когда механизм стоит: не Starting, Running,
+//    Stopping и не работает по ОС (Fault с ОС — сварился контактор: вход в OOS снял бы FailToStop, M-23)
 eRes := ProcessMode(xLocalSel := xLocal, xLocalSupported := TRUE,
                     xOosAllowed := NOT (eState = E_MotorState.Starting OR eState = E_MotorState.Running
-                                        OR eState = E_MotorState.Stopping),
+                                        OR eState = E_MotorState.Stopping OR xRunning),
                     stCmd := stCmd.stCommon, stRetain := stRetain);
 IF eRes <> E_CmdResult.None THEN
     SetCmdResult(eResult := eRes);
