@@ -23,3 +23,13 @@ FB_Alarm_Test.st  # приёмник событий FB_TestSink исключён
 FB_DeviceBase_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036
 FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036, E034
 GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
+#
+# Семейство входов: stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT (контракт, разделы 11.2, 12.2): E034 в
+# объявлении, E036 в каждом вызове (CheckConfig, CheckAlarmCfg базы, вызовы устройства в тестах). Других
+# ошибок RuSTy в файлах устройств нет (прогон 16.10.2026: остальное — предупреждения E049 о доступе к
+# переменным базы, которые в CODESYS наследуются). Имён этих файлов нет в фикстуре шаблона.
+FB_AnalogInput.st  # stCfg, CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036
+FB_DigitalInput.st  # stCfg, CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036
+FB_AnalogInput_Test.st  # вызовы FB_AnalogInput со stCfg (VAR_IN_OUT CONSTANT): E036
+FB_DigitalInput_Test.st  # вызовы FB_DigitalInput со stCfg (VAR_IN_OUT CONSTANT): E036
+GVL_TestsAiDi.st  # экземпляры наборов, исключённых выше
