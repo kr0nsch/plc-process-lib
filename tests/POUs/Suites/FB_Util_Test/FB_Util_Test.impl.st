@@ -1,0 +1,27 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов
+IsFiniteNaNReturnsFalse();
+IsFiniteInfReturnsFalse();
+IsFiniteNormalReturnsTrue();
+IsFiniteAboveSaneMaxReturnsFalse();
+Ne107WorstReturnsMostSevere();
+RateLimitUpAndDownRatesSeparate();
+RateLimitZeroRateJumps();
+RateLimitZeroDtNoChange();
+RateLimitNonFiniteTargetHoldsCurrent();
+RateLimitNonFiniteCurrentJumpsToTarget();
+RateLimitSmallStepReachesTargetExactly();
+StartsWindowCountsOnlyLastHour();
+StartsWindowTimeToFreeReportsRemaining();
+StartsWindowExactlyOneHourOldNotCounted();
+StartsWindowRingFullOverwritesOldest();
+StartsWindowRingCapacityMatchesConst();
+StartsWindowTimeBackwardsDropsFutureStamps();
+StartsWindowClearEmpties();
+LimitMonitorHighHysteresisClearsBelowSpMinusHyst();
+LimitMonitorLowHysteresisClearsAboveSpPlusHyst();
+LimitMonitorForceOffClearsImmediately();
+LimitMonitorDisabledNeverSets();
+LimitMonitorOnDelayShortExcursionIgnored();
+LimitMonitorOffDelayHoldsFlag();
+LimitMonitorNonFiniteValueKeepsState();
+LimitMonitorReenabledRestartsOnDelay();

@@ -1,0 +1,1 @@
+ProbeAlarmCfg := CheckAlarmCfg(astCfg := astCfgIn);

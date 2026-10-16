@@ -1,0 +1,1 @@
+CallViaThis := THIS^.Hook();

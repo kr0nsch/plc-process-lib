@@ -1,0 +1,25 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов
+LTimeToSecOneSecondReturnsOne();
+LTimeToSecNanosecondAndDaysExact();
+TimeToSec1500msReturns1p5();
+TimeToSecMaxTimeNoOverflow();
+FakeTimeStartsAtOneHour();
+FakeTimeAdvanceAddsStep();
+FakeTimeSetNowSetsValue();
+FakeTimeAdvanceLSubMsAndLongSteps();
+FakeTimeViaInterfaceReturnsSameTime();
+SystemTimeIsMonotonic();
+ZeroDelaysPassThroughSameCall();
+OnDelayOutputExactlyAtDelay();
+OnDelayShortPulseIgnored();
+OffDelayHoldsOutputForDelay();
+DelayChangedWhileTimingUsesNewValue();
+PresetForcesOutputWithoutDelay();
+PresetRestartsTimingOnNextCall();
+TimeGoesBackwardsRestartsTiming();
+NoTimeSourceFallsBackToSystemTime();
+RemainingReportsTimeLeft();
+BothDelaysOnThenOffTimed();
+OffDelayShortGapIgnored();
+TimingFlagsReflectCountdown();
+FirstCallWithInputTrueStartsOnDelay();
