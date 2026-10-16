@@ -124,9 +124,10 @@ flowchart LR
 4. **Фильтр** — точная экспонента `lrFlt += (1 − EXP(−dt/T))·(x_eu − lrFlt)`, `dt` — реальное время
    между вызовами (`ltDt` базы). Реакция на ступень одинакова при любом цикле: за одну T — 63,2 %
    (тест `AnalogInput_Filter_IndependentOfCycleTime`: шаги 10 мс, 250 мс и неравномерный дают одно
-   значение). Первый расчёт, расчёт после мгновенного отказа сигнала (`xRawFail`, даже не
-   подтверждённого), после OutOfService и до первой корректной Cfg начинают фильтр с текущего значения.
-   «Время назад» даёт `dt = 0`: значение не меняется.
+   значение). Пока сигнал отказал (`xRawFail`), фильтр не обновляется. Первый расчёт, расчёт после
+   подтверждённого отказа (`xFail`), после OutOfService и до первой корректной Cfg начинают фильтр с
+   текущего значения; короткий неподтверждённый провал фильтр только замораживает — после него значение
+   продолжается без скачка (AI-12). «Время назад» даёт `dt = 0`: значение не меняется.
 
 ### Выбор значения
 
@@ -273,7 +274,7 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 | № | Суть | Обоснование |
 |---|---|---|
 | AI-1 | Защищённые методы сверх 22.4 контракта: `CallLimit`, `ClassifySignal`, `ComputeValue`, `SelectValue`, `FaultBits`, `WarningBits`, `SubstRemainSec`. Их имена зарезервированы для наследников | Вызов `afbLimit[i](...)` и поле `afbLimit[i].xOut` iec_checker 0.4 не разбирает (как `CallAlarmSlot` базы, F-19). Тело — нормативные шаги 9.4, детали шагов 6.1–6.4 — в методах: классическая сложность каждого ≤ 12. Методы `PROTECTED` (L5), `VAR_IN_OUT` не трогают (R2) |
-| AI-2 | **Отказ сигнала без свежего хорошего значения** — с первого вызова после старта ПЛК или в первом вызове после выхода из OutOfService (и до первой корректной Cfg): на время подтверждения значение — как при подтверждённом отказе (`Substitute` — `rFailValue_eu`; `HoldLast` — 0.0 после старта, удерживаемое значение после OutOfService), `xValid = FALSE`, уставки сняты (если не `xLimitsOnFail`), бита `AI_STS_FAIL_PENDING` нет. NE 107 и тревога Failure — по-прежнему через `tFailDelay`. Пока сигнал не контролируется (OutOfService, нет корректной Cfg), «последнее хорошее» забывается | Таблица 11.3 («последнее хорошее, `xValid = TRUE`») этот случай не покрывает: удерживать нечего или удерживаемое значение неизвестной давности (датчик меняли «в ремонте»). «Годный ноль» дал бы ложный LL при пуске ПЛК с оборванной линией, а значение до вывода из работы — ложные H/HH или пропуск LL на `tFailDelay` после возврата в работу с неподключённой линией — то, от чего удержание и защищает. Тесты `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue`, `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` |
+| AI-2 | **Отказ сигнала без свежего хорошего значения** — с первого вызова после старта ПЛК или в первом вызове после выхода из OutOfService (и до первой корректной Cfg): на время подтверждения значение — как при подтверждённом отказе (`Substitute` — `rFailValue_eu`; `HoldLast` — 0.0 после старта, последнее хорошее измеренное до вывода из работы — после OutOfService), `xValid = FALSE`, уставки сняты (если не `xLimitsOnFail`), бита `AI_STS_FAIL_PENDING` нет. NE 107 и тревога Failure — по-прежнему через `tFailDelay`. Пока сигнал не контролируется (OutOfService, нет корректной Cfg), «последнее хорошее» забывается | Таблица 11.3 («последнее хорошее, `xValid = TRUE`») этот случай не покрывает: удерживать нечего или удерживаемое значение неизвестной давности (датчик меняли «в ремонте»). «Годный ноль» дал бы ложный LL при пуске ПЛК с оборванной линией, а значение до вывода из работы — ложные H/HH или пропуск LL на `tFailDelay` после возврата в работу с неподключённой линией — то, от чего удержание и защищает. Тесты `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue`, `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` |
 | AI-3 | Без корректной Cfg и в OutOfService сигнал не контролируется: подтверждения сброшены, `xFail = xOor = FALSE`; обрыв в OutOfService даёт CheckFunction, а не Failure | Без Cfg тип входа неизвестен: умолчание `MilliAmp` при настоящем `Eng` дало бы ложный FailHigh. OutOfService — «в ремонте», контроль отказов «нет» (таблица 2.2). После выхода отсчёт `tFailDelay` начинается заново |
 | AI-4 | Удерживаемое значение — последнее хорошее до появления отказа; пока подтверждается возврат сигнала (`xFail` ещё TRUE), значение не обновляется, а фильтр уже идёт от текущего значения | «Последнее хорошее» не должно меняться по ещё не подтверждённому сигналу; после подтверждения выдаётся отфильтрованное без «подтягивания» от старого (тест `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter`) |
 | AI-5 | Неконечное значение подмены (NaN с HMI) не принимается: значение остаётся прежним | NaN в логике станции хуже, чем удержание; контракт не задаёт. Тест `AnalogInput_SubstitutionNonFinite_ValueHeld` |
@@ -283,6 +284,19 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 | AI-9 | `AI_STS_FAIL_PENDING` — только в Auto (в Manual значение подменено, в OutOfService контроля нет) и только когда последнее хорошее значение действительно удерживается как годное (не в случае AI-2) | Бит означает «значение удерживается» (11.5, таблица 11.3) |
 | AI-10 | Слежение `stCmd.rSubstValue_eu := rValue_eu` — во всех режимах, кроме Manual (в том числе в OutOfService и без корректной Cfg) | Правило 2.1 контракта («Auto, Local, OOS, слежение»); шаг 8 цепочки 11.3 называет только Auto |
 | AI-11 | Порядок уставок проверяется обходом HH → LL: каждая следующая включённая строго меньше предыдущей включённой — то же, что LL < L < H < HH | Цикл по перечислению `E_AiAlarm` без «магических» границ; NaN в уставке даёт ошибку |
+| AI-12 | **Фильтр после провала сигнала.** «Когда отказ ушёл, `lrFlt := rEng`» (п. 5 цепочки 11.3) — после **подтверждённого** отказа (`xFail`) и после возврата контроля (OutOfService, первая корректная Cfg). Короткий неподтверждённый провал (`xRawFail` короче `tFailDelay`) фильтр замораживает: шаг провала пропускается, после провала фильтр продолжает с прежнего состояния, значение — без скачка от удерживаемого | При сбросе после каждого мгновенного провала один цикл NaN или ошибки обмена Modbus превращал отфильтрованное значение в мгновенное: на шумном сигнале с большим `tFilter` — ложное H/HH без задержки (в ПАЗ — ложный останов). Удерживаемое на время провала значение и есть состояние фильтра, поэтому продолжение от него безударно. Тест `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` (до исправления падал: 75 вместо 52,604 и HH) |
+
+Открытые вопросы к контракту (поведение — по букве 11.3 и 11.5, решение — за интегратором):
+
+| № | Что | Почему важно | Предложение |
+|---|---|---|---|
+| AI-Q1 | Решён исправлением AI-12 (фильтр после короткого провала) | — | закрепить толкование п. 5 цепочки 11.3 в контракте |
+| AI-Q2 | Перемежающийся обрыв (плохой контакт: провалы короче `tFailDelay` с короткими возвратами) отказ не подтверждает никогда: тревоги Failure нет, `xValid = TRUE`, значение то удерживается, то измеряется | Неисправность цепи не видна оператору, пока провалы не станут длиннее `tFailDelay` | счётчик эпизодов `AI_STS_FAIL_PENDING` за окно или интегрирующее подтверждение (v1.1) |
+| AI-Q3 | Пока подтверждается возврат (`Recovering`), `wFault = 0` при NE 107 Failure (11.5: «по текущей классификации») | HMI 2 с показывает отказ без причины | держать биты причины до снятия `xFail` |
+| AI-Q4 | До первой корректной Cfg `stSts.eSignal` классифицируется по типу входа из умолчаний (`MilliAmp`) | Вход `Eng` с испорченной Cfg показывает FailLow/FailHigh, хотя контроля нет (AI-3) | `eSignal := Good`, пока нет корректной Cfg |
+| AI-Q5 | После снятия принудительного сброса уставок (возврат после подтверждённого отказа, выход из OutOfService, старт ПЛК) задержки `astLimit[i].tOnDelay` отсчитываются заново: `xValid = TRUE` сразу, а `xLL` — только через `tOnDelay`, даже если значение уже ниже LL | Защита «`xLL OR NOT xValid`» на `tOnDelay` открыта: логика станции может пустить насос при всё ещё низком уровне | для защитных уставок — `xLimitsOnFail := TRUE` с `eFailValue := Substitute` и `rFailValue_eu` по безопасную сторону уставки (флаг уставки при отказе держится и после возврата не снимается без `tOffDelay`) или фиксация блокировки в логике станции (2.4); в контракте — решить, нужен ли «сброс без задержки» при возврате |
+| AI-Q6 | Обрыв с затухающим током (входной фильтр модуля AI, ёмкость линии): несколько опросов между 20 и 3,6 мА — ещё хорошие значения. Удерживается последнее из них, оно может быть уже ниже LL | Удержание (11.3, п. 6) защищает от ложного LL только при мгновенном провале тока; при затухании дольше цикла задачи ложный LL возможен | `astLimit[LL].tOnDelay` не меньше времени установления фильтра модуля (или `tFilter`); в v1.1 — удерживать значение с отметки за заданное время до отказа |
+| AI-Q7 | Смена шкалы (`eInput`, `rRangeLo_eu`/`rRangeHi_eu`, `rRawLo_cnt`/`rRawHi_cnt`, `xSqrt`) в Auto: фильтр продолжает от значения в старых единицах | При большом `tFilter` значение «доезжает» до нового с постоянной `tFilter` и может пересечь уставки | менять шкалу в OutOfService (фильтр начнётся заново) или сбрасывать фильтр при смене шкалы в LKG |
 
 Ссылки на общие решения: A-01 (LKG), A-02 (границы NE 43), A-06 (подмена не энергонезависима), F-17
 (`AlarmPriority`), F-19 (вызов слота через метод), F-28 (порядок результатов команд) —
@@ -325,28 +339,44 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 `AnalogInput_OutOfService_HoldsValueInvalid` · ★ `AnalogInput_InvalidRangeAtStartup_CheckFunctionSafeValue` ·
 ★ `AnalogInput_LimitOrderInvalidAtRuntime_KeepsLastValidCfg`.
 
-Сверх контракта (9): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
+Сверх контракта (11): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
 режим после старта — пункты 1 и 4 чек-листа), `AnalogInput_ResetCmd_AcceptedAndAcksAlarms`,
 `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` (AI-2), `AnalogInput_AlarmEvents_FailureValueIsRawInput`,
 `AnalogInput_CfgErrBits_MatchContractMap` (каждый бит `wCfgErr`), `AnalogInput_TimeBackwards_FilterHoldsWithoutJump`,
 `AnalogInput_SubstitutionNonFinite_ValueHeld` (AI-5), `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` (AI-2 после
 OutOfService), `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` (AI-7: новый срок подмены, округление
-`uiSubstRemain_s` вверх).
+`uiSubstRemain_s` вверх), `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` (AI-12: короткий провал не сбрасывает
+фильтр, ложного HH нет), `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` (подмена при оборванной линии:
+уставки по подменённому значению, тревоги уставок подавлены, при возврате в Auto уставки сняты сразу).
 
 Контрактные тесты дополнены проверками на границах, которые раньше не ловили мутации: отсечка ровно на
 `rLowCut_pct` не срабатывает (`AnalogInput_LowCut_BelowCut_ReturnsZero`), бит `AI_STS_FAIL_PENDING` снимается
 при подтверждении отказа (`AnalogInput_WireBreak_SetsFailureAfterDelay`), слежение `rSubstValue_eu` действует
-и в OutOfService (`AnalogInput_OutOfService_HoldsValueInvalid`).
+и в OutOfService (`AnalogInput_OutOfService_HoldsValueInvalid`), отсечка, равная пределу `AI_LOWCUT_MAX_PCT`,
+допустима (`AnalogInput_CfgErrBits_MatchContractMap`).
 
 Эталоны масштабирования и фильтра — `tools/reference/ai_reference.py`; совпадение чисел в тестах с
 эталоном проверяет `tools/project_checks/test_ai_reference.py` (pytest). Проверено в CODESYS
-(Control Win V3, 16.10.2026, `cds.py test`): 49 из 49.
+(Control Win V3, 16.10.2026, `cds.py test`): 51 из 51.
 
-Мутационная проверка (16.10.2026, одна сборка с семью однострочными мутациями в разных шагах цепочки,
-затем откат): граница 3,6 мА `<=` → `<` — упал `AnalogInput_At3p6mA_IsFailure`; граница 20,5 мА `>` → `>=` —
-`AnalogInput_At20p5mA_IsGood`; фильтр — неявный Эйлер `dt/(T + dt)` вместо экспоненты —
-`AnalogInput_Filter_OneTimeConstant_Reaches63Pct`, `AnalogInput_Filter_IndependentOfCycleTime`; фильтр
-не сбрасывается после отказа — `AnalogInput_SignalRecovered_…`, `AnalogInput_NaNInput_TreatedAsFailure`;
-без правила AI-2 — `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue`; порядок уставок `<` → `<=` —
-`AnalogInput_CfgErrBits_MatchContractMap`; подавление тревог уставок без учёта `xLimitsOnFail` —
-`AnalogInput_LimitsOnFail_EvaluatesFailValue`. Каждую мутацию поймал хотя бы один тест.
+Мутационная проверка (16.10.2026, копия рабочего дерева, по одной однострочной мутации на прогон `cds.py test`,
+затем откат). Первый прогон — на исходном коде, выжившие мутации закрыты новыми проверками; второй прогон (отмечен *) —
+на коде после исправлений AI-12 и DI-2:
+
+| № | Мутация | Итог | Поймал тест |
+|---|---|---|---|
+| M01 | граница 21,0 мА: `>=` → `>` | убита | `AnalogInput_At21mA_IsFailure`, `AnalogInput_Norm420_ScalesLikeMilliamps` |
+| M02 | граница 3,8 мА: `<` → `<=` | убита | `AnalogInput_At3p8mA_IsGood` |
+| M03 | `Norm420`: ток для NE 43 без смещения 4 мА | убита | `AnalogInput_Norm420_ScalesLikeMilliamps` |
+| M04* | фильтр сбрасывается при любом провале (поведение до AI-12) | убита | `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` |
+| M05* | фильтр не сбрасывается после подтверждённого отказа | убита | `AnalogInput_SignalRecovered_…`, `AnalogInput_NaNInput_TreatedAsFailure` |
+| M06 | удерживаемое значение обновляется, пока подтверждается возврат | убита | `AnalogInput_SignalRecovered_…` |
+| M07 | `Substitute` не действует | убита | `AnalogInput_FailValueSubstitute_UsesCfgValue`, `AnalogInput_LimitsOnFail_EvaluatesFailValue` |
+| M08 | уставки снимаются при отказе и в подмене (без `eMode = Auto`) | выжила → убита* | `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` (новый) |
+| M09 | сигнал контролируется и в OutOfService | убита | `AnalogInput_OutOfService_HoldsValueInvalid`, `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` |
+| M10 | `uiSubstRemain_s` без округления вверх | убита | `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` |
+| M11 | гистерезис, равный диапазону, допустим (`<` → `<=`) | убита | `AnalogInput_CfgErrBits_MatchContractMap` |
+| M12 | отсечка, равная пределу 20 %, отвергается (`<=` → `<`) | выжила → убита* | `AnalogInput_CfgErrBits_MatchContractMap` (новая проверка) |
+
+Мутации дискретного входа — в [FB_DigitalInput.md](FB_DigitalInput.md#тесты-fb_digitalinput_test). Выживших мутаций,
+меняющих поведение, нет.

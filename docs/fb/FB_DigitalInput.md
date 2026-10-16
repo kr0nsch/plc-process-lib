@@ -86,20 +86,21 @@ stateDiagram-v2
     TimingOff --> Off : прошло tOffDelay
     Off --> ChannelFault : xChannelFault
     On --> ChannelFault : xChannelFault
-    ChannelFault --> On : канал исправен, задержки — от возврата
-    ChannelFault --> Off : канал исправен, задержки — от возврата
+    ChannelFault --> On : канал исправен, задержки — от значения отказа
+    ChannelFault --> Off : канал исправен, задержки — от значения отказа
 ```
 
-При отказе канала задержки стоят на значении до отказа (оно же — значение `HoldLast`) и после
-возврата канала отсчитываются заново от этого значения. Биты `DI_STS_TIMING_ON`/`OFF` — пока канал
-исправен.
+При отказе канала задержки стоят на значении отказа — `HoldLast`: значение до отказа, `ForceFalse`/`ForceTrue`:
+FALSE/TRUE — и после возврата канала отсчитываются заново от него (DI-2). Значение отказа снимается только через
+задержку: защитный сигнал `ForceTrue` после возврата канала не «проваливается» в FALSE, разрешающий `ForceFalse`
+снова подтверждается `tOnDelay`. Биты `DI_STS_TIMING_ON`/`OFF` — пока канал исправен.
 
 ## Безопасное состояние
 
 | Ситуация | Выходы и значения |
 |---|---|
 | Корректной Cfg ещё не было | `xValue = FALSE`, `xValid = FALSE`, NE 107 CheckFunction |
-| Отказ канала (Auto) | по `eFailValue`: `HoldLast` — значение до отказа, `ForceFalse` — FALSE, `ForceTrue` — TRUE; `xValid = FALSE`, NE 107 Failure |
+| Отказ канала (Auto) | по `eFailValue`: `HoldLast` — значение до отказа, `ForceFalse` — FALSE, `ForceTrue` — TRUE; `xValid = FALSE`, NE 107 Failure. После возврата канала значение отказа снимается через `tOnDelay`/`tOffDelay` |
 | OutOfService | значение удерживается, `xValid = FALSE` |
 | Local | — (режима нет) |
 
@@ -167,7 +168,7 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 | № | Суть | Обоснование |
 |---|---|---|
 | DI-1 | В первом вызове с корректной Cfg (после старта ПЛК — сразу, если Cfg корректна; иначе — когда её исправят) задержки предустанавливаются на текущий сигнал после инверсии из этой Cfg (`FB_Delay.Preset`): значение сразу равно входу, без `tOnDelay`/`tOffDelay` | Как фильтр AI, который начинает с текущего значения. Иначе вход, включённый при старте, `tOnDelay` выглядел бы выключенным — ложная тревога у сигналов с `xAlarmOnTrue = FALSE`. Предустановка по первой корректной Cfg, а не по первому вызову: до неё инверсия берётся из умолчаний (`xInvert = FALSE`), и НЗ-контакт после исправления Cfg прошёл бы через задержку с неверной полярностью — ложное срабатывание «сухого хода» на `tOffDelay` или пропуск срабатывания на `tOnDelay` при `xValid = TRUE`. Тесты `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay`, `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` |
-| DI-2 | При отказе канала задержки стоят на значении до отказа и отсчитываются заново после возврата канала (и отсчёт, начатый до отказа); биты отсчёта — только пока канал исправен | Сигнал при отказе канала недостоверен: дребезг «мусора» не должен попасть в значение. Тесты `DigitalInput_ChannelFault_HoldLast`, `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` |
+| DI-2 | При отказе канала задержки стоят на значении отказа (`HoldLast` — значение до отказа, `ForceFalse`/`ForceTrue` — FALSE/TRUE) и отсчитываются от него заново после возврата канала (отсчёт, начатый до отказа, тоже начинается заново); биты отсчёта — только пока канал исправен. Значение на выходе при возврате канала не меняется скачком: значение отказа снимается через задержку | Сигнал при отказе канала недостоверен: дребезг «мусора» не должен попасть в значение. Если бы задержки стояли на значении до отказа, защитный сигнал `ForceTrue` («сухой ход» НЗ) после возврата канала на `tOnDelay` стал бы FALSE при `xValid = TRUE`, хотя датчик сработал — насос пустили бы на сухую; разрешающий `ForceFalse` получил бы TRUE без подтверждения `tOnDelay`. Тесты `DigitalInput_ChannelFault_HoldLast`, `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay`, `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` (до исправления падал) |
 | DI-3 | Отказ канала в OutOfService не даёт Failure и `DI_FLT_CHANNEL` (контроля нет, таблица 2.2); бит `DI_STS_CHANNEL_FAULT` показывает диагностику во всех режимах | Как AI-3 у аналогового входа: OutOfService — «в ремонте» |
 | DI-4 | Отказ канала без корректной Cfg — Failure | Диагностика канала от Cfg не зависит (в отличие от NE 43 аналогового входа) |
 | DI-5 | Защищённые методы сверх 22.4: `SelectValue`, `SubstRemainSec` | Тело — нормативные шаги 9.4, выбор значения — отдельным методом (как у AI) |
@@ -175,13 +176,25 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 | DI-7 | Значение события обоих слотов — `xValue` как 0.0 / 1.0 | Контракт задаёт `arAlmValue` только для AI |
 | DI-8 | Слежение `stCmd.xSubstValue := xValue` — во всех режимах, кроме Manual | Правило 2.1 контракта (12.3 называет только Auto) |
 
+Открытые вопросы (решение — за интегратором).
+
+DI-Q1: предустановка DI-1 обходит `tOnDelay` один раз — в первом
+вызове с корректной Cfg. Для разрешающих сигналов, которые `tOnDelay` подтверждает перед пуском (например,
+«давление на всасе есть»), подтверждение после перезапуска ПЛК пропускается; для защитных (НЗ, «сухой ход»)
+это направление безопасное. Альтернатива — предустанавливать только FALSE (сигнал TRUE после старта проходит
+`tOnDelay`) ценой ложной тревоги на `tOnDelay` у сигналов с `xAlarmOnTrue = FALSE`.
+
+DI-Q2: перемежающийся отказ канала (ошибка обмена через цикл) по 12.3 не задерживается: слот Failure и подавление
+слота State меняются каждый цикл — поток событий в журнал. Сейчас — задержки тревоги `astAlarm[Failure].tOffDelay`
+(10.4); в контракте — решить, нужна ли собственная задержка снятия отказа канала.
+
 ## Статанализ
 
 | Инструмент | Итог (16.10.2026) |
 |---|---|
 | CODESYS 3.5.17.30, `cds.py build --tests`, `cds.py check --tests` | 0 ошибок, 0 предупреждений |
 | `st_lint --strict` | 0 ошибок; `lint:allow STL007` — `stCfg`, `CheckConfig.stCfgIn` (`VAR_IN_OUT CONSTANT`, F-13) |
-| iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; PLCOPEN-CP9 обоснован в `tools/check/iec_checker_allow.toml` (классическая сложность: тело 10, `SelectValue` 7, `CheckConfig` 3); в тестах — объединения `uEnum`, `uPrio` и индекс помощника `SetAlarmPriority` |
+| iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; PLCOPEN-CP9 обоснован в `tools/check/iec_checker_allow.toml` (классическая сложность: тело 10, `SelectValue` 5, `CheckConfig` 3); в тестах — объединения `uEnum`, `uPrio` и индекс помощника `SetAlarmPriority` |
 | RuSTy 1.0.6 | `FB_DigitalInput.st`, `FB_DigitalInput_Test.st` исключены: `VAR_IN_OUT CONSTANT` (E034, E036) |
 
 ## Тесты (`FB_DigitalInput_Test`)
@@ -192,15 +205,24 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 `DigitalInput_ChannelFault_HoldLast` · `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` ·
 `DigitalInput_OutOfService_AlarmsOutOfService` · `DigitalInput_SubstitutionTimeout_ReturnsToAuto`.
 
-Сверх контракта (8): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
+Сверх контракта (9): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
 DI-1), `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` (безопасное значение без Cfg, биты
 `wCfgErr`), `DigitalInput_ResetCmd_AcceptedAndAcksAlarms`, `DigitalInput_ChannelFault_ForceFalse`,
 `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` (DI-1: предустановка по первой корректной Cfg),
 `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` (DI-2), `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod`
-(DI-6), `DigitalInput_AlarmEvents_ValueIsZeroOrOne` (DI-7).
+(DI-6), `DigitalInput_AlarmEvents_ValueIsZeroOrOne` (DI-7), `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay`
+(DI-2: значение отказа после возврата канала снимается через задержку). Контрактный
+`DigitalInput_OutOfService_AlarmsOutOfService` дополнен проверкой слежения `xSubstValue` в OutOfService (DI-8).
 
-Проверено в CODESYS (Control Win V3, 16.10.2026, `cds.py test`): 17 из 17.
+Проверено в CODESYS (Control Win V3, 16.10.2026, `cds.py test`): 18 из 18.
 
-Мутационная проверка (16.10.2026, вместе с мутациями аналогового входа, затем откат): без
-предустановки задержек в первом вызове — упал `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay`;
-тревога State не подавляется при отказе канала — `DigitalInput_ChannelFault_ForceTrue`.
+Мутационная проверка (16.10.2026, вместе с мутациями аналогового входа — нумерация и порядок там же, * — второй
+прогон на коде после исправления DI-2):
+
+| № | Мутация | Итог | Поймал тест |
+|---|---|---|---|
+| M13* | при отказе канала задержки стоят на значении до отказа (поведение до DI-2) | убита | `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` |
+| M14 | отказ канала даёт Failure и в OutOfService | убита | `DigitalInput_OutOfService_AlarmsOutOfService` |
+| M15 | слежение `xSubstValue` только в Auto | выжила → убита* | `DigitalInput_OutOfService_AlarmsOutOfService` (новая проверка) |
+| M16 | тревога State не подавляется при отказе канала | убита | `DigitalInput_ChannelFault_ForceTrue` |
+| M17* | значение отказа по `eFailValue` не применяется | убита | `DigitalInput_ChannelFault_ForceTrue`, `…_ForceFalse`, `…_ChannelFaultRecovered_…` |
