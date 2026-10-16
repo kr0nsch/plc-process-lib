@@ -1,0 +1,19 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов
+OnDelayFiltersBounce();
+OffDelayHoldsValue();
+InvertInvertsBeforeDelay();
+SubstitutionOverridesValueBypassesDelay();
+ChannelFaultForceTrue();
+ChannelFaultHoldLast();
+AlarmOnFalseActivatesWhenValueFalse();
+OutOfServiceAlarmsOutOfService();
+SubstitutionTimeoutReturnsToAuto();
+DefaultCfgFirstCallValueWithoutDelay();
+InvalidCfgAtStartupValueFalseCheckFunction();
+ResetCmdAcceptedAndAcksAlarms();
+ChannelFaultForceFalse();
+InvertFromFirstValidCfgNoFalseValue();
+ChannelFaultDuringOnDelayRestartsDelay();
+SubstitutionRenewedAfterTimeoutCountsFullPeriod();
+AlarmEventsValueIsZeroOrOne();
+ChannelFaultRecoveredForcedValueReleasedThroughDelay();

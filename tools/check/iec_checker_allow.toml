@@ -161,3 +161,36 @@ id = "UnusedVariable"
 file = "tests/POUs/Suites/FB_Runtime_Test/FB_Runtime_Test.decl.st"
 match = "variable: (RT_SAMPLES|UIRTCOUNT|ALTRTSTAMP)$"
 reason = "Артефакт понижения: состояние многоциклового теста используют методы-тесты набора (вынесены сборкой iec-checker в функции)"
+
+# =====================================================================================================
+# Семейство входов: FB_AnalogInput, FB_DigitalInput (docs/fb/FB_AnalogInput.md, FB_DigitalInput.md,
+# раздел «Статанализ»)
+# =====================================================================================================
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Devices/FB_AnalogInput/*"
+reason = "Классическая цикломатическая сложность (решения IF/ELSIF/FOR без учёта AND/OR): тело 10 (нормативный порядок 9.4), CheckConfig 12 (11 проверок карты wCfgErr 11.5), ComputeValue 12 (цепочка 11.3: тип входа, корень, отсечка, ограничение шкалой, фильтр), ClassifySignal 9 (таблица NE 43), SelectValue 8 (таблица выбора значения), FaultBits 5, WarningBits 4, SubstRemainSec 3; каждый метод — один шаг цепочки по контракту. iec_checker 0.4 считает завышенно"
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Devices/FB_DigitalInput/*"
+reason = "Классическая цикломатическая сложность (решения IF/ELSIF без учёта AND/OR): тело 10 (нормативный порядок 9.4), SelectValue 5 (таблица выбора значения 12.3 и 2.6), CheckConfig 3; iec_checker 0.4 считает завышенно"
+
+[[allow]]
+id = "UnusedVariable"
+file = "src/POUs/Devices/FB_AnalogInput/FB_AnalogInput.decl.st"
+match = "variable: (XCHANNELFAULT|LRFLT|XFLTINIT|RGOOD_EU|XCLAMPED)$"
+reason = "Артефакт понижения: вход xChannelFault читает только метод ClassifySignal, состояние фильтра и удержания (lrFlt, xFltInit, rGood_eu) и флаг xClamped — методы ComputeValue, SelectValue, WarningBits, которые сборка iec-checker выносит в отдельные функции"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Suites/FB_*Input_Test/*"
+match = "variable: (UENUM|UPRIO)$"
+reason = "Ложное срабатывание iec_checker 0.4: объединения U_AiDiTestEnum и U_TestEnumInt используются только через поля (uEnum.iValue / uEnum.eInput, uPrio.iValue / uPrio.ePriority) — значение вне строгого перечисления для тестов CheckConfig"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Suites/FB_*Input_Test/Set*.method.decl.st"
+match = "variable: (UIIDX|UISLOT)$"
+reason = "Ложное срабатывание iec_checker 0.4: вход помощника используется только как индекс массива (stCfgAi.astLimit[uiIdx], stCfgAi.astAlarm[uiSlot])"
