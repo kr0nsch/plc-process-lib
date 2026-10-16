@@ -37,12 +37,16 @@ EXPECTED: dict[str, float] = {
     "start_preset_first_step": 31.0,
     "start_preset_after_1s": 40.0,
 }
+# Сценарий -> (число в тесте ST, допуск ассерта): значения, которые REAL копит с погрешностью
+APPROX: dict[str, tuple[float, float]] = {"ramp_slow_20s": (20.0, 1.0e-3)}
 
 
 def test_scenarios_match_numbers_in_st_tests() -> None:
-    assert set(motor.SCENARIOS) == set(EXPECTED)
+    assert set(motor.SCENARIOS) == set(EXPECTED) | set(APPROX)
     for name, value in EXPECTED.items():
         assert motor.SCENARIOS[name] == value, f"{name}: модель {motor.SCENARIOS[name]!r}, в тесте ST {value!r}"
+    for name, (value, delta) in APPROX.items():
+        assert abs(motor.SCENARIOS[name] - value) <= delta, f"{name}: модель {motor.SCENARIOS[name]!r}"
 
 
 def test_run_accumulator_keeps_fraction() -> None:

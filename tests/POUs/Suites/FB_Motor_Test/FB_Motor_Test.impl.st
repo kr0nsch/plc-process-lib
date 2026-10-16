@@ -43,3 +43,4 @@ ExtFaultInLocalLatches();
 PowerLossInManualLatchClearedNoRestart();
 InterlockTripSlotAlarmWhileInterlockActive();
 TimeBackwardsNoFaultNoCountJump();
+PowerDipWhileStoppedPauseFromPowerLoss();

@@ -178,9 +178,15 @@ END_IF
 // 7. Автомат состояний (13.7). Принудительный останов без tMinRun: отказ, нет Cfg, блокировка;
 //    нет напряжения — останов без отказа
 xEnteredStarting := FALSE;
+// старт ПЛК: подхват решается в первом вызове с достоверной ОС (у ПЧ с ОС по связи — когда связь
+// появится; до этого контроль ОС приостановлен)
+xAdoptNow := xAdoptPending AND NOT xFbInvalid;
+IF xAdoptNow THEN
+    xAdoptPending := FALSE;
+END_IF
 IF xRemote THEN
-    // старт ПЛК: работающий по ОС двигатель подхватывается (Manual или запрос Auto), иначе — останов
-    IF xFirstCall AND xFbOn THEN
+    // работающий по ОС двигатель подхватывается (Manual или запрос Auto), иначе — штатный останов
+    IF xAdoptNow AND xFbOn THEN
         IF eMode = E_DeviceMode.Manual OR xAutoRun THEN
             eState := E_MotorState.Running;
             ltRunEntry := ltNow;
@@ -231,6 +237,7 @@ IF xRemote THEN
         IF eState = E_MotorState.Stopped AND xRunReq AND xStartOk THEN
             eState := E_MotorState.Starting;
             xEnteredStarting := TRUE;
+            xAdoptPending := FALSE;
             fbStarts.Register(ltNow := ltNow);
             uiFirstOut := GVL_Const.NO_FIRST_OUT;
         END_IF
@@ -277,7 +284,7 @@ fbLossSup(xIn := xSupervise AND eState = E_MotorState.Running AND NOT xFbNow, tO
           itfTime := itfTimeAct);
 fbStopSup(xIn := xSupervise AND eState = E_MotorState.Stopping, tOnDelay := stCfgLkg.tFbStop,
           itfTime := itfTimeAct);
-fbUncmdSup(xIn := xSupervise AND eState = E_MotorState.Stopped AND xFbNow AND NOT xFirstCall,
+fbUncmdSup(xIn := xSupervise AND eState = E_MotorState.Stopped AND xFbNow AND NOT xAdoptNow,
            tOnDelay := stCfgLkg.tFbStart, itfTime := itfTimeAct);
 fbExtSup(xIn := (xExtFault OR xExtFaultAdd) AND eMode <> E_DeviceMode.OutOfService,
          tOnDelay := stCfgLkg.tExtFaultFilter, itfTime := itfTimeAct);
@@ -328,8 +335,8 @@ IF xRunningPrev THEN
         udiRunCurrent_s := udiRunCurrent_s + udiWhole;
     END_IF
 END_IF
-// подхват работающего двигателя в первом вызове — не пуск; пуск в первом вызове (без ОС) — пуск
-IF xRunning AND NOT xRunningPrev AND (NOT xFirstCall OR xEnteredStarting) THEN
+// подхват после старта ПЛК — не пуск; пуск в том же вызове (без ОС) — пуск
+IF xRunning AND NOT xRunningPrev AND (NOT xAdoptNow OR xEnteredStarting) THEN
     stRetain.udiOpCount := stRetain.udiOpCount + 1;
     stRetain.udiOpCountMaint := stRetain.udiOpCountMaint + 1;
     udiRunCurrent_s := 0;

@@ -67,6 +67,7 @@ VAR
     uiFirstOut       : UINT := GVL_Const.NO_FIRST_OUT;   // номер бита первой блокировки; NO_FIRST_OUT — нет
     ltStopMark       : LTIME;          // момент останова: от него отсчитывается tMinStop
     ltRunEntry       : LTIME;          // вход в Running: от него отсчитывается tMinRun
+    xAdoptPending    : BOOL := TRUE;   // подхват после старта ПЛК ещё не решён: нет достоверной ОС
     xRunOrCmdPrev    : BOOL;           // в прошлом вызове была команда работы или работа по ОС
     xRunningPrev     : BOOL;           // xRunning прошлого вызова (фронт — пуск, наработка за шаг)
     xPowerPrev       : BOOL := TRUE;   // xPowerOk прошлого вызова (спад — останов для tMinStop)
@@ -103,6 +104,7 @@ VAR_TEMP
     xStartsLimit  : BOOL;              // лимит пусков в час исчерпан
     xInhibit      : BOOL;              // запрет пуска: питание, пауза, лимит пусков
     xStartOk      : BOOL;              // все условия пуска 13.5 выполнены
+    xAdoptNow     : BOOL;              // в этом вызове решается подхват после старта ПЛК
     xRunReq       : BOOL;              // запрос работы по режиму
     xForceStop    : BOOL;              // принудительный останов без tMinRun: нет Cfg, блокировка
     xSupervise    : BOOL;              // контроль ОС действует

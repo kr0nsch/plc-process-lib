@@ -133,7 +133,8 @@ SCENARIOS: dict[str, float] = {
     "inhibit_min_stop_at_stop": inhibit_remain_s(30.0, 0.0),
     "inhibit_min_stop_after_12p3s": inhibit_remain_s(30.0, 12.3),
     "inhibit_min_stop_after_29p9s": inhibit_remain_s(30.0, 29.9),
-    # FB_Motor_Test.PowerLossStopsWithoutFaultStartsMinStop: tMinStop 20 с, питание вернулось через 5 с
+    # FB_Motor_Test.PowerLossStopsWithoutFaultStartsMinStop и PowerDipWhileStoppedPauseFromPowerLoss:
+    # tMinStop 20 с, 5 с после пропадания питания
     "inhibit_power_loss_after_5s": inhibit_remain_s(20.0, 5.0),
     # FB_Motor_Test.StartsPerHourLimitReachedInhibitsUntilWindowFrees: пуски в 0, 10, 20 мин, лимит 3
     "starts_limit_3_free_at_30min_s": inhibit_remain_s(
@@ -153,6 +154,9 @@ SCENARIOS: dict[str, float] = {
     # FB_MotorVfd_Test.StartPresetsRampToMin: min 30 %, рост 10 %/с, цель 80 %, один шаг 100 мс
     "start_preset_first_step": ramp(30.0, 80.0, 10.0, 0.0, 0.1, 1),
     "start_preset_after_1s": ramp(30.0, 80.0, 10.0, 0.0, 0.1, 10),
+    # FB_MotorVfd_Test.SpeedDeviationDuringRampIgnored: рост 1 %/с с 0 %, 200 шагов по 100 мс (REAL копит
+    # погрешность шага 0,1: 20.00004, в тесте допуск 1E-3)
+    "ramp_slow_20s": ramp(0.0, 50.0, 1.0, 0.0, 0.1, 200),
 }
 
 

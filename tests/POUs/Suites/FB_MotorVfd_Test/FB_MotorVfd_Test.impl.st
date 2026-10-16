@@ -20,3 +20,5 @@ FirstCallSetsTypeMotorVfdAndPassesDefaultCfg();
 CfgChecksRampCommSpeedDevBits();
 LocalModeRefTracksActualSpeed();
 PlcRestartFbFromDiAdoptedWithoutFault();
+PlcRestartCommLaterAdoptedWithoutFault();
+SpeedDeviationDuringRampIgnored();
