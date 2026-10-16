@@ -348,5 +348,13 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 `Valve_DefaultCfg_PassesCheck` · `Valve_CfgChecks_SetBits` · `Valve_PermitLostWhileMoving_ContinuesMotion` ·
 `Valve_InvalidCfgAtRuntime_KeepsLastValid` · `Valve_InterlockStay_StopsMotorized`
 
+Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
+все пять мутаций `FB_Valve` поймал хотя бы один тест — реверс без паузы
+(`Valve_Reverse_PausesBeforeOppositeDirection`), уход с концевика без фильтра
+(`Valve_PositionLost_LatchesFault`), Reset снимает аварию при действующей причине
+(`Valve_ExtFault_TripsAndResetRejectedWhileActive`), катушка НО по неверной цели
+(`Valve_SolenoidEtc_FaultDeenergizesCoil`), команда в Auto без перехода в Manual
+(`Valve_ManualCmdInAuto_SwitchesToManual`).
+
 Описания — в комментариях объявлений методов набора (`tests/POUs/Suites/FB_Valve_Test/`); сводную
 таблицу в [TEST_REPORT.md](../TEST_REPORT.md) дополняет интегратор.

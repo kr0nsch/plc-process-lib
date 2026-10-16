@@ -245,5 +245,12 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 `ControlValve_DefaultCfg_PassesCheck` · `ControlValve_CfgChecks_SetBits` ·
 `ControlValve_InvalidCfgAtRuntime_KeepsLastValid` · `ControlValve_Ramp_IndependentOfCycleTime`
 
+Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
+все три мутации `FB_ControlValve` пойманы — положение безопасности по блокировке через рампу (три теста:
+`ControlValve_Interlock_SafePosBypassesRamp`, `ControlValve_DeviationAsFault_GoesSafePosition`,
+`ControlValve_PositionerFault_SafePosAction`), контроль рассогласования во время рампы
+(`ControlValve_DeviationDuringRamp_Ignored`), плотное закрытие в состоянии рампы
+(`ControlValve_TightShut_BelowThresholdGivesZero`).
+
 Описания — в комментариях объявлений методов набора (`tests/POUs/Suites/FB_ControlValve_Test/`);
 сводную таблицу в [TEST_REPORT.md](../TEST_REPORT.md) дополняет интегратор.
