@@ -76,8 +76,8 @@
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Off : первый вызов, сигнал FALSE
-    [*] --> On : первый вызов, сигнал TRUE (без задержки)
+    [*] --> Off : первый вызов с корректной Cfg, сигнал FALSE
+    [*] --> On : первый вызов с корректной Cfg, сигнал TRUE (без задержки)
     Off --> TimingOn : сигнал TRUE
     TimingOn --> Off : сигнал FALSE раньше tOnDelay
     TimingOn --> On : прошло tOnDelay
@@ -166,8 +166,8 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 
 | № | Суть | Обоснование |
 |---|---|---|
-| DI-1 | В первом вызове задержки предустанавливаются на текущий сигнал (`FB_Delay.Preset`): после старта ПЛК значение сразу равно входу, без `tOnDelay` | Как фильтр AI, который начинает с текущего значения. Иначе вход, включённый при старте, `tOnDelay` выглядел бы выключенным — ложная тревога у сигналов с `xAlarmOnTrue = FALSE`. Тест `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` |
-| DI-2 | При отказе канала задержки стоят на значении до отказа и отсчитываются заново после возврата канала; биты отсчёта — только пока канал исправен | Сигнал при отказе канала недостоверен: дребезг «мусора» не должен попасть в значение. Тест `DigitalInput_ChannelFault_HoldLast` |
+| DI-1 | В первом вызове с корректной Cfg (после старта ПЛК — сразу, если Cfg корректна; иначе — когда её исправят) задержки предустанавливаются на текущий сигнал после инверсии из этой Cfg (`FB_Delay.Preset`): значение сразу равно входу, без `tOnDelay`/`tOffDelay` | Как фильтр AI, который начинает с текущего значения. Иначе вход, включённый при старте, `tOnDelay` выглядел бы выключенным — ложная тревога у сигналов с `xAlarmOnTrue = FALSE`. Предустановка по первой корректной Cfg, а не по первому вызову: до неё инверсия берётся из умолчаний (`xInvert = FALSE`), и НЗ-контакт после исправления Cfg прошёл бы через задержку с неверной полярностью — ложное срабатывание «сухого хода» на `tOffDelay` или пропуск срабатывания на `tOnDelay` при `xValid = TRUE`. Тесты `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay`, `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` |
+| DI-2 | При отказе канала задержки стоят на значении до отказа и отсчитываются заново после возврата канала (и отсчёт, начатый до отказа); биты отсчёта — только пока канал исправен | Сигнал при отказе канала недостоверен: дребезг «мусора» не должен попасть в значение. Тесты `DigitalInput_ChannelFault_HoldLast`, `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` |
 | DI-3 | Отказ канала в OutOfService не даёт Failure и `DI_FLT_CHANNEL` (контроля нет, таблица 2.2); бит `DI_STS_CHANNEL_FAULT` показывает диагностику во всех режимах | Как AI-3 у аналогового входа: OutOfService — «в ремонте» |
 | DI-4 | Отказ канала без корректной Cfg — Failure | Диагностика канала от Cfg не зависит (в отличие от NE 43 аналогового входа) |
 | DI-5 | Защищённые методы сверх 22.4: `SelectValue`, `SubstRemainSec` | Тело — нормативные шаги 9.4, выбор значения — отдельным методом (как у AI) |
@@ -192,11 +192,14 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 `DigitalInput_ChannelFault_HoldLast` · `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` ·
 `DigitalInput_OutOfService_AlarmsOutOfService` · `DigitalInput_SubstitutionTimeout_ReturnsToAuto`.
 
-Сверх контракта (4): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
+Сверх контракта (8): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
 DI-1), `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` (безопасное значение без Cfg, биты
-`wCfgErr`), `DigitalInput_ResetCmd_AcceptedAndAcksAlarms`, `DigitalInput_ChannelFault_ForceFalse`.
+`wCfgErr`), `DigitalInput_ResetCmd_AcceptedAndAcksAlarms`, `DigitalInput_ChannelFault_ForceFalse`,
+`DigitalInput_InvertFromFirstValidCfg_NoFalseValue` (DI-1: предустановка по первой корректной Cfg),
+`DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` (DI-2), `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod`
+(DI-6), `DigitalInput_AlarmEvents_ValueIsZeroOrOne` (DI-7).
 
-Проверено в CODESYS (Control Win V3, 16.10.2026, `cds.py test`): 13 из 13.
+Проверено в CODESYS (Control Win V3, 16.10.2026, `cds.py test`): 17 из 17.
 
 Мутационная проверка (16.10.2026, вместе с мутациями аналогового входа, затем откат): без
 предустановки задержек в первом вызове — упал `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay`;

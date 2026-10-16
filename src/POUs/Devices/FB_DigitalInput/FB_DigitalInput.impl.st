@@ -39,10 +39,14 @@ IF fbSubst.xOut THEN
 END_IF
 
 // 6. Сигнал: инверсия до задержек. При отказе канала сигнал не верен: задержки стоят на значении до
-//    отказа и после возврата отсчитываются заново. В первом вызове значение берётся без задержки
+//    отказа и после возврата отсчитываются заново. В первом вызове с корректной Cfg значение берётся без
+//    задержки (DI-1): не в первом вызове вообще — до корректной Cfg инверсия взята из умолчаний, и НЗ-контакт
+//    прошёл бы через задержку с неверной полярностью
 xRaw := xIn XOR stCfgLkg.xInvert;
-IF xFirstCall THEN
-    fbDebounce.Preset(xValue := xRaw AND NOT xChannelFault);
+IF xDelayInit AND xCfgEverOk THEN
+    xGood := xRaw AND NOT xChannelFault;
+    fbDebounce.Preset(xValue := xGood);
+    xDelayInit := FALSE;
 END_IF
 IF xChannelFault THEN
     fbDebounce.Preset(xValue := xGood);

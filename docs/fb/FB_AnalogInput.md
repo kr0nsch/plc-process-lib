@@ -124,7 +124,8 @@ flowchart LR
 4. **Фильтр** — точная экспонента `lrFlt += (1 − EXP(−dt/T))·(x_eu − lrFlt)`, `dt` — реальное время
    между вызовами (`ltDt` базы). Реакция на ступень одинакова при любом цикле: за одну T — 63,2 %
    (тест `AnalogInput_Filter_IndependentOfCycleTime`: шаги 10 мс, 250 мс и неравномерный дают одно
-   значение). Первый расчёт и расчёт после отказа сигнала начинают фильтр с текущего значения.
+   значение). Первый расчёт, расчёт после мгновенного отказа сигнала (`xRawFail`, даже не
+   подтверждённого), после OutOfService и до первой корректной Cfg начинают фильтр с текущего значения.
    «Время назад» даёт `dt = 0`: значение не меняется.
 
 ### Выбор значения
@@ -134,7 +135,7 @@ flowchart LR
 | корректной Cfg ещё не было | любой | 0.0 | FALSE | сняты |
 | Auto | норма или вне диапазона | фильтрованное значение | TRUE | считаются |
 | Auto | отказ, ещё не подтверждён (бит `AI_STS_FAIL_PENDING`) | последнее хорошее | TRUE | считаются по удержанному |
-| Auto | отказ, ещё не подтверждён, хорошего значения после старта не было | как при подтверждённом отказе | FALSE | как при подтверждённом отказе |
+| Auto | отказ, ещё не подтверждён, хорошего значения после старта ПЛК или после выхода из OutOfService не было (AI-2) | как при подтверждённом отказе; бита `AI_STS_FAIL_PENDING` нет | FALSE | как при подтверждённом отказе |
 | Auto | отказ подтверждён (и пока подтверждается возврат) | `HoldLast` — последнее хорошее; `Substitute` — `rFailValue_eu` | FALSE | сняты; при `xLimitsOnFail` — по значению отказа |
 | Manual | любой | `stCmd.rSubstValue_eu` без фильтра (неконечное не принимается) | TRUE | по подменённому значению |
 | OutOfService | любой | удерживается | FALSE | сняты |
@@ -178,7 +179,8 @@ stateDiagram-v2
     end note
 ```
 
-В `FailPending` значение удерживается (`AI_STS_FAIL_PENDING`), в `Failed` и `Recovering` — по
+В `FailPending` значение удерживается (`AI_STS_FAIL_PENDING`), если хорошее значение было после старта
+ПЛК или выхода из OutOfService (иначе — как в `Failed`, AI-2); в `Failed` и `Recovering` — по
 `eFailValue`, `xValid = FALSE`, `wFault` — по текущей классификации (в `Recovering` — 0).
 
 ## Безопасное состояние
@@ -186,7 +188,7 @@ stateDiagram-v2
 | Ситуация | Выходы и значения |
 |---|---|
 | Корректной Cfg ещё не было | `rValue_eu = 0.0`, `rValue_pct = 0.0`, `xValid = FALSE`, флаги уставок FALSE, NE 107 CheckFunction |
-| Отказ подтверждён | `HoldLast` — последнее хорошее или `rFailValue_eu`, `xValid = FALSE`, флаги уставок FALSE (если не `xLimitsOnFail`) |
+| Отказ подтверждён | `HoldLast` — последнее хорошее, `Substitute` — `rFailValue_eu`; `xValid = FALSE`, флаги уставок FALSE (если не `xLimitsOnFail`) |
 | OutOfService | значение удерживается, `xValid = FALSE`, флаги уставок FALSE |
 | Local | — (режима нет) |
 
@@ -223,7 +225,7 @@ stateDiagram-v2
 | 3 | `AI_STS_LL` — `xLL` | `AI_FLT_NOT_FINITE` | — | `AI_CFG_LIMIT_OUT_OF_RANGE` — уставка вне шкалы |
 | 4 | `AI_STS_SIGNAL_FAIL` — `xFail` | — | — | `AI_CFG_HYST` — гистерезис |
 | 5 | `AI_STS_OUT_OF_RANGE` — `xOor` | — | — | `AI_CFG_LOW_CUT` — отсечка |
-| 6 | `AI_STS_FAIL_PENDING` — Auto, значение удерживается до подтверждения отказа | — | — | `AI_CFG_FAIL_VALUE` — значение отказа |
+| 6 | `AI_STS_FAIL_PENDING` — Auto, последнее хорошее значение удерживается как годное до подтверждения отказа | — | — | `AI_CFG_FAIL_VALUE` — значение отказа |
 | 7 | `AI_STS_LOW_CUT` — сработала отсечка | — | — | `AI_CFG_ALARM` — приоритет тревоги |
 | 8 | — | — | — | `AI_CFG_RAW_RANGE` — шкала отсчётов `Raw` |
 
@@ -271,14 +273,14 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 | № | Суть | Обоснование |
 |---|---|---|
 | AI-1 | Защищённые методы сверх 22.4 контракта: `CallLimit`, `ClassifySignal`, `ComputeValue`, `SelectValue`, `FaultBits`, `WarningBits`, `SubstRemainSec`. Их имена зарезервированы для наследников | Вызов `afbLimit[i](...)` и поле `afbLimit[i].xOut` iec_checker 0.4 не разбирает (как `CallAlarmSlot` базы, F-19). Тело — нормативные шаги 9.4, детали шагов 6.1–6.4 — в методах: классическая сложность каждого ≤ 12. Методы `PROTECTED` (L5), `VAR_IN_OUT` не трогают (R2) |
-| AI-2 | **Отказ сигнала с первого вызова** (хорошего значения после старта ещё не было): на время подтверждения значение — как при подтверждённом отказе (`Substitute` — `rFailValue_eu`, `HoldLast` — 0.0), `xValid = FALSE`, уставки сняты (если не `xLimitsOnFail`). NE 107 и тревога Failure — по-прежнему через `tFailDelay` | Таблица 11.3 («последнее хорошее, `xValid = TRUE`») этот случай не покрывает: удерживать нечего. «Годный ноль» дал бы ложный LL при пуске ПЛК с оборванной линией — то, от чего удержание и защищает. Тест `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` |
+| AI-2 | **Отказ сигнала без свежего хорошего значения** — с первого вызова после старта ПЛК или в первом вызове после выхода из OutOfService (и до первой корректной Cfg): на время подтверждения значение — как при подтверждённом отказе (`Substitute` — `rFailValue_eu`; `HoldLast` — 0.0 после старта, удерживаемое значение после OutOfService), `xValid = FALSE`, уставки сняты (если не `xLimitsOnFail`), бита `AI_STS_FAIL_PENDING` нет. NE 107 и тревога Failure — по-прежнему через `tFailDelay`. Пока сигнал не контролируется (OutOfService, нет корректной Cfg), «последнее хорошее» забывается | Таблица 11.3 («последнее хорошее, `xValid = TRUE`») этот случай не покрывает: удерживать нечего или удерживаемое значение неизвестной давности (датчик меняли «в ремонте»). «Годный ноль» дал бы ложный LL при пуске ПЛК с оборванной линией, а значение до вывода из работы — ложные H/HH или пропуск LL на `tFailDelay` после возврата в работу с неподключённой линией — то, от чего удержание и защищает. Тесты `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue`, `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` |
 | AI-3 | Без корректной Cfg и в OutOfService сигнал не контролируется: подтверждения сброшены, `xFail = xOor = FALSE`; обрыв в OutOfService даёт CheckFunction, а не Failure | Без Cfg тип входа неизвестен: умолчание `MilliAmp` при настоящем `Eng` дало бы ложный FailHigh. OutOfService — «в ремонте», контроль отказов «нет» (таблица 2.2). После выхода отсчёт `tFailDelay` начинается заново |
 | AI-4 | Удерживаемое значение — последнее хорошее до появления отказа; пока подтверждается возврат сигнала (`xFail` ещё TRUE), значение не обновляется, а фильтр уже идёт от текущего значения | «Последнее хорошее» не должно меняться по ещё не подтверждённому сигналу; после подтверждения выдаётся отфильтрованное без «подтягивания» от старого (тест `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter`) |
 | AI-5 | Неконечное значение подмены (NaN с HMI) не принимается: значение остаётся прежним | NaN в логике станции хуже, чем удержание; контракт не задаёт. Тест `AnalogInput_SubstitutionNonFinite_ValueHeld` |
 | AI-6 | `rValue_eu` и `rValue_pct` ограничены по модулю `REAL_SANE_MAX` (1E30) | Мусор в пределах `F_IsFinite` (например, `Norm01` = 1E30 на шкале 2E30) переполнил бы `REAL` при переводе из `LREAL`. В нормальной работе не действует |
 | AI-7 | Снятие подмены по `tSubstMax` выполняется в шаге 5 (до выбора значения), а не после слежения (п. 9 цепочки 11.3); счётчик подмены сбрасывается (`Preset`), поэтому новый запрос подмены отсчитывает срок заново | В том же вызове значение уже измеренное и статус не расходится с режимом. `uiSubstRemain_s` округляется вверх (пока подмена идёт, не 0); 0 и при `tSubstMax = T#0S` (без ограничения: снимать нечего) |
 | AI-8 | `AI_WRN_UNDER_RANGE`/`OVER_RANGE` выставляются, пока выход за диапазон подтверждён, по текущей классификации — так же, как `wFault` по контракту | Контракт задаёт правило только для `wFault`; бит предупреждения совпадает со статусом OutOfSpecification |
-| AI-9 | `AI_STS_FAIL_PENDING` — только в Auto (в Manual значение подменено, в OutOfService контроля нет) | Бит означает «значение удерживается» |
+| AI-9 | `AI_STS_FAIL_PENDING` — только в Auto (в Manual значение подменено, в OutOfService контроля нет) и только когда последнее хорошее значение действительно удерживается как годное (не в случае AI-2) | Бит означает «значение удерживается» (11.5, таблица 11.3) |
 | AI-10 | Слежение `stCmd.rSubstValue_eu := rValue_eu` — во всех режимах, кроме Manual (в том числе в OutOfService и без корректной Cfg) | Правило 2.1 контракта («Auto, Local, OOS, слежение»); шаг 8 цепочки 11.3 называет только Auto |
 | AI-11 | Порядок уставок проверяется обходом HH → LL: каждая следующая включённая строго меньше предыдущей включённой — то же, что LL < L < H < HH | Цикл по перечислению `E_AiAlarm` без «магических» границ; NaN в уставке даёт ошибку |
 
@@ -323,15 +325,22 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 `AnalogInput_OutOfService_HoldsValueInvalid` · ★ `AnalogInput_InvalidRangeAtStartup_CheckFunctionSafeValue` ·
 ★ `AnalogInput_LimitOrderInvalidAtRuntime_KeepsLastValidCfg`.
 
-Сверх контракта (7): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
+Сверх контракта (9): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
 режим после старта — пункты 1 и 4 чек-листа), `AnalogInput_ResetCmd_AcceptedAndAcksAlarms`,
 `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` (AI-2), `AnalogInput_AlarmEvents_FailureValueIsRawInput`,
 `AnalogInput_CfgErrBits_MatchContractMap` (каждый бит `wCfgErr`), `AnalogInput_TimeBackwards_FilterHoldsWithoutJump`,
-`AnalogInput_SubstitutionNonFinite_ValueHeld` (AI-5).
+`AnalogInput_SubstitutionNonFinite_ValueHeld` (AI-5), `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` (AI-2 после
+OutOfService), `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` (AI-7: новый срок подмены, округление
+`uiSubstRemain_s` вверх).
+
+Контрактные тесты дополнены проверками на границах, которые раньше не ловили мутации: отсечка ровно на
+`rLowCut_pct` не срабатывает (`AnalogInput_LowCut_BelowCut_ReturnsZero`), бит `AI_STS_FAIL_PENDING` снимается
+при подтверждении отказа (`AnalogInput_WireBreak_SetsFailureAfterDelay`), слежение `rSubstValue_eu` действует
+и в OutOfService (`AnalogInput_OutOfService_HoldsValueInvalid`).
 
 Эталоны масштабирования и фильтра — `tools/reference/ai_reference.py`; совпадение чисел в тестах с
 эталоном проверяет `tools/project_checks/test_ai_reference.py` (pytest). Проверено в CODESYS
-(Control Win V3, 16.10.2026, `cds.py test`): 47 из 47.
+(Control Win V3, 16.10.2026, `cds.py test`): 49 из 49.
 
 Мутационная проверка (16.10.2026, одна сборка с семью однострочными мутациями в разных шагах цепочки,
 затем откат): граница 3,6 мА `<=` → `<` — упал `AnalogInput_At3p6mA_IsFailure`; граница 20,5 мА `>` → `>=` —

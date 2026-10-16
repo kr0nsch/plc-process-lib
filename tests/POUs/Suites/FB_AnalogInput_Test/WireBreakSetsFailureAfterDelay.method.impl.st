@@ -24,6 +24,8 @@ AssertFalse(Condition := fbAi.xValid, Message := 'value invalid after confirmed 
 AssertEquals_WORD(Expected := GVL_Const.AI_FLT_FAIL_LOW, Actual := fbAi.stSts.stCommon.wFault,
                   Message := 'fault bit FAIL_LOW');
 AssertTrue(Condition := (fbAi.stSts.stCommon.wStatus AND GVL_Const.AI_STS_SIGNAL_FAIL) <> 0, Message := 'fail bit');
+AssertTrue(Condition := (fbAi.stSts.stCommon.wStatus AND GVL_Const.AI_STS_FAIL_PENDING) = 0,
+           Message := 'pending bit cleared after confirmation');
 AssertFalse(Condition := fbAi.xLL, Message := 'LL forced off on failure');
 itfAlm := fbAi.GetAlarm(uiIndex := E_AiAlarm.Failure);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.ActiveUnack, Message := 'failure alarm annunciated');

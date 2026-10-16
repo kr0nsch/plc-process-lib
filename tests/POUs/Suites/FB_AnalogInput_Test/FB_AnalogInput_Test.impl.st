@@ -46,3 +46,5 @@ AlarmEventsFailureValueIsRawInput();
 CfgErrBitsMatchContractMap();
 TimeBackwardsFilterHoldsWithoutJump();
 SubstitutionNonFiniteValueHeld();
+OosExitWithBrokenSignalInvalidAtOnce();
+SubstitutionRenewedAfterTimeoutCountsFullPeriod();

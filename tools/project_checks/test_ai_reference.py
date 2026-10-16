@@ -51,6 +51,7 @@ CITED: list[tuple[str, str, float, float]] = [
     ("At20p7mAIsOutOfSpecification", "104.375", scale_value("20,7 мА, шкала 0..100 (экстраполяция)"), 1.0e-4),
     ("Sqrt25PctDpReturns50PctFlow", "50.0", scale_value("корень: 8 мА (25 % перепада), 0..100"), 1.0e-4),
     ("LowCutBelowCutReturnsZero", "9.999995", scale_value("корень: 4,16 мА (1 %), отсечка 5 %"), 1.0e-4),
+    ("LowCutBelowCutReturnsZero", "12.5", scale_value("без корня: 6 мА (12,5 %), отсечка 12,5 %"), 1.0e-5),
     ("ClampLimitsToRange", "102.5", scale_value("20,4 мА без ограничения"), 1.0e-4),
     (
         "FilterOneTimeConstantReaches63Pct",

@@ -28,6 +28,7 @@ VAR
     fbDebounce : FB_Delay;           // задержки включения и отключения
     fbSubst    : FB_Delay;           // длительность подмены (tSubstMax)
     xGood      : BOOL;               // значение после задержек до отказа канала (HoldLast)
+    xDelayInit : BOOL := TRUE;       // задержки ещё не предустановлены (до первого вызова с корректной Cfg)
 END_VAR
 VAR_TEMP
     eRes      : E_CmdResult;         // результат ProcessMode

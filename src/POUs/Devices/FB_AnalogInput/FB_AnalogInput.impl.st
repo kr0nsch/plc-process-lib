@@ -47,7 +47,9 @@ xRawFail := eSignal = E_AiSignalState.NotFinite OR eSignal = E_AiSignalState.Cha
             OR eSignal = E_AiSignalState.FailLow OR eSignal = E_AiSignalState.FailHigh;
 xRawOor := eSignal = E_AiSignalState.UnderRange OR eSignal = E_AiSignalState.OverRange;
 // 6.2 Подтверждение: и появление, и возврат — через tFailDelay. Без корректной Cfg (тип входа ещё не
-//     известен) и в OutOfService сигнал не контролируется: флаги снимаются сразу, отсчёт — заново
+//     известен) и в OutOfService сигнал не контролируется: флаги снимаются сразу, отсчёт — заново.
+//     Последнее хорошее значение при этом устаревает (датчик могли сменить «в ремонте»): после возврата
+//     контроля удерживать нечего, как после старта ПЛК (AI-2)
 xSupervise := xCfgEverOk AND eMode <> E_DeviceMode.OutOfService;
 IF xSupervise THEN
     fbFail(xIn := xRawFail, tOnDelay := stCfgLkg.tFailDelay, tOffDelay := stCfgLkg.tFailDelay,
@@ -57,6 +59,7 @@ IF xSupervise THEN
 ELSE
     fbFail.Preset(xValue := FALSE);
     fbOor.Preset(xValue := FALSE);
+    xHaveGood := FALSE;
 END_IF
 xFail := fbFail.xOut;
 xOor := fbOor.xOut;
@@ -108,11 +111,12 @@ arAlmValue[E_AiAlarm.Failure] := rIn;
 arAlmValue[E_AiAlarm.OutOfRange] := rValue_eu;
 RunAlarms(udiIdBase := stCfgLkg.udiAlarmIdBase, stCmd := stCmd.stCommon, astCfg := stCfgLkg.astAlarm);
 
-// 10. Состояние. AI_STS_FAIL_PENDING — в Auto значение удерживается до подтверждения отказа
+// 10. Состояние. AI_STS_FAIL_PENDING — в Auto последнее хорошее значение удерживается как годное до
+//     подтверждения отказа (не при xValueBad: удерживать нечего, AI-2)
 wLowBits := SEL(xHH, 0, GVL_Const.AI_STS_HH) OR SEL(xH, 0, GVL_Const.AI_STS_H)
             OR SEL(xL, 0, GVL_Const.AI_STS_L) OR SEL(xLL, 0, GVL_Const.AI_STS_LL)
             OR SEL(xFail, 0, GVL_Const.AI_STS_SIGNAL_FAIL) OR SEL(xOor, 0, GVL_Const.AI_STS_OUT_OF_RANGE)
-            OR SEL(eMode = E_DeviceMode.Auto AND xSupervise AND xRawFail AND NOT xFail, 0,
+            OR SEL(eMode = E_DeviceMode.Auto AND xSupervise AND xRawFail AND NOT xValueBad, 0,
                    GVL_Const.AI_STS_FAIL_PENDING)
             OR SEL(xLowCut, 0, GVL_Const.AI_STS_LOW_CUT);
 IF xFail THEN

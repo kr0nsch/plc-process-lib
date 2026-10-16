@@ -8,7 +8,8 @@ AssertFalse(Condition := fbAi.xValid, Message := 'nothing to hold: invalid at on
 AssertEquals_REAL(Expected := 0.0, Actual := fbAi.rValue_eu, Delta := 0.0, Message := 'no good value yet');
 AssertFalse(Condition := fbAi.xLL, Message := 'no false LL at startup');
 AssertTrue(Condition := fbAi.Status = E_Ne107Status.Good, Message := 'failure not yet confirmed');
-AssertTrue(Condition := (fbAi.stSts.stCommon.wStatus AND GVL_Const.AI_STS_FAIL_PENDING) <> 0, Message := 'pending bit');
+AssertTrue(Condition := (fbAi.stSts.stCommon.wStatus AND GVL_Const.AI_STS_FAIL_PENDING) = 0,
+           Message := 'no pending bit: nothing is held');
 FOR iStep := 1 TO 20 DO   // t0 + 2,0 с
     fbTime.Advance(tStep := T#100MS);
     fbAi(itfTime := fbTime, rIn := 0.0, stCmd := stCmd, stCfg := stCfg);

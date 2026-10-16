@@ -12,3 +12,7 @@ DefaultCfgFirstCallValueWithoutDelay();
 InvalidCfgAtStartupValueFalseCheckFunction();
 ResetCmdAcceptedAndAcksAlarms();
 ChannelFaultForceFalse();
+InvertFromFirstValidCfgNoFalseValue();
+ChannelFaultDuringOnDelayRestartsDelay();
+SubstitutionRenewedAfterTimeoutCountsFullPeriod();
+AlarmEventsValueIsZeroOrOne();

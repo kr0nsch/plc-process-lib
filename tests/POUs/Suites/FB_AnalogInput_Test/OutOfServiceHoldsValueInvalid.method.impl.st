@@ -16,11 +16,14 @@ itfAlm := fbAi.GetAlarm(uiIndex := E_AiAlarm.H);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'H slot out of service');
 itfAlm := fbAi.GetAlarm(uiIndex := E_AiAlarm.Failure);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'failure slot out of service');
+stCmd.rSubstValue_eu := 7.0;   // оператор пишет поле подмены в OOS
 FOR iStep := 1 TO 30 DO   // обрыв в OOS, 3 с
     fbTime.Advance(tStep := T#100MS);
     fbAi(itfTime := fbTime, rIn := 0.0, stCmd := stCmd, stCfg := stCfg);
 END_FOR
 AssertTrue(Condition := fbAi.Status = E_Ne107Status.CheckFunction, Message := 'no failure in OOS');
+AssertEquals_REAL(Expected := 50.0, Actual := stCmd.rSubstValue_eu, Delta := 0.0,
+                  Message := 'held value tracked into rSubstValue_eu in OOS');
 stCmd.stCommon.xSetAuto := TRUE;
 fbTime.Advance(tStep := T#100MS);
 fbAi(itfTime := fbTime, rIn := 16.0, stCmd := stCmd, stCfg := stCfg);
