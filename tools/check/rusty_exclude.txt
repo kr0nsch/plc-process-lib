@@ -41,3 +41,11 @@ FB_MotorVfd.st  # наследник FB_Motor: SUPER^ и CheckConfig со stCfg 
 FB_Motor_Test.st  # вызовы двигателя и помощник Spin со stCfg (VAR_IN_OUT CONSTANT): E034, E036
 FB_MotorVfd_Test.st  # вызовы двигателя с ПЧ и помощник SpinVfd со stCfg (VAR_IN_OUT CONSTANT): E034, E036
 GVL_TestsMotor.st  # экземпляры наборов, исключённых выше
+#
+# Семейство арматуры: stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT (контракт, раздел 0), объявление
+# даёт E034, каждый вызов устройства — E036. Логику проверяют тесты coUnit в CODESYS и iec_checker.
+FB_Valve.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036 (CheckAlarmCfg)
+FB_ControlValve.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036 (CheckAlarmCfg)
+FB_Valve_Test.st  # вызовы FB_Valve со stCfg (VAR_IN_OUT CONSTANT): E036; FB_Valve исключён выше
+FB_ControlValve_Test.st  # вызовы FB_ControlValve со stCfg (VAR_IN_OUT CONSTANT): E036; ФБ исключён выше
+GVL_TestsValve.st  # экземпляры наборов арматуры, исключённых выше
