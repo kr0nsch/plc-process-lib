@@ -889,6 +889,92 @@ def scenario_fopdt_sat() -> Result:
     return res
 
 
+def scenario_tt_small() -> Result:
+    """Pid_AntiWindup_TtBelowDt_GainClampedToOne: Tt = 0,05 с меньше шага 0,1 с, Kp = 2, Ti = 10 с.
+
+    Множитель обратного расчёта MIN(dt/Tt, 1) = 1: за один шаг насыщения интегратор садится ровно
+    на v = u (I = 50 + 1 − 50 = 1), выход остаётся на пределе. Без MIN множитель был бы 2: I = −49,
+    и на следующем шаге выход упал бы с предела до 51 %.
+    """
+    sim = _start(PidCfg(kp=2.0, ti_s=10.0, tt_s=0.05), manual_out=50.0, sp=50.0, pv=50.0)
+    _to_auto(sim)
+    sim.pv = 0.0  # e = +50 %, P = 100, v = 150
+    _run(sim, 1)
+    res = {"out_sat": sim.out, "i_sat": sim.i}
+    _run(sim, 1)
+    res |= {"out_next": sim.out, "i_next": sim.i}
+    _run(sim, 8)
+    res |= {"out_1s": sim.out}
+    return res
+
+
+def scenario_start_outact() -> Result:
+    """Pid_Startup_OutActInitialisesOutput: старт в Auto с xUseOutAct, механизм на 37 %.
+
+    stCmd.rManualOut_pct = 0 (GVL_Hmi после потери питания не сохраняется) — выход берётся из
+    rOutAct_pct, а не из нуля оператора. Дальше rOutAct_pct = выход прошлого вызова (механизм без
+    внешнего насыщения). Второй экземпляр: rOutAct_pct не конечен — выход из rManualOut_pct = 42 %.
+    """
+    sim = PidSim(PidCfg(kp=2.0, ti_s=10.0, use_out_act=True), remote_mode=Mode.AUTO)
+    sim.cmd_sp = 50.0
+    sim.pv = 46.0  # e = 4 %
+    sim.pv_valid = True
+    sim.out_act = 37.0
+    sim.call()
+    res = {"out_start": sim.out, "i_start": sim.i}
+    for _ in range(2):
+        sim.out_act = sim.out
+        sim.advance_ms(100)
+        sim.call()
+    res |= {"out_2": sim.out}
+    nan = PidSim(PidCfg(kp=2.0, ti_s=10.0, use_out_act=True), remote_mode=Mode.AUTO)
+    nan.cmd_sp = 50.0
+    nan.cmd_manual_out = 42.0
+    nan.pv = 46.0
+    nan.pv_valid = True
+    nan.out_act = math.nan
+    nan.call()
+    res |= {"out_start_nan": nan.out}
+    return res
+
+
+def scenario_dt_boundary() -> Result:
+    """Pid_DtGap_BoundaryAtTDtMax: tDtMax = 1 с; шаг ровно 1 с — обычный, 1,001 с — разрыв."""
+    sim = _start(PidCfg(kp=2.0, ti_s=10.0, t_dt_max_ms=1000), manual_out=30.0, sp=50.0, pv=50.0)
+    _to_auto(sim)
+    sim.pv = 46.0  # e = 4 %
+    _run(sim, 10)
+    res = {"i_before": sim.i}
+    sim.advance_ms(1000)
+    sim.call()
+    res |= {"i_at_max": sim.i, "gap_at_max": float(sim.dt_gap), "dt_ms_at_max": sim.dt_ms}
+    sim.advance_ms(1001)
+    sim.call()
+    res |= {"i_over_max": sim.i, "gap_over_max": float(sim.dt_gap), "out_over_max": sim.out}
+    return res
+
+
+def scenario_sp_ramp_pv_fail() -> Result:
+    """Pid_SetpointRamp_ResumesAfterPvFailure: рампа 2 ед./с, 40 -> 60, PV негодна 1 с на 2-й секунде.
+
+    Пока PV негодна, расчёта нет и рампа стоит; возврат PV — шаг инициализации с dt = 0: рампа
+    продолжается с 44, а не прыгает к цели 60.
+    """
+    sim = _start(PidCfg(kp=1.0, ti_s=30.0, sp_rate=2.0), manual_out=30.0, sp=40.0, pv=40.0)
+    sim.cmd_sp = 60.0
+    _run(sim, 20)
+    res = {"sp_2s": sim.sp}
+    sim.pv_valid = False
+    _run(sim, 10)
+    res |= {"sp_fail": sim.sp}
+    sim.pv_valid = True
+    _run(sim, 1)
+    res |= {"sp_resume": sim.sp}
+    _run(sim, 10)
+    res |= {"sp_resume_1s": sim.sp}
+    return res
+
+
 def scenario_fopdt_open() -> Result:
     """FopdtModel_OpenLoopStep_MatchesPythonReference: u = 10 % с t = 0, K = 2, T = 20 с, L = 4 с."""
     plant = Fopdt()
@@ -927,6 +1013,10 @@ SCENARIOS: dict[str, Callable[[], Result]] = {
     "fopdt_step": scenario_fopdt_step,
     "fopdt_sat": scenario_fopdt_sat,
     "fopdt_open": scenario_fopdt_open,
+    "tt_small": scenario_tt_small,
+    "start_outact": scenario_start_outact,
+    "dt_boundary": scenario_dt_boundary,
+    "sp_ramp_pv_fail": scenario_sp_ramp_pv_fail,
 }
 
 _CACHE: dict[str, Result] = {}

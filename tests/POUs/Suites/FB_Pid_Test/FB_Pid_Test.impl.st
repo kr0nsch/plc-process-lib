@@ -38,3 +38,7 @@ InvalidCfgAtRuntimeKeepsLastValidCfg();
 PvInvalidAlarmActiveOnlyInAuto();
 ResetAcceptedWithoutLatchedFaults();
 TrackWithInvalidPvNoFailure();
+AntiWindupTtBelowDtGainClampedToOne();
+StartupOutActInitialisesOutput();
+DtGapBoundaryAtTDtMax();
+SetpointRampResumesAfterPvFailure();
