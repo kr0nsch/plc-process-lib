@@ -20,11 +20,9 @@ STRUCT
     rFailValue_eu  : REAL := 0.0;      // значение при Substitute
     xLimitsOnFail  : BOOL := FALSE;    // TRUE — при подтверждённом отказе уставки считаются по значению отказа
     xClamp         : BOOL := FALSE;    // ограничить значение шкалой (по умолчанию — экстраполяция)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astLimit       : ARRAY[0..3] OF ST_AiLimitCfg;   // индекс E_AiAlarm.HH, H, L, LL
     tSubstMax      : TIME := T#8H;     // макс. длительность подмены; T#0S — без ограничения
     udiAlarmIdBase : UDINT := 0;       // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm       : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.High),      // 0 HH
         (ePriority := E_AlarmPriority.Low),       // 1 H

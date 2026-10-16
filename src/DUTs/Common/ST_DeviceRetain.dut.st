@@ -15,7 +15,6 @@ STRUCT
     udiOpCount       : UDINT;                    // операций всего (двигатель — пуски; арматура — циклы)
     udiOpTimeMaint_s : UDINT;                    // наработка с последнего ТО, с
     udiOpCountMaint  : UDINT;                    // операций с последнего ТО
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     audiReserve      : ARRAY[0..3] OF UDINT;     // резерв: новые поля без смены раскладки
 END_STRUCT
 END_TYPE

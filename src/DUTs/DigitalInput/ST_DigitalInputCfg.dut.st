@@ -14,7 +14,6 @@ STRUCT
     xAlarmOnTrue   : BOOL := TRUE;     // тревога State при xValue = TRUE (FALSE — при xValue = FALSE)
     tSubstMax      : TIME := T#8H;     // макс. длительность подмены; T#0S — без ограничения
     udiAlarmIdBase : UDINT := 0;       // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm       : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.None),      // 0 State — включает генератор, если сигнал тревожный
         (ePriority := E_AlarmPriority.Medium),    // 1 Failure

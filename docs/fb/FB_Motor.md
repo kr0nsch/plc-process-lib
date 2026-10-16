@@ -390,16 +390,13 @@ GVL_IO.xM201_QReset := GVL_Devices.fbM201.xQReset;
 
 - CODESYS 3.5.17.30: `cds.py build --tests` и `check --tests` — 0 ошибок, 0 предупреждений (в том числе нет
   C0371: хук `OnModeChanged` и методы `VAR_IN_OUT` не трогают).
-- `st_lint --strict` — чисто (`stCfg`/`stCfgIn` помечены `lint:allow STL007`, как у основы).
+- `st_lint --strict` — чисто, подавлений нет (F-13 снято).
 - iec_checker 0.4 (`run_iec_checker.py --tests`): ошибок разбора нет; PLCOPEN-CP9 (сложность тела —
   шаги нормативного порядка, классическая сложность по шагам не больше 27) обоснована записью в
   `tools/check/iec_checker_allow.toml`. Обходы разборщика: `SEL(NOT x, …)` iec_checker 0.4 не разбирает —
   записано `SEL(x, …, 0)`.
-- RuSTy 1.0.6 (необязательное задание): `FB_Motor.st` не исключён — имя есть в фикстуре шаблона
-  (`test_integration_sample_passes`). Известные ошибки — только `VAR_IN_OUT CONSTANT`: E034 ×2 (объявления
-  `stCfg` и `CheckConfig.stCfgIn`), E036 ×3 (вызовы `CheckAlarmCfg`, `CheckConfig`, `RunAlarms`), E031 ×1
-  (передача `stCfg` в `CheckConfig`); предупреждения E049 — RuSTy считает переменные базы закрытыми, в CODESYS
-  они доступны наследнику (контракт 9.1). Наборы и `GVL_TestsMotor` исключены (`tools/check/rusty_exclude.txt`).
+- RuSTy 1.0.6 (необязательное задание): проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет. Предупреждения E049 — RuSTy считает переменные базы
+  закрытыми, в CODESYS они доступны наследнику (контракт 9.1).
 
 ## Проверено в CODESYS (Control Win V3, 32 бит)
 

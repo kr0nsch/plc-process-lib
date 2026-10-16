@@ -21,7 +21,6 @@ STRUCT
     xDevIsFault     : BOOL := FALSE;   // FALSE — рассогласование только предупреждение
     wInterlockMask  : WORD := 16#FFFF; // какие биты wInterlock действуют
     udiAlarmIdBase  : UDINT := 0;      // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm        : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.Low),       // 0 Deviation
         (ePriority := E_AlarmPriority.Low),       // 1 FbFailure

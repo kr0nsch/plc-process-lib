@@ -26,9 +26,8 @@
 - `TimeToFree` при `Count >= uiMax`: должна истечь отметка номер `Count - uiMax` от самой старой
   (с нуля); ответ — `STARTS_WINDOW - (ltNow - t)`, всегда больше нуля. Разность отметок
   вычисляется только при `ltNow >= t` (LTIME без знака, L7 контракта).
-- Граница массива `altStart` записана числом `29` (= `STARTS_WINDOW_MAX - 1`), а не константой:
-  iec_checker 0.4 не разбирает константы в границах массивов. Индексы считаются по константе,
-  совпадение проверяет тест `Util_StartsWindow_RingCapacity_MatchesConst` (F-07 в
+- Граница массива `altStart` — `0..GVL_Const.STARTS_WINDOW_MAX - 1`; индексы считаются по той же
+  константе, ёмкость проверяет тест `Util_StartsWindow_RingCapacity_MatchesConst` (F-07 в
   [ASSUMPTIONS.md](../ASSUMPTIONS.md)).
 
 ## Пример

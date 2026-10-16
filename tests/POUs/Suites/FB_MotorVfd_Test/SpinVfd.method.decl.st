@@ -8,7 +8,6 @@ VAR_IN_OUT
     stR : ST_DeviceRetain;   // энергонезависимые данные
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stF : ST_MotorCfg;       // конфигурация
 END_VAR
 VAR_INPUT

@@ -193,9 +193,9 @@ DI-Q2: перемежающийся отказ канала (ошибка обм
 | Инструмент | Итог (16.10.2026) |
 |---|---|
 | CODESYS 3.5.17.30, `cds.py build --tests`, `cds.py check --tests` | 0 ошибок, 0 предупреждений |
-| `st_lint --strict` | 0 ошибок; `lint:allow STL007` — `stCfg`, `CheckConfig.stCfgIn` (`VAR_IN_OUT CONSTANT`, F-13) |
+| `st_lint --strict` | 0 ошибок, подавлений нет (F-13 снято) |
 | iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; PLCOPEN-CP9 обоснован в `tools/check/iec_checker_allow.toml` (классическая сложность: тело 10, `SelectValue` 5, `CheckConfig` 3); в тестах — объединения `uEnum`, `uPrio` и индекс помощника `SetAlarmPriority` |
-| RuSTy 1.0.6 | `FB_DigitalInput.st`, `FB_DigitalInput_Test.st` исключены: `VAR_IN_OUT CONSTANT` (E034, E036) |
+| RuSTy 1.0.6 | проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет |
 
 ## Тесты (`FB_DigitalInput_Test`)
 

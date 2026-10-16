@@ -15,7 +15,6 @@ VAR_IN_OUT
     stCmd : ST_DigitalInputCmd;      // команды HMI/SCADA (GVL_Hmi.st<TAG>Cmd)
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stCfg : ST_DigitalInputCfg;      // параметры (GVL_Persist.st<TAG>Cfg), только чтение
 END_VAR
 VAR_OUTPUT

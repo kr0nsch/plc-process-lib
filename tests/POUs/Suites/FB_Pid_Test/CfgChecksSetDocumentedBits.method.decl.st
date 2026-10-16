@@ -9,7 +9,7 @@ VAR
     stRetain : ST_DeviceRetain;    // режим: Manual
     stCfgDef : ST_PidCfg;          // конфигурация по умолчанию
     stCfg    : ST_PidCfg;          // проверяемая конфигурация
-    stSlot   : ST_AlarmCfg;        // копия слота тревоги (iec_checker 0.4 не разбирает a[i].x)
+    stSlot   : ST_AlarmCfg;        // копия слота тревоги
     uBad     : U_TestPidEnumInt;   // значение вне перечислений
     uBits    : U_RealBits;         // источник NaN
 END_VAR

@@ -15,6 +15,5 @@ END_VAR
 VAR
     fbRtSysTime : FB_SystemTime;                  // системное время для теста по циклам
     uiRtCount   : UINT;                           // записано отметок
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
-    altRtStamp  : ARRAY[0..49] OF LTIME;          // LTIME() в каждом цикле задачи
+    altRtStamp  : ARRAY[0..RT_SAMPLES - 1] OF LTIME;   // LTIME() в каждом цикле задачи
 END_VAR

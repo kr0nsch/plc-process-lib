@@ -1,6 +1,6 @@
 // Умолчания astAlarm Cfg всех семи устройств и тестового проходят CheckAlarmCfg (инвариант
-// генератора для конфигурации тревог); массивы с границей GVL_Const.DEV_ALARMS_MAX - 1 из DUT
-// передаются в параметр ARRAY[0..7]. Приоритет 5 и -1 — отказ, 4 (Critical) — норма.
+// генератора для конфигурации тревог); массивы astAlarm из DUT передаются в параметр
+// ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1]. Приоритет 5 и -1 — отказ, 4 (Critical) — норма.
 METHOD PRIVATE DefaultAlarmCfgOfAllTypesPassesCheckAlarmCfg
 VAR
     fbDev  : FB_TestDevice;         // доступ к CheckAlarmCfg

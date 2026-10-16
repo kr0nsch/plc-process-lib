@@ -253,8 +253,7 @@ xPidTrack   := NOT itfLeadPump.SpeedAutoActive;
 - CODESYS 3.5.17.30: `build --tests`, `check --tests` — 0 ошибок, 0 предупреждений.
 - iec_checker 0.4: ошибок разбора нет; PLCOPEN-CP9 обоснована (классическая сложность тела 20, `CheckConfig` — 8);
   PLCOPEN-CP28 (сравнение времени на равенство) — `tCommLoss <= T#0S` вместо `= T#0S` (TIME без знака — то же).
-- RuSTy 1.0.6: `FB_MotorVfd.st` исключён (`tools/check/rusty_exclude.txt`): `SUPER^` и `CheckConfig` со
-  `stCfg` (`VAR_IN_OUT CONSTANT`) — E031, E034, E036.
+- RuSTy 1.0.6: проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Проверено в CODESYS (Control Win V3, 32 бит)
 

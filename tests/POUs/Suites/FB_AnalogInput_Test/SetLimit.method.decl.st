@@ -1,5 +1,4 @@
-// Помощник: уставка uiIdx (E_AiAlarm.HH, H, L, LL) в Cfg входа. Копия элемента: iec_checker 0.4 не
-// разбирает stCfg.astLimit[i].x
+// Помощник: уставка uiIdx (E_AiAlarm.HH, H, L, LL) в Cfg входа (через копию элемента)
 METHOD PRIVATE SetLimit
 VAR_IN_OUT
     stCfgAi : ST_AnalogInputCfg;   // конфигурация входа

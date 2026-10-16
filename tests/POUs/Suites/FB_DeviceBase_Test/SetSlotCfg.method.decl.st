@@ -1,5 +1,4 @@
-// Помощник: приоритет и срок shelve слота тревоги в Cfg тестового устройства (копия элемента:
-// iec_checker 0.4 не разбирает stCfg.astAlarm[i].ePriority)
+// Помощник: приоритет и срок shelve слота тревоги в Cfg тестового устройства (через копию элемента)
 METHOD PRIVATE SetSlotCfg
 VAR_IN_OUT
     stCfgDev : ST_TestDeviceCfg;    // конфигурация устройства

@@ -10,7 +10,6 @@ STRUCT
     rGain          : REAL := 2.0;    // коэффициент; корректен, если конечен и > 0 (бит 0 wCfgErr)
     tRunDelay      : TIME := T#0S;   // задержка включения в Auto (вложенный FB_Delay до BeginCycle)
     udiAlarmIdBase : UDINT := 0;     // номер первой тревоги устройства
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm       : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg;   // по слотам; умолчания ST_AlarmCfg
 END_STRUCT
 END_TYPE

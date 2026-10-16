@@ -47,6 +47,12 @@ reason = "Как для src/: экземпляры ФБ под тестом и �
 
 [[allow]]
 id = "UnusedVariable"
+file = "src/*"
+match = "variable: A(ST|FB|ITF)[A-Z0-9_]*$"
+reason = "Ложное срабатывание iec_checker 0.4: массив структур или ФБ, к которому обращаются только через поле элемента (astCfg[i].ePriority). Понижение iec-checker пишет такое обращение как a.x[i], а обращение к полю iec_checker 0.4 использованием не считает — как у структур выше (tools/README.md, «Что понижение скрывает и добавляет»)"
+
+[[allow]]
+id = "UnusedVariable"
 file = "*"
 match = "variable: (UBITS|UBAD)$"
 reason = "Ложное срабатывание iec_checker 0.4: объединения используются только через поля (uBits.rValue / uBits.dwValue — U_RealBits, uBad.iValue / uBad.eMode — тестовое U_TestEnumInt)"

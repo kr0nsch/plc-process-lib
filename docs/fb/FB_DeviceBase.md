@@ -81,8 +81,9 @@ SCADA. Реализует `I_Device` (и через него `I_AlarmSource`): �
 | `axAlmCond[0..7]`, `axAlmSuppress[0..7]`, `arAlmValue[0..7]` | `BOOL`, `BOOL`, `REAL` | наследник, шаг 7 | условие, подавление и значение слота |
 | `wAlmActive`, `wAlmUnack`, `wAlmShelved`, `ePrioUnack` | | `RunAlarms` | сводка тревог |
 
-Границы массивов записаны числом 7 (= `DEV_ALARMS_MAX - 1`): iec_checker 0.4 не разбирает
-константы в границах; совпадение проверяет `Device_AlarmSlotArrays_MatchDevAlarmsMax` (F-18).
+Границы массивов — `0..GVL_Const.DEV_ALARMS_MAX - 1`; длину проверяет
+`Device_AlarmSlotArrays_MatchDevAlarmsMax` (до синхронизации с понижением шаблона граница была
+числом, F-18 в [ASSUMPTIONS.md](../ASSUMPTIONS.md)).
 
 ## Защищённые методы (для наследников)
 
@@ -97,7 +98,6 @@ SCADA. Реализует `I_Device` (и через него `I_AlarmSource`): �
 | `SetCmdResult(eResult)` | 3–7 | `eCmdResult := eResult`, `uiCmdSeq := uiCmdSeq + 1` |
 | `CheckAlarmCfg(astCfg) : BOOL` | 2 | для `CheckConfig`: все `ePriority` слотов — значения перечисления |
 | `RunAlarms(udiIdBase, stCmd, astCfg)` | 7 | запросы тревог, вызов слотов, сводка ([ниже](#тревоги-в-слотах)) |
-| `CallAlarmSlot(...)` | 7 | вызов тела одного слота (часть `RunAlarms`; F-19), наследник не вызывает |
 | `FinishCycle(eDevStatus, xAvailableDev, wLow, wFaultBits, wWarnBits, stCommon)` | 8 | NE 107, `Fault`, `Available`, все 14 полей `stCommon`, конец цикла |
 
 Методы базы не трогают `VAR_IN_OUT` экземпляра (R2, предупреждение C0371): структуры приходят

@@ -11,7 +11,6 @@ VAR
     stCmd2    : ST_TestDeviceCmd;   // команды второго
     stRetain2 : ST_DeviceRetain;    // retain второго
     stCfg     : ST_TestDeviceCfg;   // общая конфигурация
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
     aitfDev   : ARRAY[0..1] OF I_Device;   // устройства через интерфейс
     itfDev    : I_Device;           // элемент массива
     itfAlm    : I_Alarm;            // тревога через интерфейс

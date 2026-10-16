@@ -273,7 +273,7 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 
 | № | Суть | Обоснование |
 |---|---|---|
-| AI-1 | Защищённые методы сверх 22.4 контракта: `CallLimit`, `ClassifySignal`, `ComputeValue`, `SelectValue`, `FaultBits`, `WarningBits`, `SubstRemainSec`. Их имена зарезервированы для наследников | Вызов `afbLimit[i](...)` и поле `afbLimit[i].xOut` iec_checker 0.4 не разбирает (как `CallAlarmSlot` базы, F-19). Тело — нормативные шаги 9.4, детали шагов 6.1–6.4 — в методах: классическая сложность каждого ≤ 12. Методы `PROTECTED` (L5), `VAR_IN_OUT` не трогают (R2) |
+| AI-1 | Защищённые методы сверх 22.4 контракта: `CallLimit`, `ClassifySignal`, `ComputeValue`, `SelectValue`, `FaultBits`, `WarningBits`, `SubstRemainSec`. Их имена зарезервированы для наследников | Тело — нормативные шаги 9.4, детали шагов 6.1–6.4 — в методах: классическая сложность каждого ≤ 12. `CallLimit` появился как обход разборщика iec_checker 0.4 (вызов `afbLimit[i](...)`); понижение шаблона теперь разбирает такой вызов, метод оставлен — шаг уставок короче. Методы `PROTECTED` (L5), `VAR_IN_OUT` не трогают (R2) |
 | AI-2 | **Отказ сигнала без свежего хорошего значения** — с первого вызова после старта ПЛК или в первом вызове после выхода из OutOfService (и до первой корректной Cfg): на время подтверждения значение — как при подтверждённом отказе (`Substitute` — `rFailValue_eu`; `HoldLast` — 0.0 после старта, последнее хорошее измеренное до вывода из работы — после OutOfService), `xValid = FALSE`, уставки сняты (если не `xLimitsOnFail`), бита `AI_STS_FAIL_PENDING` нет. NE 107 и тревога Failure — по-прежнему через `tFailDelay`. Пока сигнал не контролируется (OutOfService, нет корректной Cfg), «последнее хорошее» забывается | Таблица 11.3 («последнее хорошее, `xValid = TRUE`») этот случай не покрывает: удерживать нечего или удерживаемое значение неизвестной давности (датчик меняли «в ремонте»). «Годный ноль» дал бы ложный LL при пуске ПЛК с оборванной линией, а значение до вывода из работы — ложные H/HH или пропуск LL на `tFailDelay` после возврата в работу с неподключённой линией — то, от чего удержание и защищает. Тесты `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue`, `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` |
 | AI-3 | Без корректной Cfg и в OutOfService сигнал не контролируется: подтверждения сброшены, `xFail = xOor = FALSE`; обрыв в OutOfService даёт CheckFunction, а не Failure | Без Cfg тип входа неизвестен: умолчание `MilliAmp` при настоящем `Eng` дало бы ложный FailHigh. OutOfService — «в ремонте», контроль отказов «нет» (таблица 2.2). После выхода отсчёт `tFailDelay` начинается заново |
 | AI-4 | Удерживаемое значение — последнее хорошее до появления отказа; пока подтверждается возврат сигнала (`xFail` ещё TRUE), значение не обновляется, а фильтр уже идёт от текущего значения | «Последнее хорошее» не должно меняться по ещё не подтверждённому сигналу; после подтверждения выдаётся отфильтрованное без «подтягивания» от старого (тест `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter`) |
@@ -299,7 +299,7 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 | AI-Q7 | Смена шкалы (`eInput`, `rRangeLo_eu`/`rRangeHi_eu`, `rRawLo_cnt`/`rRawHi_cnt`, `xSqrt`) в Auto: фильтр продолжает от значения в старых единицах | При большом `tFilter` значение «доезжает» до нового с постоянной `tFilter` и может пересечь уставки | менять шкалу в OutOfService (фильтр начнётся заново) или сбрасывать фильтр при смене шкалы в LKG |
 
 Ссылки на общие решения: A-01 (LKG), A-02 (границы NE 43), A-06 (подмена не энергонезависима), F-17
-(`AlarmPriority`), F-19 (вызов слота через метод), F-28 (порядок результатов команд) —
+(`AlarmPriority`), F-28 (порядок результатов команд) —
 [ASSUMPTIONS.md](../ASSUMPTIONS.md).
 
 ## Статанализ
@@ -307,13 +307,13 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 | Инструмент | Итог (16.10.2026) |
 |---|---|
 | CODESYS 3.5.17.30, `cds.py build --tests`, `cds.py check --tests` | 0 ошибок, 0 предупреждений (C0371 нет) |
-| `st_lint --strict` | 0 ошибок; подавления `lint:allow STL007` — `stCfg`, `CheckConfig.stCfgIn` (`VAR_IN_OUT CONSTANT`) и `afbLimit` (массив `a<префикс>`), как у основы (F-13) |
+| `st_lint --strict` | 0 ошибок, подавлений нет (составные префиксы массивов и `VAR_IN_OUT CONSTANT` линтер шаблона понимает, F-13 снято) |
 | iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; обоснованы в `tools/check/iec_checker_allow.toml` (раздел семейства входов): PLCOPEN-CP9 — классическая сложность тела 10, `CheckConfig` 12, `ComputeValue` 12, `ClassifySignal` 9, `SelectValue` 8; UnusedVariable `xChannelFault`, `lrFlt`, `xFltInit`, `rGood_eu`, `xClamped` — артефакт понижения (их используют методы, вынесенные в функции); в тестах — объединения `uEnum`, `uPrio` и индексы помощников `SetLimit`, `SetAlarmPriority` |
-| RuSTy 1.0.6 (`run_rusty.py`) | `FB_AnalogInput.st`, `FB_AnalogInput_Test.st` исключены (`tools/check/rusty_exclude.txt`): `VAR_IN_OUT CONSTANT` — E034 в объявлении, E036 в вызовах. Других ошибок в файле устройства нет |
+| RuSTy 1.0.6 (`run_rusty.py`) | проверяются все файлы, ошибок нет: `VAR_IN_OUT CONSTANT` вариант сборки `rusty` понижает до `VAR_IN_OUT` (замена R13 шаблона); исключений нет |
 
-Конструкции, которые iec_checker 0.4 не разбирает, в коде обойдены так же, как в основе: поле
-элемента массива — через копию (`stLim := stCfgIn.astLimit[uiIdx]`), вызов элемента массива ФБ — через
-метод с `VAR_IN_OUT`. Ошибок разбора, «ожидающих исправления понижения в шаблоне», нет.
+Ошибок разбора нет. Копия элемента в `CheckConfig` (`stLim := stCfgIn.astLimit[uiIdx]`) и метод
+`CallLimit` остались от обходов разборщика: понижение шаблона теперь разбирает и `a[i].x`, и вызов
+`afbLimit[i](...)`, но обе формы короче в чтении и оставлены.
 
 ## Тесты (`FB_AnalogInput_Test`)
 

@@ -1,5 +1,4 @@
-// Помощник: приоритет слота тревоги в Cfg двигателя (копия элемента: iec_checker 0.4 не разбирает
-// stCfg.astAlarm[i].ePriority)
+// Помощник: приоритет слота тревоги в Cfg двигателя (через копию элемента)
 METHOD PRIVATE SetSlotPriority
 VAR_IN_OUT
     stCfgMot : ST_MotorCfg;         // конфигурация двигателя

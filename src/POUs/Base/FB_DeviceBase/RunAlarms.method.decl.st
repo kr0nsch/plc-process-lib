@@ -10,17 +10,15 @@ VAR_IN_OUT
     stCmd : ST_DeviceCmd;         // общий заголовок команд
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT массив a<префикс> (имя по контракту), см. docs/STATIC_ANALYSIS.md
-    astCfg : ARRAY[0..7] OF ST_AlarmCfg;   // stCfgLkg.astAlarm
+    astCfg : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg;   // stCfgLkg.astAlarm
 END_VAR
 VAR
     uiUsed     : UINT;            // слотов в работе: MIN(uiAlarmCount, DEV_ALARMS_MAX)
     uiLoop     : UINT;            // номер слота + 1
     uiSlot     : UINT;            // номер слота
-    wBit       : WORD;            // бит слота в масках (сдвиг переменной: iec_checker 0.4 не разбирает WORD#1)
+    wBit       : WORD;            // бит слота в масках
     xAckAllNow : BOOL;            // квитировать все слоты
     xShelveAny : BOOL;            // хотя бы один слот принял shelve
     xAccepted  : BOOL;            // ответ метода слота (запрос выполнит вызов слота ниже)
-    itfAlarm   : I_Alarm;         // слот через интерфейс (iec_checker 0.4 не разбирает afbAlarm[i].x)
     eSlotState : E_AlarmState := E_AlarmState.Normal;   // состояние слота
 END_VAR

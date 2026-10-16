@@ -350,9 +350,7 @@ GVL_Devices.fbP101.rSpeedSpAuto_pct := GVL_Devices.fbLIC101.rOut_pct;
   UnusedVariable — артефакты понижения методов и аргументы `SEL`. Обход: iec_checker 0.4 не
   разбирает `NOT` в начале позиционного аргумента (`SEL(NOT xPvOk, 0, M)` — ParserError), поэтому
   бит записан как `SEL(xPvOk, M, 0)`.
-- RuSTy 1.0.6 — `FB_PID.st`, `FB_Pid_Test.st`, `GVL_TestsPid.st` исключены (`VAR_IN_OUT CONSTANT`:
-  E034, E036; `tools/check/rusty_exclude.txt`); `FB_FopdtModel.st` и `U_TestPidEnumInt.st` проверяются
-  без находок.
+- RuSTy 1.0.6 — проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Тесты (`FB_Pid_Test`)
 

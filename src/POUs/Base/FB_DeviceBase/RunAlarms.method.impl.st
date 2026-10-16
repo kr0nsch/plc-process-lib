@@ -3,24 +3,22 @@ uiUsed := MIN(uiAlarmCount, GVL_Const.DEV_ALARMS_MAX);
 // 1. Запросы: квитировать всё (xAck, xReset, AckAll(), Reset()), маски по слотам. Методы слотов
 //    только ставят запрос — его выполняет вызов слота в шаге 2 этого же цикла
 xAckAllNow := stCmd.xAck OR stCmd.xReset OR xAckAllReq OR xResetReq;
-wBit := 1;
 FOR uiLoop := 1 TO uiUsed DO
     uiSlot := uiLoop - 1;
-    itfAlarm := afbAlarm[uiSlot];
+    wBit := SHL(WORD#16#0001, uiSlot);
     IF xAckAllNow OR (stCmd.wAckReq AND wBit) <> 0 THEN
-        xAccepted := itfAlarm.Ack();
+        xAccepted := afbAlarm[uiSlot].Ack();
     END_IF
     // в OutOfService shelve не принимается (10.1); проверка по режиму устройства, а не по ответу
     // слота: в вызове входа в OutOfService слот ещё не в OutOfService и ответил бы TRUE, а его тело
     // запрос отклонит — результат команды был бы ложным Accepted
     IF (stCmd.wShelveReq AND wBit) <> 0 AND eMode <> E_DeviceMode.OutOfService THEN
-        xAccepted := itfAlarm.Shelve(tDuration := T#0S);
+        xAccepted := afbAlarm[uiSlot].Shelve(tDuration := T#0S);
         xShelveAny := xShelveAny OR xAccepted;
     END_IF
     IF (stCmd.wUnshelveReq AND wBit) <> 0 THEN
-        xAccepted := itfAlarm.Unshelve();
+        xAccepted := afbAlarm[uiSlot].Unshelve();
     END_IF
-    wBit := SHL(wBit, 1);
 END_FOR
 // результаты: «квитировать всё» (xAck и AckAll() вместе — одна команда) и каждая ненулевая маска;
 // xReset и Reset() дают результат в шаге Reset устройства
@@ -51,24 +49,23 @@ wAlmActive := 0;
 wAlmUnack := 0;
 wAlmShelved := 0;
 ePrioUnack := E_AlarmPriority.None;
-wBit := 1;
 FOR uiLoop := 1 TO uiUsed DO
     uiSlot := uiLoop - 1;
-    CallAlarmSlot(xCond := axAlmCond[uiSlot], xSupp := axAlmSuppress[uiSlot], udiSlotId := udiIdBase + uiSlot,
-                  rSlotValue := arAlmValue[uiSlot], stSlotCfg := astCfg[uiSlot], fbAlarm := afbAlarm[uiSlot]);
-    itfAlarm := afbAlarm[uiSlot];
-    IF itfAlarm.Active THEN
+    wBit := SHL(WORD#16#0001, uiSlot);
+    afbAlarm[uiSlot](xIn := axAlmCond[uiSlot], xSuppress := axAlmSuppress[uiSlot],
+                     xOutOfService := (eMode = E_DeviceMode.OutOfService), udiId := udiIdBase + uiSlot,
+                     rValue := arAlmValue[uiSlot], stCfg := astCfg[uiSlot], itfTime := itfTimeAct);
+    IF afbAlarm[uiSlot].Active THEN
         wAlmActive := wAlmActive OR wBit;
     END_IF
-    IF itfAlarm.Unacked THEN
+    IF afbAlarm[uiSlot].Unacked THEN
         wAlmUnack := wAlmUnack OR wBit;
-        ePrioUnack := MAX(ePrioUnack, itfAlarm.AlarmPriority);
+        ePrioUnack := MAX(ePrioUnack, afbAlarm[uiSlot].AlarmPriority);
     END_IF
-    eSlotState := itfAlarm.State;
+    eSlotState := afbAlarm[uiSlot].State;
     IF eSlotState = E_AlarmState.Shelved OR eSlotState = E_AlarmState.SuppressedByDesign
        OR eSlotState = E_AlarmState.OutOfService
     THEN
         wAlmShelved := wAlmShelved OR wBit;
     END_IF
-    wBit := SHL(wBit, 1);
 END_FOR

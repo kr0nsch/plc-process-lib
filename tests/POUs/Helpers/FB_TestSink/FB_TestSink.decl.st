@@ -9,8 +9,7 @@ VAR CONSTANT
     EVENTS_MAX : UINT := 32;                   // ёмкость кольца
 END_VAR
 VAR
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
-    astEvent : ARRAY[0..31] OF ST_AlarmEvent;  // кольцо событий
+    astEvent : ARRAY[0..EVENTS_MAX - 1] OF ST_AlarmEvent;  // кольцо событий
     uiNext   : UINT;                           // индекс следующей записи
     uiCount  : UINT;                           // событий с последнего Clear (не больше UINT_MAX)
 END_VAR

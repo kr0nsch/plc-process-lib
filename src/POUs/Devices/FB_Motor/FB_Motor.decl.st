@@ -25,7 +25,6 @@ VAR_IN_OUT
     stRetain : ST_DeviceRetain;        // режим, OOS, моточасы, пуски (GVL_Persist.st<TAG>Retain)
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stCfg : ST_MotorCfg;               // параметры (GVL_Persist.st<TAG>Cfg)
 END_VAR
 VAR_OUTPUT

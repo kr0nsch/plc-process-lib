@@ -19,7 +19,6 @@ VAR_IN_OUT
     stCmd : ST_AnalogInputCmd;       // команды HMI/SCADA (GVL_Hmi.st<TAG>Cmd)
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stCfg : ST_AnalogInputCfg;       // параметры (GVL_Persist.st<TAG>Cfg), только чтение
 END_VAR
 VAR_OUTPUT
@@ -34,7 +33,6 @@ VAR_OUTPUT
 END_VAR
 VAR
     stCfgLkg  : ST_AnalogInputCfg;                       // последняя корректная конфигурация (LKG)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     afbLimit  : ARRAY[0..3] OF FB_LimitMonitor;          // уставки, индекс E_AiAlarm.HH, H, L, LL
     fbFail    : FB_Delay;                                // подтверждение отказа сигнала и возврата
     fbOor     : FB_Delay;                                // подтверждение выхода за диапазон и возврата

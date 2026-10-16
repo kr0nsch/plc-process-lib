@@ -11,7 +11,6 @@ VAR
     fbMot          : FB_Motor;                 // двигатель прямого пуска
     stCmd2         : ST_MotorCmd;              // его команды
     stRetain2      : ST_DeviceRetain;          // его энергонезависимые данные
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
     aitfMot        : ARRAY[1..2] OF I_Motor;   // насосы станции
     itfMot         : I_Motor;                  // насос через интерфейс
     itfDev         : I_Device;                 // устройство через интерфейс

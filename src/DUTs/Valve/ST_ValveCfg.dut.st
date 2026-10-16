@@ -22,7 +22,6 @@ STRUCT
     tResetWindow     : TIME := T#3S;      // окно снятия причин после Reset
     udiMaintCycles   : UDINT := 0;        // ТО по числу циклов; 0 — нет
     udiAlarmIdBase   : UDINT := 0;        // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm         : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.Medium),    // 0 FailToOpen
         (ePriority := E_AlarmPriority.Medium),    // 1 FailToClose

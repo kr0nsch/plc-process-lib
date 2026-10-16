@@ -40,17 +40,12 @@ VAR
     // --- результат команд ---
     eCmdResult     : E_CmdResult := E_CmdResult.None;
     uiCmdSeq       : UINT;                   // +1 на каждую обработанную команду (по кругу)
-    // --- тревоги (границы массивов — числом 7 = DEV_ALARMS_MAX - 1: iec_checker 0.4 не разбирает
-    //     константы в границах; совпадение проверяет тест Device_AlarmSlotArrays_MatchDevAlarmsMax) ---
+    // --- тревоги (слоты 0..DEV_ALARMS_MAX - 1) ---
     uiAlarmCount   : UINT;                   // используемых слотов; задаёт наследник в первом вызове
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
-    afbAlarm       : ARRAY[0..7] OF FB_Alarm;
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
-    axAlmCond      : ARRAY[0..7] OF BOOL;    // условия (заполняет наследник)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
-    axAlmSuppress  : ARRAY[0..7] OF BOOL;    // подавление по условию
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
-    arAlmValue     : ARRAY[0..7] OF REAL;    // значение для события
+    afbAlarm       : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF FB_Alarm;   // слоты тревог
+    axAlmCond      : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF BOOL;       // условия (заполняет наследник)
+    axAlmSuppress  : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF BOOL;       // подавление по условию
+    arAlmValue     : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF REAL;       // значение для события
     wAlmActive     : WORD;                   // бит i: условие слота i активно (после задержек)
     wAlmUnack      : WORD;                   // бит i: слот i не квитирован
     wAlmShelved    : WORD;                   // бит i: слот в Shelved, SuppressedByDesign или OutOfService

@@ -29,7 +29,6 @@ STRUCT
     xSpTrackPv     : BOOL := FALSE;   // в Manual задание следует за PV
     xUseOutAct     : BOOL := FALSE;   // обратный расчёт по rOutAct_pct (внешнее насыщение)
     udiAlarmIdBase : UDINT := 0;      // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm       : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.Medium),    // 0 PvInvalid
         (ePriority := E_AlarmPriority.None), (ePriority := E_AlarmPriority.None),

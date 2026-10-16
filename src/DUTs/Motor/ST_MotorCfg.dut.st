@@ -24,7 +24,6 @@ STRUCT
     udiMaintStarts     : UDINT := 0;        // ТО по числу пусков; 0 — нет
     stVfd              : ST_VfdCfg;         // только FB_MotorVfd
     udiAlarmIdBase     : UDINT := 0;        // номер первой тревоги устройства (dev_no * 10)
-    // lint:allow STL007 массив a<префикс элемента> (имя по контракту), см. docs/STATIC_ANALYSIS.md
     astAlarm           : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF ST_AlarmCfg := [
         (ePriority := E_AlarmPriority.Medium),    // 0 FailToStart
         (ePriority := E_AlarmPriority.Medium),    // 1 FeedbackLost

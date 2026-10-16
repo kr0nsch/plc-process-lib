@@ -1,1 +1,1 @@
-Now := ltSys;
+Now := LTIME();

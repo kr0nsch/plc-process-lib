@@ -228,8 +228,7 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
   `tools/check/iec_checker_allow.toml`, раздел «Семейство арматуры»: PLCOPEN-CP9 (классическая
   сложность — тело 16, `SelectOutput` 12, `CheckConfig` 8) и UnusedVariable `rPosSpAuto_pct` —
   артефакт понижения (вход использует только `SelectOutput`).
-- RuSTy 1.0.6: `FB_ControlValve.st`, `FB_ControlValve_Test.st` исключены
-  (`tools/check/rusty_exclude.txt`): `stCfg`/`CheckConfig.stCfgIn` — `VAR_IN_OUT CONSTANT` (E034, E036).
+- RuSTy 1.0.6: проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Тесты (`FB_ControlValve_Test`)
 

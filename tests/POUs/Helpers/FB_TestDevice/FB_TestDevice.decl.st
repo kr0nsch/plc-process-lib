@@ -30,10 +30,8 @@ VAR_INPUT
     eTypeSel        : E_DeviceType := E_DeviceType.Valve;     // тип для eDevType (в первом вызове)
     eDevStatusIn    : E_Ne107Status := E_Ne107Status.Good;    // вклад логики устройства в NE 107
     wWarnIn         : WORD;                                   // предупреждения устройства
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
-    axCondIn        : ARRAY[0..7] OF BOOL;                    // условия тревог слотов
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
-    axSuppressIn    : ARRAY[0..7] OF BOOL;                    // подавление по условию
+    axCondIn        : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF BOOL;   // условия тревог слотов
+    axSuppressIn    : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF BOOL;   // подавление по условию
     rValueIn        : REAL;                                   // значение процесса для событий
 END_VAR
 VAR_IN_OUT
@@ -41,7 +39,6 @@ VAR_IN_OUT
     stRetain : ST_DeviceRetain;    // энергонезависимые данные (при xInputLike не используются)
 END_VAR
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stCfg : ST_TestDeviceCfg;      // конфигурация
 END_VAR
 VAR_OUTPUT

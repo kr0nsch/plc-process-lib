@@ -2,13 +2,12 @@
 // считает, ничего не меняет. Сравнения записаны так, чтобы NaN давал ошибку (NOT (x >= a AND x <= b))
 METHOD PROTECTED CheckConfig : WORD
 VAR_IN_OUT CONSTANT
-    // lint:allow STL007 VAR_IN_OUT CONSTANT — параметр, а не константа, см. docs/STATIC_ANALYSIS.md
     stCfgIn : ST_AnalogInputCfg;   // проверяемая конфигурация
 END_VAR
 VAR
     wErr    : WORD;                // непройденные проверки
     uiIdx   : UINT;                // индекс уставки: HH, H, L, LL
-    stLim   : ST_AiLimitCfg;       // копия уставки (iec_checker 0.4 не разбирает stCfgIn.astLimit[i].x)
+    stLim   : ST_AiLimitCfg;       // копия уставки: короче условия проверок
     xPrev   : BOOL;                // была включённая уставка старше текущей
     rPrevSp : REAL;                // её значение, инж. ед.
     rSpan   : REAL;                // диапазон шкалы, инж. ед.

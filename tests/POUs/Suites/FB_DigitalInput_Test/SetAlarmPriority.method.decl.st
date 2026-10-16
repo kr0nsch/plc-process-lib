@@ -1,5 +1,4 @@
-// Помощник: приоритет слота тревоги uiSlot в Cfg входа. Копия элемента: iec_checker 0.4 не разбирает
-// stCfg.astAlarm[i].x
+// Помощник: приоритет слота тревоги uiSlot в Cfg входа (через копию элемента)
 METHOD PRIVATE SetAlarmPriority
 VAR_IN_OUT
     stCfgDi : ST_DigitalInputCfg;  // конфигурация входа

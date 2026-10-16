@@ -336,8 +336,7 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
   раздел «Семейство арматуры»: PLCOPEN-CP9 (классическая сложность — тело 10, `DriveToTarget` 20,
   `HandleCommands` 15, `TrackPosition` 15, `RunTravelTimers` 12, `SelectTarget` 10, остальные ≤ 8) и
   UnusedVariable — артефакт понижения (переменные, которые используют только методы-шаги).
-- RuSTy 1.0.6: `FB_Valve.st`, `FB_Valve_Test.st`, `GVL_TestsValve.st` исключены
-  (`tools/check/rusty_exclude.txt`): `stCfg`/`CheckConfig.stCfgIn` — `VAR_IN_OUT CONSTANT` (E034, E036).
+- RuSTy 1.0.6: проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Тесты (`FB_Valve_Test`)
 

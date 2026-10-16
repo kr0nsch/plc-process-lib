@@ -20,8 +20,7 @@ VAR_OUTPUT
     rY : REAL;                    // выход объекта, инж. ед.
 END_VAR
 VAR
-    // lint:allow STL007 массив a<префикс элемента>, см. docs/STATIC_ANALYSIS.md
-    arDelay : ARRAY[0..39] OF REAL;   // кольцо запаздывания; граница — числом (iec_checker 0.4)
+    arDelay : ARRAY[0..RING_SIZE - 1] OF REAL;   // кольцо запаздывания
     uiHead  : UINT;                   // самая старая запись кольца: u[k - 40]
     lrY     : LREAL;                  // состояние y
 END_VAR
