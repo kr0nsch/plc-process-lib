@@ -246,14 +246,19 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 `ControlValve_AutoToManual_Bumpless` · `ControlValve_FbInvalid_MaintenanceRequiredKeepsControl` ·
 `ControlValve_PositionerFault_SafePosAction` · ★ `ControlValve_InvalidCfg_StartupSafePosition`
 
-Сверх контракта (9): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
+Сверх контракта (11): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
 `ControlValve_PositionerFault_HoldAction` · `ControlValve_OosEntry_ClearsLatchedDeviation` ·
 `ControlValve_DefaultCfg_PassesCheck` · `ControlValve_CfgChecks_SetBits` ·
 `ControlValve_InvalidCfgAtRuntime_KeepsLastValid` · `ControlValve_Ramp_IndependentOfCycleTime` ·
-`ControlValve_LocalFeedbackOutOfRange_OutputClamped`
+`ControlValve_LocalFeedbackOutOfRange_OutputClamped` ·
+`ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev` · `ControlValve_InterlockInManual_StaysAtSafePosition`
 
-Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
-все три мутации `FB_ControlValve` пойманы — положение безопасности по блокировке через рампу (три теста:
+Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат).
+Второй круг (после исправлений проверки, в копии рабочего дерева), четыре мутации: сразу пойман отказ
+позиционера в OOS (`ControlValve_OutOfService_HoldsOutput`); выжили три, после добавленных тестов
+пойманы все — задание Manual не следит при блокировке (`ControlValve_InterlockInManual_StaysAtSafePosition`),
+предупреждение рассогласования и при `xDevIsFault`, Reset не перезапускает отсчёт `tDev` (оба —
+`ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev`). Первый круг: все три мутации пойманы — положение безопасности по блокировке через рампу (три теста:
 `ControlValve_Interlock_SafePosBypassesRamp`, `ControlValve_DeviationAsFault_GoesSafePosition`,
 `ControlValve_PositionerFault_SafePosAction`), контроль рассогласования во время рампы
 (`ControlValve_DeviationDuringRamp_Ignored`), плотное закрытие в состоянии рампы

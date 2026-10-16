@@ -357,7 +357,7 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 `Valve_PowerLoss_StopsWithoutFault` · `Valve_Local_OutputsOffTracksLimits` · `Valve_Cycles_CountedOnOpen` ·
 ★ `Valve_InvalidCfg_StartupOutputsOff`
 
-Сверх контракта (18): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
+Сверх контракта (20): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
 `Valve_Reset_CauseClearsWithinWindow_FaultCleared` · `Valve_OosRequestWhileMoving_Rejected` ·
 `Valve_OosEntry_ClearsLatchedFaults` · `Valve_AutoToManual_Bumpless` · `Valve_PlcRestart_StateFromLimits` ·
 `Valve_ActTime_AccumulatesInRetain` · `Valve_MaintCyclesReached_MaintenanceRequired` ·
@@ -365,15 +365,25 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 `Valve_InvalidCfgAtRuntime_KeepsLastValid` · `Valve_InterlockStay_StopsMotorized` ·
 `Valve_CloseOnTorque_ZscAloneKeepsDrivingUntilTimeout` · `Valve_ReverseAfterEndStop_WaitsReversePause` ·
 `Valve_CloseOnTorque_TorqueBeforeZsc_LatchesTorqueTrip` · `Valve_PositionByTime_LostInLocal_AutoDrivesAgain` ·
-`Valve_SolenoidByTime_CoilOff_NotReportedOpen`
+`Valve_SolenoidByTime_CoilOff_NotReportedOpen` · `Valve_CloseOnTorqueNoZsc_TorqueMissing_SetsFailToClose` ·
+`Valve_PermitCloseMissing_AutoWaitsReportsCloseBits`
 
-Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
-все пять мутаций `FB_Valve` поймал хотя бы один тест — реверс без паузы
+Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат).
+Первый круг: все пять мутаций `FB_Valve` поймал хотя бы один тест — реверс без паузы
 (`Valve_Reverse_PausesBeforeOppositeDirection`), уход с концевика без фильтра
 (`Valve_PositionLost_LatchesFault`), Reset снимает аварию при действующей причине
 (`Valve_ExtFault_TripsAndResetRejectedWhileActive`), катушка НО по неверной цели
 (`Valve_SolenoidEtc_FaultDeenergizesCoil`), команда в Auto без перехода в Manual
-(`Valve_ManualCmdInAuto_SwitchesToManual`).
+(`Valve_ManualCmdInAuto_SwitchesToManual`). Второй круг (после исправлений проверки, в копии рабочего
+дерева), восемь мутаций `FB_Valve`: сразу пойманы три — Reset снимает TorqueTrip при нажатой муфте
+(`Valve_Reset_CauseClearsWithinWindow_FaultCleared`), внешняя авария фиксируется в OOS
+(`Valve_OosEntry_ClearsLatchedFaults`), нет выбега перед закрытием после остановки
+(`Valve_ReverseAfterEndStop_WaitsReversePause`). Выжили пять; после добавленных тестов пойманы все:
+таймаут закрытия по моменту без ZSC не отказ (`Valve_CloseOnTorqueNoZsc_TorqueMissing_SetsFailToClose`),
+вход в OOS не снимает TorqueTrip (`Valve_OosEntry_ClearsLatchedFaults`), готовность без проверки
+напряжения (`Valve_PowerLoss_StopsWithoutFault`), `xResetMaint` не обнуляет время с ТО
+(`Valve_ActTime_AccumulatesInRetain`), `wPermitMissing` закрытия из маски открытия
+(`Valve_PermitCloseMissing_AutoWaitsReportsCloseBits`).
 
 Описания — в комментариях объявлений методов набора (`tests/POUs/Suites/FB_Valve_Test/`); сводную
 таблицу в [TEST_REPORT.md](../TEST_REPORT.md) дополняет интегратор.
