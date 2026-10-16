@@ -80,7 +80,7 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
 |---|---|---|---|---|
 | 1 | корректной Cfg ещё не было | `LIMIT(0, rSafePos_pct, 100)` **поданной** Cfg; NaN — 0 | нет | `CV_STS_SAFE_POS` |
 | 2 | OutOfService | удерживается | — | — |
-| 3 | Local | = `rPosFb_pct` при `xFbUsed` и достоверной ОС, иначе удерживается | нет | — |
+| 3 | Local | = `LIMIT(0, rPosFb_pct, 100)` при `xFbUsed` и достоверной ОС, иначе удерживается | нет | — |
 | 4 | блокировка (Auto/Manual) | `rSafePos_pct` — мимо `rOutMin/Max` | нет: безопасность важнее плавности | `CV_STS_SAFE_POS`, `CV_STS_INTERLOCKED` |
 | 5 | отказ и `eFaultAction = SafePos` | `rSafePos_pct` | нет | `CV_STS_SAFE_POS` |
 | 5а | отказ и `eFaultAction = Hold` | удерживается | — | — |
@@ -92,7 +92,7 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
   «залипает» (тест `ControlValve_TightShut_BelowThresholdGivesZero`).
 - Рампа — `F_RateLimit` по фактическому шагу времени `ltDt`: результат не зависит от цикла задачи
   (тест `ControlValve_Ramp_IndependentOfCycleTime`). В первом вызове (шаг 0) при неограниченной скорости
-  в нужную сторону выход сразу равен заданию.
+  в нужную сторону выход сразу равен заданию. После старта ПЛК рампа начинается от 0 % (CV-12).
 - При переключениях рампа начинается с текущего выхода: `OnModeChanged` предустанавливает её
   `rOut_pct`; после блокировки и отказа с `SafePos` рампа идёт от положения безопасности.
 - `xLocalSupported = TRUE`, `xOosAllowed = TRUE` (клапан не «движется» как механизм). Вход в
@@ -105,7 +105,7 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
 | Корректной Cfg ещё не было | `LIMIT(0, rSafePos_pct, 100)` поданной Cfg (NaN — 0), ток — с её `xOutInvert` (тест `ControlValve_InvalidCfg_StartupSafePosition`) |
 | Отказ | `eFaultAction`: `SafePos` — `rSafePos_pct` без рампы; `Hold` — удержание |
 | OutOfService | удержание (A-09) |
-| Local | следит за ОС |
+| Local | следит за ОС в пределах хода 0…100 % (ток не выходит из 4…20 мА) |
 
 ## Отказы и тревоги
 
@@ -123,6 +123,10 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
   `ControlValve_DeviationAsFault_GoesSafePosition`).
 - **Reset** снимает фиксацию рассогласования без условия и начинает отсчёт `tDev` заново: если клапан
   по-прежнему не следует, отказ вернётся через `tDev`.
+- **`tDev` больше полного хода клапана.** Отсчёт рассогласования начинается, как только рампа дошла до
+  задания; при скачке выхода (скорость не ограничена, положение безопасности по блокировке или
+  отказу) — сразу. Клапан, которому на полный ход нужно больше `tDev`, при таком скачке получит ложное
+  рассогласование, а при `xDevIsFault` — отказ.
 - **Отказ ОС** — только предупреждение и NE 107 MaintenanceRequired, клапан управляется дальше (тест
   `ControlValve_FbInvalid_MaintenanceRequiredKeepsControl`).
 - **Отказ позиционера** не фиксируется: ушёл — выход возвращается к заданию по рампе (тест
@@ -211,6 +215,8 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 | CV-8 | `rDeviation_pct = 0` и бит `AT_SETPOINT = 0` без достоверной ОС; `rPosSp_pct` в принудительных и удерживающих ветвях — их цель | Контракт не уточняет |
 | CV-9 | Первопричина — как у FB_Valve (переход 0 → не 0, кроме OOS; снимают Reset и вход в OOS) | Единообразие арматуры и двигателя (13.6) |
 | CV-10 | Выбор выхода вынесен в защищённый метод `SelectOutput`, условия вызова — переменные `VAR` экземпляра | Классическая цикломатическая сложность тела была 27, после — 16 и 12 |
+| CV-11 | Local: выход следует ОС в пределах хода — `LIMIT(0, rPosFb_pct, 100)` | Контракт 16.3: «= rPosFb_pct». Датчик положения закрытого клапана часто показывает чуть ниже нуля (-1…-2 %) и при этом достоверен; без ограничения ток выхода ушёл бы ниже 4 мА (3,76 мА при -1,5 %), а позиционеру с питанием от токовой петли нужен минимальный ток (по паспорту позиционера). Ход клапана за 0…100 % не выходит. Тест `ControlValve_LocalFeedbackOutOfRange_OutputClamped` |
+| CV-12 | После старта ПЛК рампа (при ограничении скорости) начинается от 0 %, ОС для предустановки не используется. **Открытый вопрос интегратору** | Недостоверная или «застрявшая» ОС не должна сдвигать выход в первом вызове. Для клапана «открыт при отказе» с ограничением скорости это рывок к 0 % после рестарта, если модуль AO держал прошлый ток. Предустановка от ОС или от `rSafePos_pct` — решение за интегратором |
 
 Связанные решения основы: A-01 (LKG), A-09 (OOS — удержание).
 
@@ -229,7 +235,7 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 
 Прогон: CODESYS 3.5.17.30, Control Win V3, 16.10.2026, `cds.py test` — все тесты набора пройдены.
 Числа — из `tools/reference/valve_reference.py` (сценарии `cv_manual_ramp`, `cv_tight_ramp`,
-`cv_return_ramp`, `cv_bumpless`, `cv_positioner`, `cv_cycle_independence`, `cv_ma`), их согласованность
+`cv_return_ramp`, `cv_bumpless`, `cv_positioner`, `cv_cycle_independence`, `cv_ma`, `cv_local_clamp`), их согласованность
 проверяет `tools/project_checks/test_valve_reference.py`.
 
 Из списка контракта (13, ★ 7 — все): ★ `ControlValve_ManualSetpoint_RateLimited` · ★
@@ -240,10 +246,11 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 `ControlValve_AutoToManual_Bumpless` · `ControlValve_FbInvalid_MaintenanceRequiredKeepsControl` ·
 `ControlValve_PositionerFault_SafePosAction` · ★ `ControlValve_InvalidCfg_StartupSafePosition`
 
-Сверх контракта (8): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
+Сверх контракта (9): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
 `ControlValve_PositionerFault_HoldAction` · `ControlValve_OosEntry_ClearsLatchedDeviation` ·
 `ControlValve_DefaultCfg_PassesCheck` · `ControlValve_CfgChecks_SetBits` ·
-`ControlValve_InvalidCfgAtRuntime_KeepsLastValid` · `ControlValve_Ramp_IndependentOfCycleTime`
+`ControlValve_InvalidCfgAtRuntime_KeepsLastValid` · `ControlValve_Ramp_IndependentOfCycleTime` ·
+`ControlValve_LocalFeedbackOutOfRange_OutputClamped`
 
 Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
 все три мутации `FB_ControlValve` пойманы — положение безопасности по блокировке через рампу (три теста:
