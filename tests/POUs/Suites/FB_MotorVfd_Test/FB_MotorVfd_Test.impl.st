@@ -1,0 +1,22 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов
+FirstCallFakeTimeCommLossDeterministic();
+ImplementsIMotorVfdLeadPumpProperties();
+SpeedRampLimitsRate();
+SpeedClampedToMinMax();
+StartPresetsRampToMin();
+StopSetsRefZero();
+CommLossFaultAfterDelayNotLatched();
+CommLossSuppressesFeedbackSupervisionImmediately();
+CommRestoredRunningWithoutDemandStops();
+CommLossNotFaultWarning();
+VfdFaultTripsAndResetPulses();
+VfdNotReadyBlocksStart();
+SpeedDeviationWarningAfterDelay();
+ManualSpeedTracksAutoForBumpless();
+SpeedSpNaNHoldsRef();
+InvalidSpeedLimitsCfgErrBit8();
+ImplementsIMotorPolymorphicArray();
+FirstCallSetsTypeMotorVfdAndPassesDefaultCfg();
+CfgChecksRampCommSpeedDevBits();
+LocalModeRefTracksActualSpeed();
+PlcRestartFbFromDiAdoptedWithoutFault();

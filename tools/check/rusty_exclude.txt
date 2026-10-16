@@ -28,3 +28,6 @@ GVL_TestsAlarm.st  # экземпляры наборов, исключённых
 # НЕ исключён (имя есть в фикстуре шаблона, test_integration_sample_passes): его известные ошибки E034/E036 —
 # в docs/fb/FB_Motor.md, раздел «Статанализ».
 FB_MotorVfd.st  # наследник FB_Motor: SUPER^ и CheckConfig со stCfg (VAR_IN_OUT CONSTANT): E031, E034, E036
+FB_Motor_Test.st  # вызовы двигателя и помощник Spin со stCfg (VAR_IN_OUT CONSTANT): E034, E036
+FB_MotorVfd_Test.st  # вызовы двигателя с ПЧ и помощник SpinVfd со stCfg (VAR_IN_OUT CONSTANT): E034, E036
+GVL_TestsMotor.st  # экземпляры наборов, исключённых выше

@@ -175,3 +175,15 @@ reason = "Тело FB_Motor — шаги нормативного порядка
 id = "PLCOPEN-CP9"
 file = "src/POUs/Devices/FB_MotorVfd/*"
 reason = "Классическая цикломатическая сложность тела FB_MotorVfd — 20 (точки расширения 14.2 — 6, задание скорости 14.3 — 12, слежение — 3), CheckConfig — 8; iec_checker 0.4 считает завышенно (docs/STATIC_ANALYSIS.md)"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Suites/FB_Motor*_Test/Spin*.method.decl.st"
+match = "variable: UIN$"
+reason = "Ложное срабатывание iec_checker 0.4: вход помощника используется только как верхняя граница цикла FOR uiLoop := 1 TO uiN"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Suites/FB_Motor_Test/SetSlotPriority.method.decl.st"
+match = "variable: UISLOT$"
+reason = "Ложное срабатывание iec_checker 0.4: вход используется только как индекс массива (stCfgMot.astAlarm[uiSlot])"
