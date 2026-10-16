@@ -23,3 +23,8 @@ FB_Alarm_Test.st  # приёмник событий FB_TestSink исключён
 FB_DeviceBase_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036
 FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036, E034
 GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
+#
+# Семейство двигателей: stCfg (VAR_IN_OUT CONSTANT) у FB_Motor и FB_MotorVfd и у помощников наборов. FB_Motor.st
+# НЕ исключён (имя есть в фикстуре шаблона, test_integration_sample_passes): его известные ошибки E034/E036 —
+# в docs/fb/FB_Motor.md, раздел «Статанализ».
+FB_MotorVfd.st  # наследник FB_Motor: SUPER^ и CheckConfig со stCfg (VAR_IN_OUT CONSTANT): E031, E034, E036
