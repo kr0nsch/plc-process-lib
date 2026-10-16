@@ -101,7 +101,8 @@ SUPER^(stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 
 - **Есть команда работы** (`xRunCmd`): `rSpeedRef_pct := F_RateLimit(rSpeedRef_pct, LIMIT(rSpeedMin_pct, цель,
   rSpeedMax_pct), rRampUp_pctps, rRampDown_pctps, dt)`. В вызове входа в Starting рампа начинается с
-  `rSpeedMin_pct` (при `rRampUp_pctps = 0` — сразу цель в пределах).
+  `rSpeedMin_pct` (при `rRampUp_pctps = 0` — сразу цель в пределах; цель не конечна — `rSpeedMin_pct`,
+  `MotorVfd_StartWithNaNTarget_RefStartsAtMin`).
 - **Нет команды работы** в Auto/Manual (стоп, отказ, пауза): `rSpeedRef_pct := 0.0` — торможение рампой ПЧ.
 - **Local, OutOfService:** задание следит за фактической скоростью — возврат в дистанционный режим без рывка.
 - **Связь потеряна:** задание удерживается — передать его всё равно нельзя.
@@ -120,7 +121,7 @@ stateDiagram-v2
     Ramp --> Track : Local / OutOfService
     Track --> Ramp : возврат в Auto/Manual при работе
     Zero : 0 %
-    Preset : rSpeedMin_pct
+    Preset : rSpeedMin_pct, при rRampUp_pctps = 0 — цель
     Hold : удержание
     Track : = rSpeedAct_pct
 ```
@@ -129,7 +130,7 @@ stateDiagram-v2
 
 | Настройка | Потеря связи (до `tCommLoss`) | После `tCommLoss` | Восстановление |
 |---|---|---|---|
-| `xCommLossIsFault = TRUE` (по умолчанию) | контроль ОС приостановлен (`MOT_WRN_FB_SUSPENDED`), состояние и задание удерживаются | нефиксируемый отказ: `wFault` бит 5, Fault, выходы сняты, `Available = FALSE`, тревога слота 6 | отказ снимается сам; состояние — по ОС: ПЧ работает и есть запрос — Running, запроса нет — штатный останов с контролем |
+| `xCommLossIsFault = TRUE` (по умолчанию) | ОС из слова состояния (`xFbFromComm = TRUE`) — контроль ОС приостановлен (`MOT_WRN_FB_SUSPENDED`), состояние удерживается; ОС по DI — контролируется как обычно; задание удерживается | нефиксируемый отказ: `wFault` бит 5, Fault, выходы сняты, `Available = FALSE`, тревога слота 6 | отказ снимается сам; состояние — по ОС: ПЧ работает и есть запрос — Running, запроса нет — штатный останов с контролем |
 | `xCommLossIsFault = FALSE` (рекомендуемая схема: пуск/стоп и авария ПЧ проводами, `xFbFromComm = FALSE`) | ОС по DI контролируется как обычно | только `MOT_WRN_COMM_LOSS`, NE 107 OutOfSpecification, тревога слота 6; двигатель управляется дальше | предупреждение снимается |
 
 Во время потери связи ПЛК **не может** остановить ПЧ, если команда идёт по Modbus: поведение задаёт сторожевой
@@ -137,9 +138,21 @@ stateDiagram-v2
 
 - **Авария ПЧ** (`xVfdFault` при связи) — внешняя авария `FB_Motor` (фильтр `tExtFaultFilter`, фиксируется):
   Reset даёт импульс `xQReset`, и если ПЧ сбросил аварию в окне `tResetWindow`, отказ снимается без второго
-  нажатия.
+  нажатия. Без связи слово состояния не учитывается (`MotorVfd_CommLost_StatusWordIgnored`): Reset в это время
+  снимает зафиксированную аварию ПЧ (причина не видна), и если ПЧ всё ещё в аварии, ExtFault снова
+  зафиксируется через `tExtFaultFilter` после восстановления связи.
 - **ПЧ не готов** (`xVfdReady = FALSE` при связи) — запрет пуска: `MOT_STS_PERMIT_MISSING`, `RejectedPermit`,
   в Auto запрос ждёт.
+
+Наладка (ограничения контракта, не ошибки реализации):
+- **Единичные пропуски ответа** приостанавливают контроль ОС и сбрасывают его таймеры (13.6, 14.2). При ОС из
+  слова состояния и частых пропусках (плохая линия, ответ теряется раз в 1–2 с) таймер FailToStart каждый раз
+  начинается заново, а фильтр `tCommLoss` не успевает сработать: неудачный пуск может не дать отказа, и
+  `Available` остаётся TRUE. Повторы запроса и фильтр единичных пропусков — в драйвере Modbus до `xCommOk`;
+  тревога качества связи — на стороне приложения (проект 02).
+- **`SpeedAutoActive` при потере связи без отказа** (`xCommLossIsFault = FALSE`) остаётся TRUE (формула
+  контракта 6: Auto, Running, `wFault = 0`), хотя задание до ПЧ не доходит. ПИД станции на это время лучше
+  перевести в слежение по биту `MOT_WRN_COMM_LOSS` — иначе интегратор накапливается против замершего задания.
 
 ## Рассогласование скорости
 
@@ -149,6 +162,12 @@ stateDiagram-v2
 Это не отказ: ПЧ в токоограничении на забитом насосе — повод для обслуживания, а не для останова.
 Во время рампы контроль не действует (`MotorVfd_SpeedDeviationDuringRamp_Ignored`): медленная рампа ПЛК
 дольше `tSpeedDev` не даёт ложного предупреждения.
+
+Наладка: при `rRampUp_pctps = 0` (по умолчанию) разгон ведёт сам ПЧ, а «рампа задания завершена» наступает
+сразу — задание равно цели с первого вызова. Тогда ПЧ должен дойти до «цель − `rSpeedDev_pct`» быстрее
+`tSpeedDev`, иначе предупреждение появится в каждом пуске. При линейном разгоне 0–100 % за время T и цели
+100 % это 0,9·T < `tSpeedDev`: с умолчаниями (10 %, `T#10S`) — T меньше 11 с. Время разгона — параметр
+конкретного ПЧ, сверить при наладке.
 
 ## Безопасное состояние
 
@@ -214,7 +233,7 @@ xPidTrack   := NOT itfLeadPump.SpeedAutoActive;
 ## Допущения и отклонения
 
 Решения, которые контракт не задаёт или задаёт неоднозначно; интегратор переносит их в
-[ASSUMPTIONS.md](../ASSUMPTIONS.md). Решения `FB_Motor` (M-01…M-19) действуют и здесь.
+[ASSUMPTIONS.md](../ASSUMPTIONS.md). Решения `FB_Motor` (M-01…M-23) действуют и здесь.
 
 | № | Суть | Обоснование / чем проверено |
 |---|---|---|
@@ -245,6 +264,9 @@ xPidTrack   := NOT itfLeadPump.SpeedAutoActive;
 - Виртуальный вызов `THIS^.CheckConfig` из тела `FB_Motor` попадает в переопределение:
   `MotorVfd_InvalidSpeedLimits_CfgErrBit8`.
 - `FB_Motor` и `FB_MotorVfd` в одном массиве `I_Motor`: `MotorVfd_ImplementsIMotor_PolymorphicArray`.
+- Мутационная проверка (16.10.2026, 12 мутаций, из них 5 в `FB_MotorVfd`): таблица — в
+  [FB_Motor](FB_Motor.md#проверено-в-codesys-control-win-v3-32-бит); выжившие мутации ПЧ (слово состояния без
+  связи, OutOfService, пуск с не конечной целью, недостоверная ОС при торможении) убиты новыми тестами набора.
 
 ## Тесты (`FB_MotorVfd_Test`)
 
@@ -256,9 +278,11 @@ xPidTrack   := NOT itfLeadPump.SpeedAutoActive;
 `MotorVfd_SpeedDeviation_WarningAfterDelay`, `MotorVfd_ManualSpeed_TracksAutoForBumpless`, `MotorVfd_SpeedSpNaN_HoldsRef`,
 ★ `MotorVfd_InvalidSpeedLimits_CfgErrBit8`, ★ `MotorVfd_ImplementsIMotor_PolymorphicArray`.
 
-Сверх контракта (6): `MotorVfd_FirstCall_SetsTypeMotorVfdAndPassesDefaultCfg`, `MotorVfd_CfgChecks_RampCommSpeedDevBits`,
+Сверх контракта (10): `MotorVfd_FirstCall_SetsTypeMotorVfdAndPassesDefaultCfg`, `MotorVfd_CfgChecks_RampCommSpeedDevBits`,
 `MotorVfd_LocalMode_RefTracksActualSpeed`, `MotorVfd_PlcRestartFbFromDi_AdoptedWithoutFault`,
-`MotorVfd_PlcRestartCommLater_AdoptedWithoutFault`, `MotorVfd_SpeedDeviationDuringRamp_Ignored`.
+`MotorVfd_PlcRestartCommLater_AdoptedWithoutFault`, `MotorVfd_SpeedDeviationDuringRamp_Ignored`;
+по мутационной проверке: `MotorVfd_CommLost_StatusWordIgnored`, `MotorVfd_CommLossInOos_NoFaultNoWarning`,
+`MotorVfd_StartWithNaNTarget_RefStartsAtMin`, `MotorVfd_CommLossWhileStopping_HoldsStopping`.
 
 Числа рампы — `tools/reference/motor.py` (сценарии `ramp_*`, `start_preset_*`), сверка модели с тестами —
 `tools/project_checks/test_motor_reference.py`.
