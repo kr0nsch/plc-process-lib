@@ -33,5 +33,10 @@ fbTime.Advance(tStep := T#1M);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 // источник: tools/reference/valve_reference.py, сценарий valve_act_time: one 60 s step = 10 s (0,5 + 10 с)
 AssertEquals_UDINT(Expected := 7212, Actual := stRetain.udiOpTime_s, Message := 'large step bounded by DT_ACCUM_MAX');
+stCmd.xResetMaint := TRUE;
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertEquals_UDINT(Expected := 0, Actual := stRetain.udiOpTimeMaint_s,
+                   Message := 'xResetMaint clears run time since maintenance');
+AssertEquals_UDINT(Expected := 7212, Actual := stRetain.udiOpTime_s, Message := 'total run time kept');
 
 coUnit.TEST_FINISHED();

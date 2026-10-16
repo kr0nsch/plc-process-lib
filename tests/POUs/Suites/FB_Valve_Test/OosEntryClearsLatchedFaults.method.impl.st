@@ -1,12 +1,25 @@
 coUnit.TEST('Valve_OosEntry_ClearsLatchedFaults');
 
+stCfg.xTorqueUsed := TRUE;
 fbVlv.xZsc := TRUE;
-fbVlv.xExtFault := TRUE;
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
-fbVlv.xExtFault := FALSE;
+stCmd.xOpen := TRUE;
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+fbVlv.xZsc := FALSE;
+fbVlv.xTorqueOpen := TRUE;
+fbTime.Advance(tStep := T#100MS);
+// муфта в ходе
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+fbVlv.xTorqueOpen := FALSE;
+fbVlv.xExtFault := TRUE;
 fbTime.Advance(tStep := T#100MS);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
-AssertEquals_WORD(Expected := GVL_Const.VLV_FLT_EXT_FAULT, Actual := fbVlv.stSts.stCommon.wFault, Message := 'latched');
+fbVlv.xExtFault := FALSE;
+fbVlv.xZsc := TRUE;
+fbTime.Advance(tStep := T#100MS);
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertEquals_WORD(Expected := GVL_Const.VLV_FLT_TORQUE_TRIP OR GVL_Const.VLV_FLT_EXT_FAULT,
+                  Actual := fbVlv.stSts.stCommon.wFault, Message := 'latched');
 stCmd.stCommon.xSetOos := TRUE;
 fbTime.Advance(tStep := T#100MS);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);

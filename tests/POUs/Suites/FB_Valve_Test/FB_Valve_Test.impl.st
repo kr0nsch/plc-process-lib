@@ -38,3 +38,5 @@ ReverseAfterEndStopWaitsReversePause();
 CloseOnTorqueTorqueBeforeZscLatchesTorqueTrip();
 PositionByTimeLostInLocalAutoDrivesAgain();
 SolenoidByTimeCoilOffNotReportedOpen();
+CloseOnTorqueNoZscTorqueMissingSetsFailToClose();
+PermitCloseMissingAutoWaitsReportsCloseBits();

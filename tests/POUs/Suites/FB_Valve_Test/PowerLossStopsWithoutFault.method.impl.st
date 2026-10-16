@@ -39,10 +39,14 @@ fbVlv.xAutoOpen := TRUE;
 fbTime.Advance(tStep := T#100MS);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 AssertTrue(Condition := fbVlv.xQOpen, Message := 'Auto drives to target');
+AssertTrue(Condition := fbVlv.Available, Message := 'available in Auto with power');
 fbVlv.xPowerOk := FALSE;
 fbTime.Advance(tStep := T#100MS);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 AssertFalse(Condition := fbVlv.xQOpen, Message := 'off again without power');
+AssertFalse(Condition := fbVlv.Available, Message := 'not available without power');
+AssertEquals_WORD(Expected := 0, Actual := fbVlv.stSts.stCommon.wStatus AND GVL_Const.VLV_STS_AVAILABLE,
+                  Message := 'AVAILABLE bit off without power');
 fbVlv.xPowerOk := TRUE;
 fbTime.Advance(tStep := T#100MS);
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);

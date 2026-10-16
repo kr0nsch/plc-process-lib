@@ -21,3 +21,5 @@ CfgChecksSetBits();
 InvalidCfgAtRuntimeKeepsLastValid();
 RampIndependentOfCycleTime();
 LocalFeedbackOutOfRangeOutputClamped();
+DeviationFaultResetStuckValveRetripsAfterTDev();
+InterlockInManualStaysAtSafePosition();
