@@ -1,0 +1,30 @@
+coUnit.TEST('Motor_InterlockCleared_AutoRestarts_ManualDoesNot');
+
+Spin(fbM := fbMot, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#0S);
+stCmd.stCommon.xSetAuto := TRUE;
+fbMot.xAutoRun := TRUE;
+Spin(fbM := fbMot, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#100MS);
+fbMot.xFbRun := TRUE;
+Spin(fbM := fbMot, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#100MS);
+fbMot.wInterlock := 16#0001;
+fbMot.xFbRun := FALSE;
+Spin(fbM := fbMot, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#100MS);
+AssertTrue(Condition := fbMot.stSts.eState = E_MotorState.Stopped, Message := 'Auto motor stopped by interlock');
+fbMot.wInterlock := 16#0000;
+Spin(fbM := fbMot, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#100MS);
+AssertTrue(Condition := fbMot.xQRun, Message := 'Auto restarts after the interlock clears');
+AssertTrue(Condition := fbMot.stSts.eState = E_MotorState.Starting, Message := 'Auto motor starting');
+Spin(fbM := fbMot2, fbT := fbTime2, stC := stCmd2, stR := stRetain2, stF := stCfg, uiN := 1, tDt := T#0S);
+stCmd2.xStart := TRUE;
+fbMot2.xFbRun := TRUE;
+Spin(fbM := fbMot2, fbT := fbTime2, stC := stCmd2, stR := stRetain2, stF := stCfg, uiN := 1, tDt := T#100MS);
+AssertTrue(Condition := fbMot2.stSts.eState = E_MotorState.Running, Message := 'Manual motor running');
+fbMot2.wInterlock := 16#0001;
+fbMot2.xFbRun := FALSE;
+Spin(fbM := fbMot2, fbT := fbTime2, stC := stCmd2, stR := stRetain2, stF := stCfg, uiN := 1, tDt := T#100MS);
+fbMot2.wInterlock := 16#0000;
+Spin(fbM := fbMot2, fbT := fbTime2, stC := stCmd2, stR := stRetain2, stF := stCfg, uiN := 10, tDt := T#100MS);
+AssertFalse(Condition := fbMot2.xQRun, Message := 'Manual does not restart');
+AssertTrue(Condition := fbMot2.stSts.eState = E_MotorState.Stopped, Message := 'Manual motor stopped');
+
+coUnit.TEST_FINISHED();
