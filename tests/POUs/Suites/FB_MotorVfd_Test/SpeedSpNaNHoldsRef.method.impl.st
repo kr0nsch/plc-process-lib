@@ -10,6 +10,10 @@ SpinVfd(fbV := fbVfd, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg
 uBits.dwValue := 16#7FC00000;
 fbVfd.rSpeedSpAuto_pct := uBits.rValue;
 SpinVfd(fbV := fbVfd, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 1, tDt := T#100MS);
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbVfd.rSpeedRef_pct) AND F_IsFinite(rIn := fbVfd.stSts.rSpeedRef_pct),
+           Message := 'reference finite');
+AssertTrue(Condition := F_IsFinite(rIn := stCmd.rSpeedSp_pct), Message := 'operator setpoint finite');
 AssertEquals_REAL(Expected := 60.0, Actual := fbVfd.rSpeedRef_pct, Delta := 1.0E-4, Message := 'reference held');
 AssertTrue(Condition := (fbVfd.stSts.stCommon.wWarning AND GVL_Const.MOT_WRN_SPEED_SP_INVALID) <> 0,
            Message := 'SP_INVALID');

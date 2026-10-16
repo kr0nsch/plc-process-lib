@@ -1,0 +1,3 @@
+DefaultCfgPassesCheck();
+DevTypeReportedInStsCommon();
+AllTypesAlarmCountThroughIDevice();

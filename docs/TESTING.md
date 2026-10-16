@@ -28,7 +28,8 @@ tests/
   GVLs/
     GVL_TestsFoundation.gvl.st        наборы основы, этап 1: время, утилиты, общие типы
     GVL_TestsAlarm.gvl.st             наборы основы, этап 2: FB_Alarm, FB_DeviceBase, зонды
-    GVL_Tests<Семейство>.gvl.st       по GVL на семейство
+    GVL_Tests<Семейство>.gvl.st       по GVL на семейство (AiDi, Motor, Valve, Pid)
+    GVL_TestsIntegration.gvl.st       межсемейные тесты: все семь типов устройств вместе
   POUs/
     PRG_Tests/                        coUnit.RUN(); экземпляров наборов нет
     Suites/FB_<X>_Test/               наборы
@@ -70,17 +71,17 @@ END_VAR
 В отчёте имя набора — путь экземпляра без `Device.Application.`: `GVL_TestsFoundation.fbTimeTest`.
 Атрибут `qualified_only` на регистрацию не влияет (прогон 3: одна GVL с ним, другая без).
 
-Рекомендуемое разбиение (имена GVL выбирает команда; правило — одна GVL на семейство, чужие не
-правятся):
+Разбиение (правило — одна GVL на семейство, чужие не правятся):
 
 | GVL | Наборы |
 |---|---|
-| `GVL_TestsFoundation` | `FB_Time_Test`, `FB_Util_Test`, `FB_Common_Test` (этап 1, готовы) |
-| `GVL_TestsAlarm` | `FB_Alarm_Test`, `FB_DeviceBase_Test`, `FB_Runtime_Test` (этап 2, готовы) |
-| `GVL_TestsInputs` | `FB_AnalogInput_Test`, `FB_DigitalInput_Test` |
-| `GVL_TestsMotors` | `FB_Motor_Test`, `FB_MotorVfd_Test` |
-| `GVL_TestsValves` | `FB_Valve_Test`, `FB_ControlValve_Test` |
+| `GVL_TestsFoundation` | `FB_Time_Test`, `FB_Util_Test`, `FB_Common_Test` (основа, этап 1) |
+| `GVL_TestsAlarm` | `FB_Alarm_Test`, `FB_DeviceBase_Test`, `FB_Runtime_Test` (основа, этап 2) |
+| `GVL_TestsAiDi` | `FB_AnalogInput_Test`, `FB_DigitalInput_Test` |
+| `GVL_TestsMotor` | `FB_Motor_Test`, `FB_MotorVfd_Test` |
+| `GVL_TestsValve` | `FB_Valve_Test`, `FB_ControlValve_Test` |
 | `GVL_TestsPid` | `FB_Pid_Test` |
+| `GVL_TestsIntegration` | `FB_Integration_Test` (после слияния семейств, F-26) |
 
 Тесты `Common_SizeOfSts_MatchesRegisterMap` и `Common_SizeOfDeviceRetain_Is36` (в контракте — в
 `FB_DeviceBase_Test`) уже есть в `FB_Common_Test`: типы DUT сделаны на этапе 1. В
@@ -180,6 +181,27 @@ coUnit.TEST_FINISHED();
 - Допуск сравнения REAL — по смыслу (обычно `1.0E-5` относительно значения порядка 100); для значений,
   которые ФБ возвращает без арифметики, — `0.0`. Для LREAL — типизированные литералы
   (`LREAL#1.0E-9`), иначе литерал округлится до REAL.
+- **NaN проходит `AssertEquals_REAL`.** coUnit сравнивает `ABS(Expected - Actual) > Delta`, а любое
+  сравнение с NaN ложно: при `Actual = NaN` ассерт **проходит**, хотя значение испорчено (найдено
+  мутационной проверкой ПИД: мутант, пропускавший NaN в выход, выживал). Правило: в тесте с
+  неконечным входом (NaN, ±Inf, больше `REAL_SANE_MAX` — через `U_RealBits`) каждый REAL-выход, который
+  тест сравнивает или который может принять мусор (выход, значение в Sts, слежение в Cmd), сначала
+  проверяется на конечность, затем на значение:
+
+  ```st
+  // AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+  AssertTrue(Condition := F_IsFinite(rIn := fbCv.rOut_pct) AND F_IsFinite(rIn := fbCv.rOut_mA),
+             Message := 'output finite');
+  AssertEquals_REAL(Expected := 35.0, Actual := fbCv.rOut_pct, Delta := 0.0, Message := 'held on NaN setpoint');
+  ```
+
+  Так же для `AssertEquals_LREAL`. Проверено по всем наборам: тесты с неконечными входами
+  `FB_Util_Test` (`F_RateLimit`), `FB_AnalogInput_Test`, `FB_MotorVfd_Test`, `FB_ControlValve_Test`,
+  `FB_Pid_Test` проверяют конечность; тесты, где NaN подаётся только в Cfg (`*_CfgErrBits*`,
+  `*_CfgChecks*`), сравнивают только биты `wCfgErr`, а `FB_LimitMonitor` — только `BOOL`.
+  Мутационная проверка правила (Control Win V3, 16.10.2026): `F_RateLimit` без проверки конечности
+  цели возвращает NaN — прежний `AssertEquals_REAL(Expected := 42.0, …)` проходил, проверка
+  `F_IsFinite` роняет `Util_RateLimit_NonFiniteTarget_HoldsCurrent` («NaN target: result finite»).
 
 ## Ограничения coUnit и инструментов, которые влияют на текст тестов
 
@@ -259,8 +281,23 @@ Cfg — `ST_TestDeviceCfg` (`rGain` > 0 и конечен — иначе бит 
 | 10 | Порядок результатов | `eCmdResult` — последней команды в порядке тела: Reset → режим → команды устройства → `xAck`/`AckAll()` и маски тревог (F-28) | — |
 
 Тесты `Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов в одном
-тесте, F-26) пишет основа после слияния семейств. До этого команда проверяет пункты 1 и 4 и
-умолчания своей Cfg в своём наборе.
+тесте, F-26) — в наборе `FB_Integration_Test` ([ниже](#межсемейные-тесты)); команда проверяет
+пункты 1 и 4 и умолчания своей Cfg и в своём наборе.
+
+## Межсемейные тесты
+
+`FB_Integration_Test` (`tests/POUs/Suites/FB_Integration_Test/`, регистрация —
+`GVL_TestsIntegration`) проверяет все семь типов устройств вместе, на настоящих ФБ (тесты 23.2,
+отложенные основой до слияния семейств, F-26):
+
+| Тест | Что проверяет |
+|---|---|
+| `Device_DefaultCfg_PassesCheck` | умолчания Cfg семи типов проходят `CheckConfig`: после первого вызова `wCfgErr = 0` и нет бита `DEV_STS_CFG_ERROR` (инвариант генератора, 2.3 и 20) |
+| `Device_DevType_ReportedInStsCommon` | до первого вызова `eDevType = None`, после — свой `E_DeviceType` у каждого типа; `FB_MotorVfd` — `MotorVfd`, а не `Motor`, и во втором вызове тоже |
+| `Device_AllTypes_AlarmCountThroughIDevice` | все семь типов доступны через `I_Device`: `AlarmCount` = `<DEV>_ALARM_COUNT`, слот 0 доступен через `GetAlarm`, режим — из перечисления |
+
+Семь экземпляров со структурами — локальные переменные метода (R5: стека задачи хватает, прогон
+Control Win V3).
 
 ## Зонды времени выполнения
 
@@ -284,8 +321,9 @@ Cfg — `ST_TestDeviceCfg` (`rGain` > 0 и конечен — иначе бит 
 | `FB_Runtime_Test` | 8 | — | 8 | R1 (по циклам задачи и внутри цикла), L6, R9, L7, счётчики по кругу, R5, R13 |
 | **Всего** | **151** | **33 / 62** | **89** | |
 
-Тесты `Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов)
-пишутся на этапе устройств (F-26). Список тестов с описаниями — [TEST_REPORT.md](TEST_REPORT.md).
+Тесты `Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов) —
+в `FB_Integration_Test` ([выше](#межсемейные-тесты)). Наборы семейств — в `docs/fb/<ФБ>.md`, раздел
+«Тесты»; итоги по наборам и список тестов с описаниями — [TEST_REPORT.md](TEST_REPORT.md).
 
 ## Как запускать
 

@@ -3,4 +3,5 @@
 METHOD PRIVATE RateLimitNonFiniteCurrentJumpsToTarget
 VAR
     uBits : U_RealBits;      // значение REAL по битам IEEE 754
+    rOut  : REAL;            // результат F_RateLimit
 END_VAR

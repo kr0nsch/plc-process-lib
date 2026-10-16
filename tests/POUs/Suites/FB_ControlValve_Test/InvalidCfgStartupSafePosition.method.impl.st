@@ -27,6 +27,10 @@ stCfgBad.rSafePos_pct := uBits.rValue;
 fbCvBad(itfTime := fbTime, stCmd := stCmdBad, stRetain := stRetainBad, stCfg := stCfgBad);
 AssertEquals_WORD(Expected := GVL_Const.CV_CFG_SAFE_POS, Actual := fbCvBad.stSts.stCommon.wCfgErr,
                   Message := 'CV_CFG_SAFE_POS');
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbCvBad.rOut_pct) AND F_IsFinite(rIn := fbCvBad.rOut_mA),
+           Message := 'NaN safe position: output finite');
+AssertTrue(Condition := F_IsFinite(rIn := stCmdBad.rPosSpMan_pct), Message := 'manual setpoint tracking finite');
 AssertEquals_REAL(Expected := 0.0, Actual := fbCvBad.rOut_pct, Delta := 0.0, Message := 'NaN safe position: 0 %');
 AssertEquals_REAL(Expected := 4.0, Actual := fbCvBad.rOut_mA, Delta := 1.0E-5, Message := '4 mA');
 stCfgBad.rSafePos_pct := 150.0;

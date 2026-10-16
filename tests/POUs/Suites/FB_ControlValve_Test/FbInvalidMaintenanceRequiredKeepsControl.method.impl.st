@@ -32,6 +32,13 @@ fbTime.Advance(tStep := T#100MS);
 fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 AssertEquals_WORD(Expected := GVL_Const.CV_WRN_FB_INVALID,
                   Actual := fbCv.stSts.stCommon.wWarning AND GVL_Const.CV_WRN_FB_INVALID,
-Message := 'NaN feedback invalid');
+                  Message := 'NaN feedback invalid');
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbCv.rOut_pct) AND F_IsFinite(rIn := fbCv.rOut_mA),
+           Message := 'output finite with NaN feedback');
+AssertTrue(Condition := F_IsFinite(rIn := fbCv.stSts.rDeviation_pct), Message := 'deviation finite');
+AssertEquals_REAL(Expected := 0.0, Actual := fbCv.stSts.rDeviation_pct, Delta := 0.0,
+                  Message := 'no deviation without valid feedback (CV-8)');
+AssertEquals_REAL(Expected := 60.0, Actual := fbCv.rOut_pct, Delta := 0.0, Message := 'control continues');
 
 coUnit.TEST_FINISHED();

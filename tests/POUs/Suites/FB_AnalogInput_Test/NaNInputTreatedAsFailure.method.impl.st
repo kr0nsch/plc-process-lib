@@ -12,6 +12,10 @@ FOR iStep := 1 TO 9 DO   // t1 + 0,9 с
 END_FOR
 AssertTrue(Condition := fbAi.stSts.eSignal = E_AiSignalState.NotFinite, Message := 'NaN is NotFinite');
 AssertFalse(Condition := fbAi.Fault, Message := 'no failure before tFailDelay');
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbAi.rValue_eu) AND F_IsFinite(rIn := fbAi.rValue_pct),
+           Message := 'NaN input: value finite');
+AssertTrue(Condition := F_IsFinite(rIn := stCmd.rSubstValue_eu), Message := 'NaN input: substitution tracking finite');
 AssertEquals_REAL(Expected := 50.0, Actual := fbAi.rValue_eu, Delta := 1.0E-4, Message := 'value held, not NaN');
 fbTime.Advance(tStep := T#100MS);
 fbAi(itfTime := fbTime, rIn := uBits.rValue, stCmd := stCmd, stCfg := stCfg);   // t1 + 1,0 с
@@ -22,6 +26,8 @@ uBits.dwValue := 16#7F800000;                                     // +Inf
 fbTime.Advance(tStep := T#100MS);
 fbAi(itfTime := fbTime, rIn := uBits.rValue, stCmd := stCmd, stCfg := stCfg);
 AssertTrue(Condition := fbAi.stSts.eSignal = E_AiSignalState.NotFinite, Message := '+Inf is NotFinite');
+AssertTrue(Condition := F_IsFinite(rIn := fbAi.rValue_eu) AND F_IsFinite(rIn := fbAi.rValue_pct),
+           Message := '+Inf input: value finite');
 fbTime.Advance(tStep := T#100MS);
 fbAi(itfTime := fbTime, rIn := 1.0E31, stCmd := stCmd, stCfg := stCfg);
 AssertTrue(Condition := fbAi.stSts.eSignal = E_AiSignalState.NotFinite, Message := 'above REAL_SANE_MAX is NotFinite');

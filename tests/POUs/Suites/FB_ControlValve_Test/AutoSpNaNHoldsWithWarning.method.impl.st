@@ -7,6 +7,10 @@ uBits.dwValue := 16#7FC00000;
 fbCv.rPosSpAuto_pct := uBits.rValue;
 fbTime.Advance(tStep := T#100MS);
 fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbCv.rOut_pct) AND F_IsFinite(rIn := fbCv.rOut_mA),
+           Message := 'output finite');
+AssertTrue(Condition := F_IsFinite(rIn := stCmd.rPosSpMan_pct), Message := 'manual setpoint tracking finite');
 AssertEquals_REAL(Expected := 35.0, Actual := fbCv.rOut_pct, Delta := 0.0, Message := 'held on NaN setpoint');
 AssertEquals_WORD(Expected := GVL_Const.CV_WRN_SP_INVALID,
                   Actual := fbCv.stSts.stCommon.wWarning AND GVL_Const.CV_WRN_SP_INVALID, Message := 'SP_INVALID');
