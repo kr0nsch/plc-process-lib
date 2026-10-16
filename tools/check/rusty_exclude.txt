@@ -25,5 +25,7 @@ FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CON
 GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
 #
 # Семейство ПИД: stCfg (VAR_IN_OUT CONSTANT, контракт, раздел 0) и CheckConfig.stCfgIn — E034 в
-# объявлении, E036 в каждом вызове.
+# объявлении, E036 в каждом вызове. FB_FopdtModel.st и U_TestPidEnumInt.st RuSTy проверяет.
 FB_PID.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036
+FB_Pid_Test.st  # вызовы FB_PID со stCfg (VAR_IN_OUT CONSTANT): E036; логику проверяют тесты в CODESYS
+GVL_TestsPid.st  # экземпляр набора FB_Pid_Test, исключённого выше

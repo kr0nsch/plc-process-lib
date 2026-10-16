@@ -163,7 +163,7 @@ match = "variable: (RT_SAMPLES|UIRTCOUNT|ALTRTSTAMP)$"
 reason = "Артефакт понижения: состояние многоциклового теста используют методы-тесты набора (вынесены сборкой iec-checker в функции)"
 
 # =====================================================================================================
-# Семейство ПИД: FB_PID
+# Семейство ПИД: FB_PID, помощник тестов FB_FopdtModel
 # =====================================================================================================
 
 [[allow]]
@@ -176,3 +176,9 @@ id = "UnusedVariable"
 file = "src/POUs/Control/FB_PID/FB_PID.decl.st"
 match = "variable: (XSATHIGH|XSATLOW|LRV_PCT|LRPVPREV_EU|XSPINIT|XINDEADBAND|XOUTRATELIM)$"
 reason = "Артефакт понижения и ложное срабатывание iec_checker 0.4: переменные пишут и читают методы CalcStep, SelectOutput, OnModeChanged (сборка iec-checker выносит их в отдельные функции), тело читает xSatHigh, xSatLow, xInDeadband, xOutRateLim только как аргументы SEL в вызове FinishCycle"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Helpers/FB_FopdtModel/FB_FopdtModel.decl.st"
+match = "variable: (DT_S|RING_SIZE|RU_PCT|RGAIN|RT_S|RY|ARDELAY|UIHEAD|LRY)$"
+reason = "Артефакт понижения: константы, входы, выход и состояние модели использует только метод Step, который сборка iec-checker выносит в отдельную функцию; тела у ФБ нет"

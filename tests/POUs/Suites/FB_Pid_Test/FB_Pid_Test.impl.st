@@ -1,0 +1,40 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов.
+// Тесты списка контракта (23.2)
+POnlyErrorStepOutputEqualsKpTimesError();
+IntegralConstantErrorRampRateKpOverTi();
+DOnMeasurementSetpointStepNoDerivativeKick();
+DFilterPvStepDecaysWithTdOverN();
+DirectActionInvertsSign();
+OutputLimitsClampAndFlags();
+AntiWindupLongSaturationRecoversWithinTt();
+AntiWindupOutActFeedbackTracksExternalLimit();
+OutputRateLimitIntegratorBacksOff();
+ManualToAutoBumpless();
+TrackPresetsIntegratorBumplessRelease();
+SpExternalTracksIntoCmd();
+SetpointRampRateLimited();
+RealDtSameResultFor10msAnd100msSteps();
+SampleComputesOnlyEveryTSample();
+DtGapSkipsIntegration();
+DeadbandNoActionInsideBand();
+PvFailHoldOutputBumplessResume();
+PvFailShedToManual();
+SetAutoWithInvalidPvRejected();
+FopdtClosedLoopMatchesPythonReference();
+InvalidCfgStartupManualOutput();
+RetainAutoRestoredOnRestart();
+OutOfServiceHoldsOutput();
+// Сверх контракта
+FopdtSaturatedStepBackCalcLimitsOvershoot();
+OpenLoopStepMatchesPythonReference();
+TimeBackwardsInitStepNoJump();
+PvFailSafeOutDrivesSafeOutput();
+SpTrackPvManualSetpointFollowsPv();
+SetpointNaNHoldsTargetWarns();
+DefaultCfgPassesCheck();
+FirstCallReportsDevTypeAndAlarmCount();
+CfgChecksSetDocumentedBits();
+InvalidCfgAtRuntimeKeepsLastValidCfg();
+PvInvalidAlarmActiveOnlyInAuto();
+ResetAcceptedWithoutLatchedFaults();
+TrackWithInvalidPvNoFailure();
