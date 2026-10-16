@@ -48,3 +48,5 @@ TimeBackwardsFilterHoldsWithoutJump();
 SubstitutionNonFiniteValueHeld();
 OosExitWithBrokenSignalInvalidAtOnce();
 SubstitutionRenewedAfterTimeoutCountsFullPeriod();
+ShortGlitchFilterKeptNoFalseLimit();
+SubstitutionDuringFailureLimitsOnSubstValue();

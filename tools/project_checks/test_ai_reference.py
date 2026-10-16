@@ -66,6 +66,18 @@ CITED: list[tuple[str, str, float, float]] = [
         1.0e-3,
     ),
     ("FilterIndependentOfCycleTime", "39.34694", filter_value("ступень 0 -> 100, T = 10 с, 5 с шагом 10 мс"), 1.0e-3),
+    (
+        "ShortGlitchFilterKeptNoFalseLimit",
+        "52.37906",
+        filter_value("ступень 50 -> 75, T = 10 с, 1 с до провала"),
+        1.0e-3,
+    ),
+    (
+        "ShortGlitchFilterKeptNoFalseLimit",
+        "52.60415",
+        filter_value("ступень 50 -> 75, T = 10 с, провал 0,1 с, фильтр заморожен"),
+        1.0e-3,
+    ),
 ]
 
 

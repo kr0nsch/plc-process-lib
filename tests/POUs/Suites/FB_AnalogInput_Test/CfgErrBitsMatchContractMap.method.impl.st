@@ -46,6 +46,9 @@ stBad.rLowCut_pct := -1.0;
 fbAi(itfTime := fbTime, rIn := 50.0, stCmd := stCmd, stCfg := stBad);
 AssertEquals_WORD(Expected := GVL_Const.AI_CFG_LOW_CUT, Actual := fbAi.stSts.stCommon.wCfgErr,
                   Message := 'low cut < 0');
+stBad.rLowCut_pct := GVL_Const.AI_LOWCUT_MAX_PCT;
+fbAi(itfTime := fbTime, rIn := 50.0, stCmd := stCmd, stCfg := stBad);
+AssertEquals_WORD(Expected := 0, Actual := fbAi.stSts.stCommon.wCfgErr, Message := 'low cut at the limit is valid');
 stBad := stCfg;
 uEnum.iValue := 5;
 stBad.eFailValue := uEnum.eAiFailValue;

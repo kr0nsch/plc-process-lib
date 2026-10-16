@@ -9,13 +9,8 @@ ELSIF eMode = E_DeviceMode.Manual THEN
     xValue := xSubst;
     xValid := TRUE;
 ELSIF xChannelFault THEN
-    IF stCfgLkg.eFailValue = E_DiFailValue.ForceFalse THEN
-        xValue := FALSE;
-    ELSIF stCfgLkg.eFailValue = E_DiFailValue.ForceTrue THEN
-        xValue := TRUE;
-    ELSE
-        xValue := xGood;
-    END_IF
+    // значение отказа: тело выставило xGood по eFailValue (HoldLast — значение до отказа)
+    xValue := xGood;
     xValid := FALSE;
 ELSE
     xValue := xGood;

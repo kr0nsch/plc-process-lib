@@ -15,9 +15,11 @@ AssertEquals_WORD(Expected := 16#0003, Actual := fbDi.stSts.stCommon.wAlmShelved
 AssertTrue(Condition := fbDi.xValue, Message := 'value held');
 AssertFalse(Condition := fbDi.xValid, Message := 'invalid in OOS');
 AssertTrue(Condition := fbDi.Status = E_Ne107Status.CheckFunction, Message := 'CheckFunction');
+stCmd.xSubstValue := FALSE;   // оператор пишет поле подмены в OOS
 fbTime.Advance(tStep := T#100MS);
 fbDi(itfTime := fbTime, xIn := FALSE, xChannelFault := TRUE, stCmd := stCmd, stCfg := stCfg);
 AssertTrue(Condition := fbDi.Status = E_Ne107Status.CheckFunction, Message := 'no failure in OOS');
+AssertTrue(Condition := stCmd.xSubstValue, Message := 'held value tracked into xSubstValue in OOS');
 AssertEquals_WORD(Expected := 0, Actual := fbDi.stSts.stCommon.wFault, Message := 'no fault bit in OOS');
 stCmd.stCommon.xSetAuto := TRUE;
 fbTime.Advance(tStep := T#100MS);

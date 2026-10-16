@@ -38,10 +38,12 @@ IF fbSubst.xOut THEN
     SetCmdResult(eResult := E_CmdResult.SubstExpired);
 END_IF
 
-// 6. Сигнал: инверсия до задержек. При отказе канала сигнал не верен: задержки стоят на значении до
-//    отказа и после возврата отсчитываются заново. В первом вызове с корректной Cfg значение берётся без
-//    задержки (DI-1): не в первом вызове вообще — до корректной Cfg инверсия взята из умолчаний, и НЗ-контакт
-//    прошёл бы через задержку с неверной полярностью
+// 6. Сигнал: инверсия до задержек. При отказе канала сигнал не верен: задержки стоят на значении отказа
+//    (HoldLast — значение до отказа, ForceFalse/ForceTrue — значение по eFailValue) и после возврата канала
+//    отсчитываются от него заново: значение отказа снимается только через задержку, без провала защитного
+//    сигнала (DI-2). В первом вызове с корректной Cfg значение берётся без задержки (DI-1): не в первом вызове
+//    вообще — до корректной Cfg инверсия взята из умолчаний, и НЗ-контакт прошёл бы через задержку с неверной
+//    полярностью
 xRaw := xIn XOR stCfgLkg.xInvert;
 IF xDelayInit AND xCfgEverOk THEN
     xGood := xRaw AND NOT xChannelFault;
@@ -49,6 +51,8 @@ IF xDelayInit AND xCfgEverOk THEN
     xDelayInit := FALSE;
 END_IF
 IF xChannelFault THEN
+    // значение отказа: HoldLast — прежнее, ForceTrue — TRUE, ForceFalse — FALSE (eFailValue проверен CheckConfig)
+    xGood := (xGood AND stCfgLkg.eFailValue = E_DiFailValue.HoldLast) OR stCfgLkg.eFailValue = E_DiFailValue.ForceTrue;
     fbDebounce.Preset(xValue := xGood);
 ELSE
     fbDebounce(xIn := xRaw, tOnDelay := stCfgLkg.tOnDelay, tOffDelay := stCfgLkg.tOffDelay, itfTime := itfTimeAct);

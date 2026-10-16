@@ -39,7 +39,7 @@ IF xCompute THEN
         END_IF
     END_IF
 
-    // фильтр: alpha = 1 - exp(-dt / T); T#0S, первый расчёт и расчёт после отказа — без фильтра
+    // фильтр: alpha = 1 - exp(-dt / T); T#0S, первый расчёт и расчёт после подтверждённого отказа — без фильтра
     lrT_s := F_TimeToSec(tIn := stCfgLkg.tFilter);
     IF xFltInit OR lrT_s <= 0.0 THEN
         lrFlt := lrEng;
@@ -55,6 +55,7 @@ IF xCompute THEN
         xHaveGood := TRUE;
     END_IF
 ELSE
-    // расчёта нет: фильтр начнётся заново с текущего значения
-    xFltInit := TRUE;
+    // расчёта нет. Отказ подтверждён или сигнал не контролируется (xRestart): фильтр начнётся заново с
+    // текущего значения. Неподтверждённый провал фильтр замораживает: после него — продолжение без скачка
+    xFltInit := xFltInit OR xRestart;
 END_IF

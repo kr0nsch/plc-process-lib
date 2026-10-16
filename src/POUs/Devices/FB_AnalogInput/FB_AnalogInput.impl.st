@@ -63,8 +63,10 @@ ELSE
 END_IF
 xFail := fbFail.xOut;
 xOor := fbOor.xOut;
-// 6.3 Значение и фильтр: не считаются без корректной Cfg, в OutOfService и пока сигнал отказал
-ComputeValue(xCompute := xSupervise AND NOT xRawFail);
+// 6.3 Значение и фильтр: не считаются без корректной Cfg, в OutOfService и пока сигнал отказал. Фильтр
+//     начинается заново после подтверждённого отказа и после возврата контроля; короткий провал его только
+//     замораживает (AI-12)
+ComputeValue(xCompute := xSupervise AND NOT xRawFail, xRestart := xFail OR NOT xSupervise);
 // 6.4 Выбор значения по режиму и состоянию сигнала
 xValueBad := xFail OR (xRawFail AND NOT xHaveGood);
 SelectValue(rSubst_eu := stCmd.rSubstValue_eu);

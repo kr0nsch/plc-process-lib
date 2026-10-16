@@ -27,7 +27,7 @@ VAR
     stCfgLkg   : ST_DigitalInputCfg; // последняя корректная конфигурация (LKG)
     fbDebounce : FB_Delay;           // задержки включения и отключения
     fbSubst    : FB_Delay;           // длительность подмены (tSubstMax)
-    xGood      : BOOL;               // значение после задержек до отказа канала (HoldLast)
+    xGood      : BOOL;               // значение после задержек; при отказе канала — значение отказа (DI-2)
     xDelayInit : BOOL := TRUE;       // задержки ещё не предустановлены (до первого вызова с корректной Cfg)
 END_VAR
 VAR_TEMP

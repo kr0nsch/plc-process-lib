@@ -16,3 +16,4 @@ InvertFromFirstValidCfgNoFalseValue();
 ChannelFaultDuringOnDelayRestartsDelay();
 SubstitutionRenewedAfterTimeoutCountsFullPeriod();
 AlarmEventsValueIsZeroOrOne();
+ChannelFaultRecoveredForcedValueReleasedThroughDelay();
