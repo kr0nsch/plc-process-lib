@@ -1,4 +1,25 @@
 # Файлы build/assembled/rusty/, которые run_rusty.py не передаёт компилятору RuSTy.
 # Формат: <Имя>.st  # причина (обязательно). Пустые строки и строки с '#' в начале пропускаются.
-# Пример:
-#   FB_ModbusMaster.st  # использует SysCom (CAA), объявлений для RuSTy нет
+# Подробный разбор — docs/STATIC_ANALYSIS.md, раздел «RuSTy».
+#
+# RuSTy 1.0.6 не поддерживает VAR_IN_OUT CONSTANT (расширение CODESYS) в методах: E034 в объявлении
+# и E036 «Cannot assign to CONSTANT» в каждом вызове. Сигнатура I_AlarmSink.OnAlarmEvent задана
+# контрактом (VAR_IN_OUT CONSTANT stEvent), вариант сборки rusty её пока не понижает.
+FB_TestSink.st  # реализует I_AlarmSink.OnAlarmEvent с VAR_IN_OUT CONSTANT: E034
+FB_Common_Test.st  # вызывает OnAlarmEvent (VAR_IN_OUT CONSTANT): E036; типы DUT проверяет компилятор CODESYS
+GVL_TestsFoundation.st  # объявляет экземпляр FB_Common_Test, который исключён выше
+#
+# Этап 2: устройства передают stCfg как VAR_IN_OUT CONSTANT (контракт, раздел 0) — каждый вызов даёт
+# E036, объявление — E034. Исключённый файл компилятору не передаётся, поэтому исключаются и все, кто
+# ссылается на исключённые. FB_Alarm.st и FB_DeviceBase.st НЕ исключены: у них три известные ошибки
+# (E036 в вызове OnAlarmEvent, E034 у параметров CheckAlarmCfg и RunAlarms), а остальной текст RuSTy
+# проверяет. Исключить FB_DeviceBase.st нельзя ещё и потому, что тест шаблона
+# test_integration_sample_passes читает этот файл исключений и для своей фикстуры, где тоже есть
+# FB_DeviceBase.st (docs/STATIC_ANALYSIS.md).
+FB_TestDevice.st  # наследник FB_DeviceBase, stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036
+FB_TestDeviceExt.st  # наследник FB_TestDevice; SUPER^ со stCfg (VAR_IN_OUT CONSTANT): E031, E036
+FB_TestDeviceNoSuper.st  # наследник FB_TestDevice, исключённого выше
+FB_Alarm_Test.st  # приёмник событий FB_TestSink исключён выше (E034): E052 «Unknown type»
+FB_DeviceBase_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036
+FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036, E034
+GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
