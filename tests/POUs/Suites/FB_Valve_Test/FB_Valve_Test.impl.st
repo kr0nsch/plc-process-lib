@@ -33,3 +33,4 @@ CfgChecksSetBits();
 PermitLostWhileMovingContinuesMotion();
 InvalidCfgAtRuntimeKeepsLastValid();
 InterlockStayStopsMotorized();
+CloseOnTorqueZscAloneKeepsDrivingUntilTimeout();

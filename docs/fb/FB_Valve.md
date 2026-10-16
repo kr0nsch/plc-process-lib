@@ -72,7 +72,7 @@
 | `tLimitFilter` | `TIME` | `T#500MS` | фильтр «оба концевика» и ухода с концевика; `T#0S` — без фильтра | — |
 | `tReverse` | `TIME` | `T#1S` | пауза перед сменой направления (`Motorized`) | бит 4 `VLV_CFG_REVERSE` — `Motorized` и `T#0S` |
 | `xTorqueUsed` | `BOOL` | FALSE | муфта подключена (`Motorized`) | бит 3 `VLV_CFG_TORQUE` — у соленоида |
-| `xCloseOnTorque` | `BOOL` | FALSE | закрытие «по моменту» (клиновые задвижки) | бит 3 `VLV_CFG_TORQUE` — без `xTorqueUsed` |
+| `xCloseOnTorque` | `BOOL` | FALSE | закрытие «по моменту» (клиновые задвижки): `xQClose` держится до муфты закрытия, ZSC выход не снимает | бит 3 `VLV_CFG_TORQUE` — без `xTorqueUsed` |
 | `eSafePos` | `E_ValveSafePos` | `Closed` | куда вести по блокировке: `Closed`, `Open`, `Stay` (стоп) | бит 2 `VLV_CFG_SAFE_POS` — вне перечисления или `Stay` у соленоида |
 | `wInterlockMask` | `WORD` | 16#FFFF | какие биты `wInterlock` действуют | — |
 | `wPermitOpenMask` | `WORD` | 16#FFFF | какие биты `wPermitOpen` обязательны | — |
@@ -117,7 +117,7 @@ stateDiagram-v2
     Intermediate --> Closing : цель Closed
     Unknown --> Closing : цель Closed
     Opening --> Open : ZSO (без ZSO — через tTravel)
-    Closing --> Closed : ZSC или муфта при xCloseOnTorque (без них — через tTravel)
+    Closing --> Closed : ZSC, при xCloseOnTorque — муфта (без ZSC — через tTravel)
     Opening --> Reversing : цель Closed (Motorized)
     Closing --> Reversing : цель Open (Motorized)
     Opening --> Closing : цель Closed (соленоид)
@@ -168,7 +168,7 @@ stateDiagram-v2
 | Слот (`E_ValveAlarm`) | Условие | Где контролируется | Фиксация до Reset | Приоритет по умолч. | `wFault` |
 |---|---|---|---|---|---|
 | 0 `FailToOpen` | Opening дольше `tTravel` (от включения выхода; у соленоида — от смены цели), ZSO подключён | Auto, Manual | да | Medium | бит 0 |
-| 1 `FailToClose` | Closing дольше `tTravel`, подключён ZSC или закрытие по моменту | Auto, Manual | да | Medium | бит 1 |
+| 1 `FailToClose` | Closing дольше `tTravel`, подключён ZSC или закрытие по моменту (тогда и при сработавшем ZSC: муфта не сработала) | Auto, Manual | да | Medium | бит 1 |
 | 2 `BothLimits` | оба концевика дольше `tLimitFilter` (при старте ПЛК — сразу) | Auto, Manual при корректной Cfg | **нет**: снимается сам | Medium | бит 2 |
 | 3 `PositionLost` | в Open/Closed, подтверждённом концевиком, он пропал без команды дольше `tLimitFilter` | Auto, Manual, есть напряжение | да | Medium | бит 3 |
 | 4 `TorqueTrip` | муфта в направлении хода раньше концевика (кроме закрытия по моменту) | Auto, Manual, в ходе | да | Medium | бит 4 |
@@ -296,7 +296,8 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 | V-6 | Разрешения проверяются при начале движения в направлении (и после паузы реверса); идущий ход пропавшее разрешение не останавливает; движение по блокировке разрешений не требует | Раздел 2.4: «пуск или движение запрещены, работающий механизм не останавливается» |
 | V-7 | «Оба концевика»: фильтр `tLimitFilter` только на появление, снимается сразу; при старте ПЛК — без фильтра (15.4: «оба → Fault»); контролируется только в Auto/Manual при корректной Cfg; в Local/OOS — состояние Unknown без отказа | Нефиксируемый отказ сигнала (2.4). В Local/OOS контроля нет (2.2) |
 | V-8 | Уход с концевика контролируется только у положения, подтверждённого своим концевиком (не «по времени» и не «по моменту»), и только при напряжении | Клиновая задвижка, закрытая по моменту, может не дойти до ZSC — ложный PositionLost (тест `Valve_CloseOnTorque_CompletesClosing`); соленоид без напряжения уходит на пружину штатно |
-| V-9 | Таймаут хода — ровно на `tTravel` (как `FB_Delay`: прошло ≥ задержки). Закрытие с `xCloseOnTorque` подтверждается ZSC или муфтой, поэтому таймаут — отказ и без ZSC | Контракт: «прошло больше tTravel»; граница одна на всю библиотеку (FB_Delay) |
+| V-9 | Таймаут хода — ровно на `tTravel` (как `FB_Delay`: прошло ≥ задержки). Закрытие с `xCloseOnTorque` завершает только муфта, поэтому таймаут — отказ и без ZSC, и при сработавшем ZSC | Контракт: «прошло больше tTravel»; граница одна на всю библиотеку (FB_Delay) |
+| V-19 | При `xCloseOnTorque` ZSC в ходе закрытия выход `xQClose` не снимает: Closing → Closed только по муфте закрытия. После этого ZSC, если сработал, подтверждает положение (контроль ухода с концевика) | Контракт 15.4: «при xCloseOnTorque — до срабатывания муфты закрытия». Концевик закрытия у клиновой задвижки настраивают чуть раньше посадки клина: останов по ZSC оставил бы задвижку недожатой. Тест `Valve_CloseOnTorque_ZscAloneKeepsDrivingUntilTimeout` |
 | V-10 | Окно Reset: FailToOpen, FailToClose, PositionLost снимаются сразу; TorqueTrip — когда муфта отпустила; ExtFault — когда `xExtFault = FALSE`; окно закрывается раньше, если всё снято; Reset без зафиксированных отказов — только `Accepted`; BothLimits Reset не нужен | Причина отказа хода в прошлом (привод стоит); «Reset при неснятой причине» (E_CmdResult) относится к муфте и аварии |
 | V-11 | Внешняя авария: во всех режимах, кроме OutOfService (и в Local), без фильтра (в Cfg нет `tExtFaultFilter`), фиксируется | Как у двигателя (13.6); Cfg заморожена (A-13) |
 | V-12 | Цикл «открыто» — вход в Open, если прошлое достигнутое крайнее положение не Open; неполный ход и старт ПЛК не считаются | Контракт: «вход в Open из другого состояния». Буквально Open → стоп → Open дал бы цикл без хода на закрытие — счётчик ТО завышался бы |
@@ -341,12 +342,13 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 `Valve_PowerLoss_StopsWithoutFault` · `Valve_Local_OutputsOffTracksLimits` · `Valve_Cycles_CountedOnOpen` ·
 ★ `Valve_InvalidCfg_StartupOutputsOff`
 
-Сверх контракта (13): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
+Сверх контракта (14): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
 `Valve_Reset_CauseClearsWithinWindow_FaultCleared` · `Valve_OosRequestWhileMoving_Rejected` ·
 `Valve_OosEntry_ClearsLatchedFaults` · `Valve_AutoToManual_Bumpless` · `Valve_PlcRestart_StateFromLimits` ·
 `Valve_ActTime_AccumulatesInRetain` · `Valve_MaintCyclesReached_MaintenanceRequired` ·
 `Valve_DefaultCfg_PassesCheck` · `Valve_CfgChecks_SetBits` · `Valve_PermitLostWhileMoving_ContinuesMotion` ·
-`Valve_InvalidCfgAtRuntime_KeepsLastValid` · `Valve_InterlockStay_StopsMotorized`
+`Valve_InvalidCfgAtRuntime_KeepsLastValid` · `Valve_InterlockStay_StopsMotorized` ·
+`Valve_CloseOnTorque_ZscAloneKeepsDrivingUntilTimeout`
 
 Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат):
 все пять мутаций `FB_Valve` поймал хотя бы один тест — реверс без паузы

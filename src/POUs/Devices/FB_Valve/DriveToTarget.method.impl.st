@@ -21,8 +21,10 @@ IF xDrive THEN
             eState := E_ValveState.Intermediate;
         END_IF
     ELSIF eState = E_ValveState.Closing THEN
-        IF xAtClose OR (stCfgLkg.xCloseOnTorque AND xTrqClose) THEN
-            eState := E_ValveState.Closed;     // по ZSC или «по моменту» (клиновая задвижка)
+        IF (xAtClose AND NOT stCfgLkg.xCloseOnTorque) OR (stCfgLkg.xCloseOnTorque AND xTrqClose) THEN
+            // по ZSC; при закрытии «по моменту» (клиновая задвижка) — только по муфте: ZSC стоит чуть
+            // раньше посадки клина и выход не снимает, иначе задвижка не дожата
+            eState := E_ValveState.Closed;
         ELSIF xTrqClose THEN
             xFltTorque := TRUE;
             eState := E_ValveState.Fault;
