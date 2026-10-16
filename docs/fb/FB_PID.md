@@ -113,7 +113,8 @@ Auto:  uLim = LIMIT(OutMin, v, OutMax);  u = RateStep(u_prev, uLim, OutRate, dt)
   `I := u − P − D` (следующий расчёт начинается с `v = u`, P-01). Когда:
   - первый расчёт (после старта ПЛК или после первой корректной Cfg) — бит `PID_STS_DT_GAP` и
     предупреждение `PID_WRN_DT_GAP` на один вызов;
-  - разрыв: прошло больше `tDtMax` или время ушло назад — тоже с битом и предупреждением;
+  - разрыв: прошло больше `tDtMax` (ровно `tDtMax` — ещё обычный шаг) или время ушло назад — тоже с
+    битом и предупреждением;
   - PV снова годна, выход из OutOfService, первая корректная Cfg — без бита (P-03).
 - Два вызова с одним и тем же временем (`dt = 0`) — расчёта нет, выход держится (P-02).
 - D по измерению: ступень задания не даёт «удара» по выходу. Обратная разность Эйлера для фильтра
@@ -152,7 +153,8 @@ Auto:  uLim = LIMIT(OutMin, v, OutMax);  u = RateStep(u_prev, uLim, OutRate, dt)
 снимает запрос Auto без корректной Cfg (`RejectedCfg`) или при негодной PV (`RejectedFault`).
 Неконечные `rManualOut_pct` или `rTrack_pct` — выход прежний. Старт ПЛК: режим — из `stRetain`,
 выход — `rOutAct_pct` при `xUseOutAct`, иначе `rTrack_pct` при `xTrack`, иначе
-`stCmd.rManualOut_pct`; интегратор инициализирует шаг инициализации первого расчёта.
+`stCmd.rManualOut_pct` (неконечное значение источника — следующий источник); интегратор
+инициализирует шаг инициализации первого расчёта.
 
 ## Состояния
 
@@ -348,14 +350,18 @@ GVL_Devices.fbP101.rSpeedSpAuto_pct := GVL_Devices.fbLIC101.rOut_pct;
 ★ `Pid_Fopdt_ClosedLoop_MatchesPythonReference` · ★ `Pid_InvalidCfg_StartupManualOutput` ·
 `Pid_RetainAuto_RestoredOnRestart` · `Pid_OutOfService_HoldsOutput`
 
-Сверх контракта (13): `Pid_Fopdt_SaturatedStep_BackCalcLimitsOvershoot` (насыщение в замкнутом
+Сверх контракта (17): `Pid_Fopdt_SaturatedStep_BackCalcLimitsOvershoot` (насыщение в замкнутом
 контуре с обратным расчётом и без) · `FopdtModel_OpenLoopStep_MatchesPythonReference` (помощник) ·
 `Pid_TimeBackwards_InitStep_NoJump` · `Pid_PvFail_SafeOut_DrivesSafeOutput` ·
 `Pid_SpTrackPv_ManualSetpoint_FollowsPv` · `Pid_SetpointNaN_HoldsTarget_Warns` ·
 `Pid_DefaultCfg_PassesCheck` · `Pid_FirstCall_ReportsDevTypeAndAlarmCount` ·
 `Pid_CfgChecks_SetDocumentedBits` (все 13 битов `wCfgErr`) · `Pid_InvalidCfgAtRuntime_KeepsLastValidCfg` ·
 `Pid_PvInvalidAlarm_ActiveOnlyInAuto` · `Pid_Reset_AcceptedWithoutLatchedFaults` ·
-`Pid_TrackWithInvalidPv_NoFailure`
+`Pid_TrackWithInvalidPv_NoFailure` · `Pid_AntiWindup_TtBelowDt_GainClampedToOne` (`Tt < dt`: множитель
+`MIN(dt/Tt, 1)`) · `Pid_Startup_OutActInitialisesOutput` (старт в Auto от `rOutAct_pct`, а не от нуля
+`rManualOut_pct`; неконечный `rOutAct_pct` — следующий источник) · `Pid_DtGap_BoundaryAtTDtMax` (шаг
+ровно `tDtMax` — обычный, на 1 мс больше — разрыв) · `Pid_SetpointRamp_ResumesAfterPvFailure` (рампа
+задания стоит, пока PV негодна, и продолжается без скачка к цели)
 
 Ключевые числа (эталон, совпадение в CODESYS до допуска теста):
 
@@ -365,9 +371,10 @@ GVL_Devices.fbP101.rSpeedSpAuto_pct := GVL_Devices.fbLIC101.rOut_pct;
 | `outact` | внешний минимум механизма 30 % | с `xUseOutAct` выход держится у 20,07 % и через 3 с после смены знака — 42,84 %; без — 0 % и 14,24 % (механизм всё ещё на 30 %) |
 | `fopdt_step` | замкнутый контур, ступень задания 0 → 40 | выход/PV: 10 с — 31,212/22,550; 30 с — 20,687/40,312; 60 с — 19,998/40,323; 120 с — 19,999/40,012; перерегулирование 1,67 %; установление (±2 %) 24,3 с |
 | `fopdt_sat` | то же, предел выхода 30 % | с обратным расчётом выход уходит с предела на 8,4 с, перерегулирования нет; без — на 20,8 с, пик 43,64 (9,1 %) |
+| `tt_small` | `Tt = 0,05 с` при `dt = 0,1 с`, e = +50 % | за шаг насыщения I = 1 %, выход остаётся на 100 %; без `MIN` множитель 2 дал бы I = −49 % и выход 51 % на следующем шаге |
 
 Проверено в CODESYS 3.5.17.30 + CODESYS Control Win V3 (32 бит), 16.10.2026, `cds.py test`: набор
-`GVL_TestsPid.fbPidTest` — 37 тестов, все пройдены (вместе с основой — 7 наборов, 188 тестов).
+`GVL_TestsPid.fbPidTest` — 41 тест, все пройдены (вместе с основой — 7 наборов, 192 теста).
 
 Мутационная проверка (тот же прогон, по одной однострочной мутации, затем откат): каждую ловит хотя
 бы один тест.
@@ -378,3 +385,9 @@ GVL_Devices.fbP101.rSpeedSpAuto_pct := GVL_Devices.fbLIC101.rOut_pct;
 | знак D (`PV_prev − PV` вместо `PV − PV_prev`) | `Pid_DOnMeasurement_SetpointStep_NoDerivativeKick`, `Pid_DFilter_PvStep_DecaysWithTdOverN`, `Pid_Fopdt_ClosedLoop_MatchesPythonReference`, `Pid_Fopdt_SaturatedStep_BackCalcLimitsOvershoot` |
 | `DT_GAP` без первого расчёта | `Pid_RetainAuto_RestoredOnRestart` |
 | выход из OutOfService без шага инициализации | `Pid_OutOfService_HoldsOutput` |
+| множитель обратного расчёта без `MIN(…, 1)` (`dt/Tt` как есть) | `Pid_AntiWindup_TtBelowDt_GainClampedToOne` |
+| разрыв при `dt >= tDtMax` вместо `dt > tDtMax` | `Pid_DtGap_BoundaryAtTDtMax` |
+| старт без источника `rOutAct_pct` (выход из `rManualOut_pct`) | `Pid_Startup_OutActInitialisesOutput` |
+| `RateStep` при `dt = 0` сразу к цели | `Pid_SetpointRamp_ResumesAfterPvFailure` |
+
+Последние четыре мутации (прогон 16.10.2026) ловит только свой тест: до них эти места не проверял ни один.
