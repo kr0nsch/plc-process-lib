@@ -126,6 +126,10 @@ SCENARIOS: dict[str, float] = {
     # FB_Motor_Test.CurrentRunSecondsCountsAndResetsOnStop: 65 шагов по 1 с, затем 3 шага по 1 с
     "current_run_65s": run_seconds([1.0] * 65),
     "current_run_total_68s": run_seconds([1.0] * 65) + run_seconds([1.0] * 3),
+    # FB_Motor_Test.FeedbackDropoutWithinFilterNotCountedAsStart: 10 шагов по 1 с, провал ОС на два шага по
+    # 100 мс и шаг возврата (провал короче tFbLossFilter — работа продолжается), затем ещё 10 шагов по 1 с
+    "dropout_bridged_at_return_s": run_seconds([1.0] * 10 + [0.1] * 3),
+    "dropout_bridged_total_s": run_seconds([1.0] * 10 + [0.1] * 3 + [1.0] * 10),
     # FB_Motor_Test.MaintIntervalReachedMaintenanceRequired: порог 1 ч — 3600 с; 3590 + 10 шагов по 1 с
     "maint_runtime_threshold_s": 1 * S_PER_H,
     "maint_runtime_after_s": 3590 + run_seconds([1.0] * 10),

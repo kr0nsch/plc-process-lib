@@ -20,6 +20,8 @@ EXPECTED: dict[str, float] = {
     "run_large_step_then_3s_s": 13,
     "current_run_65s": 65,
     "current_run_total_68s": 68,
+    "dropout_bridged_at_return_s": 10,
+    "dropout_bridged_total_s": 20,
     "maint_runtime_threshold_s": 3600,
     "maint_runtime_after_s": 3600,
     "inhibit_min_stop_at_stop": 30,

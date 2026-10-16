@@ -197,9 +197,15 @@ IF xRemote THEN
             eState := E_MotorState.Stopping;
         END_IF
     END_IF
+    // нет напряжения — останов без отказа. ОС ещё есть (выбег; ПЧ пережил провал) — Stopping: после
+    // восстановления питания торможение контролирует tFbStop, а не контроль самопроизвольного пуска (M-10)
     IF NOT xPowerOk THEN
         IF eState = E_MotorState.Starting OR eState = E_MotorState.Running OR eState = E_MotorState.Stopping THEN
-            eState := E_MotorState.Stopped;
+            IF xFbOff THEN
+                eState := E_MotorState.Stopped;
+            ELSE
+                eState := E_MotorState.Stopping;
+            END_IF
         END_IF
         xManualRun := FALSE;
     END_IF
@@ -232,6 +238,17 @@ IF xRemote THEN
                 ltRunEntry := ltNow;
             ELSE
                 eState := E_MotorState.Stopping;
+            END_IF
+        END_IF
+        // отложенный ручной пуск («Пуск» во время выбега, M-09): двигатель остановился, а условия пуска уже не
+        // выполнены (пропало разрешение) — пуск отменяется вторым результатом, сам позже он не произойдёт (13.5)
+        IF eState = E_MotorState.Stopped AND eMode = E_DeviceMode.Manual AND xManualRun AND NOT xStartOk THEN
+            xManualRun := FALSE;
+            xRunReq := FALSE;
+            IF xPermitOk THEN
+                SetCmdResult(eResult := E_CmdResult.RejectedInhibit);
+            ELSE
+                SetCmdResult(eResult := E_CmdResult.RejectedPermit);
             END_IF
         END_IF
         IF eState = E_MotorState.Stopped AND xRunReq AND xStartOk THEN
@@ -282,8 +299,13 @@ fbStartSup(xIn := xSupervise AND eState = E_MotorState.Starting, tOnDelay := stC
            itfTime := itfTimeAct);
 fbLossSup(xIn := xSupervise AND eState = E_MotorState.Running AND NOT xFbNow, tOnDelay := stCfgLkg.tFbLossFilter,
           itfTime := itfTimeAct);
-fbStopSup(xIn := xSupervise AND eState = E_MotorState.Stopping, tOnDelay := stCfgLkg.tFbStop,
-          itfTime := itfTimeAct);
+// останов контролируется и после отключения отказом (M-20): ОС осталась после внешней аварии, FailToStart или
+// FeedbackLost — команды нет, механизм не остановился (сварился контактор). UncommandedRun и отказ связи — нет:
+// у первого причина и есть ОС без команды, второй снимается сам по восстановлении связи (13.7)
+fbStopSup(xIn := xSupervise AND (eState = E_MotorState.Stopping
+                                 OR (eState = E_MotorState.Fault AND xFbNow
+                                     AND (xFltExt OR xFltFailToStart OR xFltFbLost))),
+          tOnDelay := stCfgLkg.tFbStop, itfTime := itfTimeAct);
 fbUncmdSup(xIn := xSupervise AND eState = E_MotorState.Stopped AND xFbNow AND NOT xAdoptNow,
            tOnDelay := stCfgLkg.tFbStart, itfTime := itfTimeAct);
 fbExtSup(xIn := (xExtFault OR xExtFaultAdd) AND eMode <> E_DeviceMode.OutOfService,
@@ -319,9 +341,11 @@ IF NOT stCfgLkg.xFbUsed THEN
 END_IF
 
 // 8. Счётчики (13.8): шаг ltDt (не больше DT_ACCUM_MAX) идёт в накопитель, если двигатель работал в
-//    прошлом вызове; целые секунды переносятся в stRetain. Фронт xRunning — пуск
+//    прошлом вызове; целые секунды переносятся в stRetain. Фронт работы — пуск. Провал ОС в Running короче
+//    tFbLossFilter (дребезг блок-контакта) — не останов и не новый пуск (M-21)
 uliOneSecond := LTIME_TO_ULINT(LTIME#1S);
-IF xRunningPrev THEN
+xRunCount := xRunning OR (eState = E_MotorState.Running AND fbLossSup.xTimingOn);
+IF xRunCountPrev THEN
     IF ltDt > GVL_Const.DT_ACCUM_MAX THEN
         ltRunAcc := ltRunAcc + GVL_Const.DT_ACCUM_MAX;
     ELSE
@@ -336,7 +360,7 @@ IF xRunningPrev THEN
     END_IF
 END_IF
 // подхват после старта ПЛК — не пуск; пуск в том же вызове (без ОС) — пуск
-IF xRunning AND NOT xRunningPrev AND (NOT xAdoptNow OR xEnteredStarting) THEN
+IF xRunCount AND NOT xRunCountPrev AND (NOT xAdoptNow OR xEnteredStarting) THEN
     stRetain.udiOpCount := stRetain.udiOpCount + 1;
     stRetain.udiOpCountMaint := stRetain.udiOpCountMaint + 1;
     udiRunCurrent_s := 0;
@@ -345,10 +369,10 @@ IF xRunning AND NOT xRunningPrev AND (NOT xAdoptNow OR xEnteredStarting) THEN
         fbStarts.Register(ltNow := ltNow);
     END_IF
 END_IF
-IF NOT xRunning THEN
+IF NOT xRunCount THEN
     udiRunCurrent_s := 0;
 END_IF
-xRunningPrev := xRunning;
+xRunCountPrev := xRunCount;
 // пауза tMinStop отсчитывается от первого вызова без команды и без работы по ОС
 IF xRunCmd OR xRunning OR xRunOrCmdPrev THEN
     ltStopMark := ltNow;
@@ -444,6 +468,7 @@ FinishCycle(eDevStatus := eDevSt, xAvailableDev := xAvailDev, wLow := wLow, wFau
             stCommon := stSts.stCommon);
 
 // 11. Значения для свойств I_Motor (свойства не читают stRetain, R2)
-xReadyToStart := xAvailable AND NOT xRunning AND xPermitOk AND NOT xInhibit;
+// «стоит»: нет ни команды работы (Starting — ещё не готов), ни работы по ОС
+xReadyToStart := xAvailable AND xIdle AND xPermitOk AND NOT xInhibit;
 udiRunSecondsMem := stRetain.udiOpTime_s;
 udiStartsMem := stRetain.udiOpCount;

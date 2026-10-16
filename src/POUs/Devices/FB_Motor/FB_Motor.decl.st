@@ -69,7 +69,7 @@ VAR
     ltRunEntry       : LTIME;          // вход в Running: от него отсчитывается tMinRun
     xAdoptPending    : BOOL := TRUE;   // подхват после старта ПЛК ещё не решён: нет достоверной ОС
     xRunOrCmdPrev    : BOOL;           // в прошлом вызове была команда работы или работа по ОС
-    xRunningPrev     : BOOL;           // xRunning прошлого вызова (фронт — пуск, наработка за шаг)
+    xRunCountPrev    : BOOL;           // работа для счётчиков прошлого вызова (фронт — пуск, наработка за шаг)
     xPowerPrev       : BOOL := TRUE;   // xPowerOk прошлого вызова (спад — останов для tMinStop)
     xResetWindow     : BOOL;           // идёт окно tResetWindow после Reset
     ltResetMark      : LTIME;          // момент последнего Reset
@@ -114,6 +114,7 @@ VAR_TEMP
     udiWhole      : UDINT;             // целые секунды из накопителя
     uliRemain      : ULINT;             // остаток запрета пуска, нс
     xIdle         : BOOL;              // нет ни команды работы, ни работы по ОС
+    xRunCount     : BOOL;              // работа для счётчиков: xRunning, провал ОС в Running внутри tFbLossFilter
     wLow          : WORD;              // младший байт wStatus
     wFlt          : WORD;              // wFault
     wWrn          : WORD;              // wWarning

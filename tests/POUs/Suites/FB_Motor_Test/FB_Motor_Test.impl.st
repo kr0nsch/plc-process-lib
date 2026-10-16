@@ -44,3 +44,8 @@ PowerLossInManualLatchClearedNoRestart();
 InterlockTripSlotAlarmWhileInterlockActive();
 TimeBackwardsNoFaultNoCountJump();
 PowerDipWhileStoppedPauseFromPowerLoss();
+StartWhileStoppingPermitLostCancelsLatch();
+PowerDipFeedbackStaysStoppingWithoutUncommandedRun();
+FeedbackStaysAfterTripRaisesFailToStop();
+FeedbackDropoutWithinFilterNotCountedAsStart();
+ReadyToStartFalseWhileStarting();
