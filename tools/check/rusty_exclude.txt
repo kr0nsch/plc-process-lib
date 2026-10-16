@@ -23,3 +23,7 @@ FB_Alarm_Test.st  # приёмник событий FB_TestSink исключён
 FB_DeviceBase_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036
 FB_Runtime_Test.st  # вызовы устройств со stCfg (VAR_IN_OUT CONSTANT): E036, E034
 GVL_TestsAlarm.st  # экземпляры наборов, исключённых выше
+#
+# Семейство ПИД: stCfg (VAR_IN_OUT CONSTANT, контракт, раздел 0) и CheckConfig.stCfgIn — E034 в
+# объявлении, E036 в каждом вызове.
+FB_PID.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036

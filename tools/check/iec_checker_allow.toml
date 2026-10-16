@@ -161,3 +161,18 @@ id = "UnusedVariable"
 file = "tests/POUs/Suites/FB_Runtime_Test/FB_Runtime_Test.decl.st"
 match = "variable: (RT_SAMPLES|UIRTCOUNT|ALTRTSTAMP)$"
 reason = "Артефакт понижения: состояние многоциклового теста используют методы-тесты набора (вынесены сборкой iec-checker в функции)"
+
+# =====================================================================================================
+# Семейство ПИД: FB_PID
+# =====================================================================================================
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Control/FB_PID/*"
+reason = "Классическая цикломатическая сложность: тело 26 (шаги нормативного порядка 9.4: первый вызов, LKG, старт выхода, Reset, отклонение Auto, режим, ShedToManual, цель задания, план расчёта), SelectOutput 16 (таблица выбора выхода 17.5 строка в строку), CheckConfig 14 (13 проверок карты wCfgErr), CalcStep 6; iec_checker 0.4 считает завышенно (docs/fb/FB_PID.md, раздел «Статанализ»)"
+
+[[allow]]
+id = "UnusedVariable"
+file = "src/POUs/Control/FB_PID/FB_PID.decl.st"
+match = "variable: (XSATHIGH|XSATLOW|LRV_PCT|LRPVPREV_EU|XSPINIT|XINDEADBAND|XOUTRATELIM)$"
+reason = "Артефакт понижения и ложное срабатывание iec_checker 0.4: переменные пишут и читают методы CalcStep, SelectOutput, OnModeChanged (сборка iec-checker выносит их в отдельные функции), тело читает xSatHigh, xSatLow, xInDeadband, xOutRateLim только как аргументы SEL в вызове FinishCycle"
