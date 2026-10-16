@@ -21,6 +21,9 @@ FOR iStep := 1 TO 50 DO
     fbTime.Advance(tStep := T#100MS);
     fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 END_FOR
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbPid.stSts.rI_pct), Message := 'integrator stays finite');
+AssertTrue(Condition := F_IsFinite(rIn := fbPid.rOut_pct), Message := 'output stays finite');
 // ref: outact_nan.out_first
 AssertEquals_REAL(Expected := 38.0, Actual := rOut1, Delta := 1.0E-4, Message := 'first step: 30 + P');
 // ref: outact_nan.out_after_5s

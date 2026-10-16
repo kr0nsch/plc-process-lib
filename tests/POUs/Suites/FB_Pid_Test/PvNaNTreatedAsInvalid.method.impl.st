@@ -21,6 +21,9 @@ rOutNaN := fbPid.rOut_pct;
 fbPid.rPv_eu := 50.0;
 fbTime.Advance(tStep := T#100MS);
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := rOutNaN), Message := 'output stays finite');
+AssertTrue(Condition := F_IsFinite(rIn := fbPid.stSts.rI_pct), Message := 'integrator stays finite');
 AssertTrue(Condition := eStNaN = E_Ne107Status.Failure, Message := 'NaN PV in Auto: Failure');
 AssertEquals_WORD(Expected := GVL_Const.PID_STS_PV_FAIL, Actual := wStsNaN AND GVL_Const.PID_STS_PV_FAIL,
                   Message := 'status bit PV_FAIL');

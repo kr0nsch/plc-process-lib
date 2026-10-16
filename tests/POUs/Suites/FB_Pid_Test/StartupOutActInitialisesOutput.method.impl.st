@@ -34,6 +34,8 @@ AssertEquals_REAL(Expected := 37.0, Actual := rCmdOutSt, Delta := 0.0,
                   Message := 'rManualOut_pct tracks startup output');
 // ref: start_outact.out_2
 AssertEquals_REAL(Expected := 37.08, Actual := fbPid.rOut_pct, Delta := 1.0E-4, Message := 'control continues from 37');
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := fbPidNaN.rOut_pct), Message := 'NaN source: output stays finite');
 // ref: start_outact.out_start_nan
 AssertEquals_REAL(Expected := 42.0, Actual := fbPidNaN.rOut_pct, Delta := 1.0E-4,
                   Message := 'non-finite rOutAct_pct: output from rManualOut_pct');

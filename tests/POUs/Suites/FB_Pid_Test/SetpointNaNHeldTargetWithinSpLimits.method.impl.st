@@ -19,6 +19,9 @@ rTgtHeld := fbPid.stSts.rSpTarget_eu;
 stCfg.rSpMax_eu := 60.0;                                                               // наладчик сузил пределы
 fbTime.Advance(tStep := T#100MS);
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := rTgtStart) AND F_IsFinite(rIn := rSpStart) AND F_IsFinite(rIn := rTgtHeld),
+           Message := 'targets stay finite');
 AssertEquals_REAL(Expected := 20.0, Actual := rTgtStart, Delta := 0.0, Message := 'NaN at start: target = rSpMin_eu');
 AssertEquals_REAL(Expected := 20.0, Actual := rSpStart, Delta := 0.0, Message := 'NaN at start: SP = rSpMin_eu');
 AssertEquals_REAL(Expected := 70.0, Actual := rTgtValid, Delta := 0.0, Message := 'finite SP accepted');

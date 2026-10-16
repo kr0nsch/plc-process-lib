@@ -13,6 +13,8 @@ wStsNaN := fbPid.stSts.stCommon.wStatus;
 stCmd.rSp_eu := 60.0;
 fbTime.Advance(tStep := T#100MS);
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+// AssertEquals_REAL пропускает NaN (ABS(NaN) > Delta = FALSE): конечность проверяется отдельно
+AssertTrue(Condition := F_IsFinite(rIn := rTgtNaN), Message := 'target stays finite');
 AssertEquals_REAL(Expected := 55.0, Actual := rTgtNaN, Delta := 0.0, Message := 'NaN SP: previous target held');
 AssertEquals_WORD(Expected := GVL_Const.PID_WRN_SP_INVALID, Actual := wWrnNaN, Message := 'warning SP_INVALID');
 AssertEquals_WORD(Expected := GVL_Const.DEV_STS_WARNING, Actual := wStsNaN AND GVL_Const.DEV_STS_WARNING,
