@@ -22,6 +22,8 @@
 - ``cv_positioner`` — от положения безопасности 100 % к 40 % (спад 2 %/с, шаг 0,1 с);
 - ``cv_cycle_independence`` — рампа 10 %/с за 2 с при шаге 10 мс и 100 мс;
 - ``cv_ma`` — ток выхода для набора положений, прямой и инверсный;
+- ``cv_local_clamp`` — Local: выход следует ОС в пределах хода 0…100 % (ОС -1,5 % и 102,5 %), ток
+  прямой и инверсный; для сравнения — ток без ограничения;
 - ``valve_travel_remain`` — остаток времени хода при tTravel = 10 с;
 - ``valve_act_time`` — время работы привода: 12,5 с шагами 0,1 с; один шаг 60 с; часы.
 
@@ -79,6 +81,11 @@ def out_ma(out_pct: float, invert: bool) -> float:
     """Ток выхода позиционера, мА."""
     x = PCT_FULL - out_pct if invert else out_pct
     return f32(MA_ZERO + MA_SPAN * x / PCT_FULL)
+
+
+def local_out(fb_pct: float) -> float:
+    """Local: выход следует ОС в пределах хода, LIMIT(0, fb, 100)."""
+    return f32(min(max(fb_pct, 0.0), PCT_FULL))
 
 
 def travel_remain_s(travel_s: float, elapsed_s: float) -> int:
@@ -148,6 +155,16 @@ def scenarios() -> dict[str, dict[str, float]]:
         "100 % inverted": out_ma(100.0, True),
         "30 %": out_ma(30.0, False),
         "100 %": out_ma(100.0, False),
+    }
+    result["cv_local_clamp"] = {
+        "fb -1.5 %: out": local_out(-1.5),
+        "fb -1.5 %: mA": out_ma(local_out(-1.5), False),
+        "fb -1.5 %: mA inverted": out_ma(local_out(-1.5), True),
+        "fb -1.5 %: mA without clamp": out_ma(-1.5, False),
+        "fb 102.5 %: out": local_out(102.5),
+        "fb 102.5 %: mA": out_ma(local_out(102.5), False),
+        "fb 102.5 %: mA inverted": out_ma(local_out(102.5), True),
+        "fb 102.5 %: mA without clamp": out_ma(102.5, False),
     }
     result["valve_travel_remain"] = {
         "elapsed 0 s": travel_remain_s(10.0, 0.0),

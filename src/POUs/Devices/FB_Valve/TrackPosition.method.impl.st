@@ -28,6 +28,16 @@ END_IF
 IF eState = E_ValveState.Open OR eState = E_ValveState.Closed OR eState = E_ValveState.Intermediate
    OR eState = E_ValveState.Unknown
 THEN
+    //  положение «по времени» (не подтверждённое своим концевиком) держится, только пока арматурой
+    //  управляет ПЛК: в Local и OOS её двигают с места или руками, соленоид без тока катушки уходит на
+    //  пружину. Дальше — только по концевикам (без концевиков — Unknown)
+    xCoilEnd := (stCfgLkg.eType = E_ValveType.SolenoidEto AND eState = E_ValveState.Open)
+                OR (stCfgLkg.eType = E_ValveType.SolenoidEtc AND eState = E_ValveState.Closed);
+    IF (eState = E_ValveState.Open OR eState = E_ValveState.Closed) AND NOT xEndByLs
+       AND (NOT xRemote OR (xCoilEnd AND NOT xDrive))
+    THEN
+        eState := LimitPosition();
+    END_IF
     xLeftEnd := xEndByLs AND ((eState = E_ValveState.Open AND NOT xAtOpen)
                               OR (eState = E_ValveState.Closed AND NOT xAtClose));
     IF NOT (xLeftEnd AND xPosSup) THEN

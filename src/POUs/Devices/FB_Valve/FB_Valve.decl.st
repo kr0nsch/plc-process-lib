@@ -48,6 +48,7 @@ VAR
     eManTarget   : E_ValveState := E_ValveState.Intermediate;   // цель Manual: последняя команда оператора
     eSolCmd      : E_ValveState := E_ValveState.Intermediate;  // соленоид: куда держит катушка; Intermediate — нет тока
     eLastEnd     : E_ValveState := E_ValveState.Unknown;        // последнее достигнутое крайнее положение (счёт циклов)
+    eLastDir     : E_ValveState := E_ValveState.Intermediate;   // последнее включённое направление привода (выбег)
     xEndByLs     : BOOL;            // положение Open/Closed подтверждено своим концевиком (контроль ухода)
     // --- отказы: фиксируются до Reset (BothLimits — нет) ---
     xFltFailOpen  : BOOL;            // не открылась за tTravel
@@ -66,6 +67,7 @@ VAR
     // --- задержки (FB_Delay — единственный таймер библиотеки) ---
     fbTravel      : FB_Delay;        // время хода tTravel: от включения выхода (у соленоида — от смены цели)
     fbReverse     : FB_Delay;        // пауза перед реверсом tReverse
+    fbRunOff      : FB_Delay;        // выбег привода: TRUE, пока выход включён, и ещё tReverse после снятия
     fbBoth        : FB_Delay;        // фильтр «оба концевика» tLimitFilter
     fbPosLost     : FB_Delay;        // фильтр ухода с концевика tLimitFilter
     fbResetWin    : FB_Delay;        // окно Reset tResetWindow

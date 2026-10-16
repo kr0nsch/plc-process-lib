@@ -56,6 +56,14 @@ def test_cv_output_current() -> None:
     assert s["30 %"] == pytest.approx(8.8, abs=1e-5)
 
 
+def test_cv_local_output_clamped_to_stroke() -> None:
+    s = vr.scenarios()["cv_local_clamp"]
+    assert (s["fb -1.5 %: out"], s["fb -1.5 %: mA"], s["fb -1.5 %: mA inverted"]) == (0.0, 4.0, 20.0)
+    assert (s["fb 102.5 %: out"], s["fb 102.5 %: mA"], s["fb 102.5 %: mA inverted"]) == (100.0, 20.0, 4.0)
+    assert s["fb -1.5 %: mA without clamp"] == pytest.approx(3.76, abs=1e-5)  # ниже 4 мА без ограничения
+    assert s["fb 102.5 %: mA without clamp"] == pytest.approx(20.4, abs=1e-5)
+
+
 def test_valve_travel_remain_rounds_up() -> None:
     s = vr.scenarios()["valve_travel_remain"]
     assert (s["elapsed 0 s"], s["elapsed 2.0 s"], s["elapsed 2.05 s"], s["elapsed 9.9 s"]) == (10, 8, 8, 1)

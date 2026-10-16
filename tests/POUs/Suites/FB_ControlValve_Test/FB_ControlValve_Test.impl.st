@@ -20,3 +20,4 @@ DefaultCfgPassesCheck();
 CfgChecksSetBits();
 InvalidCfgAtRuntimeKeepsLastValid();
 RampIndependentOfCycleTime();
+LocalFeedbackOutOfRangeOutputClamped();

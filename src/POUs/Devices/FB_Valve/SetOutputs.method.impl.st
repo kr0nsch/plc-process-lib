@@ -13,3 +13,10 @@ xQCoil := xOutEn AND ((stCfgLkg.eType = E_ValveType.SolenoidEto AND eSolCmd = E_
                       OR (stCfgLkg.eType = E_ValveType.SolenoidEtc AND eSolCmd = E_ValveState.Closed));
 xOpened := eState = E_ValveState.Open OR (eState = E_ValveState.Fault AND xAtOpen AND NOT xAtClose);
 xClosed := eState = E_ValveState.Closed OR (eState = E_ValveState.Fault AND xAtClose AND NOT xAtOpen);
+//     выбег привода: последнее включённое направление и отсчёт tReverse от снятия выхода (DriveToTarget)
+IF xQOpen THEN
+    eLastDir := E_ValveState.Opening;
+ELSIF xQClose THEN
+    eLastDir := E_ValveState.Closing;
+END_IF
+fbRunOff(xIn := xQOpen OR xQClose, tOffDelay := stCfgLkg.tReverse, itfTime := itfTimeAct);

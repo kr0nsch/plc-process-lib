@@ -34,3 +34,7 @@ PermitLostWhileMovingContinuesMotion();
 InvalidCfgAtRuntimeKeepsLastValid();
 InterlockStayStopsMotorized();
 CloseOnTorqueZscAloneKeepsDrivingUntilTimeout();
+ReverseAfterEndStopWaitsReversePause();
+CloseOnTorqueTorqueBeforeZscLatchesTorqueTrip();
+PositionByTimeLostInLocalAutoDrivesAgain();
+SolenoidByTimeCoilOffNotReportedOpen();

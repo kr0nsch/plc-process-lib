@@ -16,9 +16,10 @@ IF NOT xCfgEverOk THEN
 ELSIF eMode = E_DeviceMode.OutOfService THEN
     rSpAct := rRamp_pct;
 ELSIF eMode = E_DeviceMode.Local THEN
-    // позиционер на месте: выход следит за ОС (возврат без рывка), без ОС — удержание
+    // позиционер на месте: выход следит за ОС (возврат без рывка), без ОС — удержание. ОС датчика
+    // чуть выходит за 0…100 % (-1 %, 102 %) — выход в пределах хода, ток не выходит из 4…20 мА
     IF xFbOk THEN
-        rRamp_pct := rPosFb_pct;
+        rRamp_pct := LIMIT(0.0, rPosFb_pct, GVL_Const.PCT_FULL);
     END_IF
     rSpAct := rRamp_pct;
 ELSIF xIlkAct OR (xFaultAny AND stCfgLkg.eFaultAction = E_CvFaultAction.SafePos) THEN

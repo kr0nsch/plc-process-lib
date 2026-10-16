@@ -4,4 +4,5 @@
 METHOD PROTECTED TrackPosition
 VAR
     xLeftEnd : BOOL;   // в Open/Closed, подтверждённом концевиком, он пропал
+    xCoilEnd : BOOL;   // соленоид в положении, которое держит ток катушки (Eto — Open, Etc — Closed)
 END_VAR

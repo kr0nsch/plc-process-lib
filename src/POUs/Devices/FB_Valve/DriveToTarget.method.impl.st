@@ -3,6 +3,13 @@
 xMayOpen := xIlkAct OR wPermMissOpen = 0;
 xMayClose := xIlkAct OR wPermMissClose = 0;
 xEnterMove := FALSE;
+//     выбег: встречное направление включается не раньше tReverse после снятия выхода — и после
+//     остановки на концевике или по стопу, а не только при смене направления в ходе. Выходы здесь —
+//     прошлого вызова; SetOutputs обновляет fbRunOff выходами этого вызова, поэтому отсчёт идёт ровно
+//     от снятия выхода
+fbRunOff(xIn := xQOpen OR xQClose, tOffDelay := stCfgLkg.tReverse, itfTime := itfTimeAct);
+xHoldOpen := xMotorized AND fbRunOff.xOut AND eLastDir = E_ValveState.Closing;
+xHoldClose := xMotorized AND fbRunOff.xOut AND eLastDir = E_ValveState.Opening;
 IF xDrive THEN
     IF eState = E_ValveState.Opening THEN
         IF xAtOpen THEN
@@ -21,9 +28,12 @@ IF xDrive THEN
             eState := E_ValveState.Intermediate;
         END_IF
     ELSIF eState = E_ValveState.Closing THEN
-        IF (xAtClose AND NOT stCfgLkg.xCloseOnTorque) OR (stCfgLkg.xCloseOnTorque AND xTrqClose) THEN
+        IF (xAtClose AND NOT stCfgLkg.xCloseOnTorque)
+           OR (stCfgLkg.xCloseOnTorque AND xTrqClose AND (xAtClose OR NOT stCfgLkg.xZscUsed))
+        THEN
             // по ZSC; при закрытии «по моменту» (клиновая задвижка) — только по муфте: ZSC стоит чуть
-            // раньше посадки клина и выход не снимает, иначе задвижка не дожата
+            // раньше посадки клина и выход не снимает, иначе задвижка не дожата. Муфта раньше
+            // подключённого ZSC — не посадка, а заклинивание: TorqueTrip ниже
             eState := E_ValveState.Closed;
         ELSIF xTrqClose THEN
             xFltTorque := TRUE;
@@ -42,10 +52,10 @@ IF xDrive THEN
         IF eTarget = E_ValveState.Intermediate THEN
             eState := E_ValveState.Intermediate;
         END_IF
-    ELSIF eTarget = E_ValveState.Open AND eState <> E_ValveState.Open AND xMayOpen THEN
+    ELSIF eTarget = E_ValveState.Open AND eState <> E_ValveState.Open AND xMayOpen AND NOT xHoldOpen THEN
         eState := E_ValveState.Opening;
         xEnterMove := TRUE;
-    ELSIF eTarget = E_ValveState.Closed AND eState <> E_ValveState.Closed AND xMayClose THEN
+    ELSIF eTarget = E_ValveState.Closed AND eState <> E_ValveState.Closed AND xMayClose AND NOT xHoldClose THEN
         eState := E_ValveState.Closing;
         xEnterMove := TRUE;
     END_IF
