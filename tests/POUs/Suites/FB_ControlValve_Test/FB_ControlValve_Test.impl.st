@@ -1,0 +1,22 @@
+// Раннер coUnit вызывает набор, набор — каждый тест-метод; тест завершается за один вызов
+ManualSetpointRateLimited();
+OutputLimitsClamp();
+Invert20mAAtZero();
+TightShutBelowThresholdGivesZero();
+DeviationWarningAfterDelay();
+DeviationDuringRampIgnored();
+DeviationAsFaultGoesSafePosition();
+InterlockSafePosBypassesRamp();
+LocalTracksFeedback();
+AutoToManualBumpless();
+FbInvalidMaintenanceRequiredKeepsControl();
+PositionerFaultSafePosAction();
+InvalidCfgStartupSafePosition();
+OutOfServiceHoldsOutput();
+AutoSpNaNHoldsWithWarning();
+PositionerFaultHoldAction();
+OosEntryClearsLatchedDeviation();
+DefaultCfgPassesCheck();
+CfgChecksSetBits();
+InvalidCfgAtRuntimeKeepsLastValid();
+RampIndependentOfCycleTime();

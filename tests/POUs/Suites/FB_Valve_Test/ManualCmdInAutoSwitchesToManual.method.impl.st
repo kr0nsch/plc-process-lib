@@ -1,0 +1,31 @@
+coUnit.TEST('Valve_ManualCmdInAuto_SwitchesToManual');
+
+stRetain.eRemoteMode := E_DeviceMode.Auto;
+fbVlv.xAutoOpen := FALSE;
+fbVlv.xZsc := TRUE;
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbVlv.Mode = E_DeviceMode.Auto, Message := 'Auto');
+AssertTrue(Condition := fbVlv.stSts.eState = E_ValveState.Closed, Message := 'Closed');
+stCmd.xOpen := TRUE;
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbVlv.Mode = E_DeviceMode.Manual, Message := 'operator command switches to Manual');
+AssertTrue(Condition := stRetain.eRemoteMode = E_DeviceMode.Manual, Message := 'Manual remembered in retain');
+AssertTrue(Condition := fbVlv.stSts.eState = E_ValveState.Opening, Message := 'Opening');
+AssertTrue(Condition := fbVlv.stSts.stCommon.eCmdResult = E_CmdResult.Accepted, Message := 'accepted');
+fbVlv.xZsc := FALSE;
+fbTime.Advance(tStep := T#100MS);
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbVlv.stSts.eState = E_ValveState.Opening, Message := 'automation request no longer applies');
+stCmd.stCommon.xSetAuto := TRUE;
+fbVlv.xAutoOpen := TRUE;
+fbTime.Advance(tStep := T#100MS);
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbVlv.Mode = E_DeviceMode.Auto, Message := 'back to Auto');
+stCmd.xStop := TRUE;
+fbTime.Advance(tStep := T#100MS);
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbVlv.Mode = E_DeviceMode.Manual, Message := 'stop in Auto switches to Manual');
+AssertTrue(Condition := fbVlv.stSts.eState = E_ValveState.Intermediate, Message := 'and stops');
+AssertFalse(Condition := fbVlv.xQOpen, Message := 'output off');
+
+coUnit.TEST_FINISHED();
