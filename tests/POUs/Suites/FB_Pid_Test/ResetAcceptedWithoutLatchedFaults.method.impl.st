@@ -1,0 +1,15 @@
+coUnit.TEST('Pid_Reset_AcceptedWithoutLatchedFaults');
+fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+stCmd.stCommon.xReset := TRUE;
+fbTime.Advance(tStep := T#100MS);
+fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbPid.stSts.stCommon.eCmdResult = E_CmdResult.Accepted, Message := 'xReset accepted');
+AssertEquals_UINT(Expected := 1, Actual := fbPid.stSts.stCommon.uiCmdSeq, Message := 'one command');
+AssertFalse(Condition := stCmd.stCommon.xReset, Message := 'xReset cleared');
+xResOk := fbPid.Reset();
+fbTime.Advance(tStep := T#100MS);
+fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := xResOk, Message := 'Reset() queued');
+AssertTrue(Condition := fbPid.stSts.stCommon.eCmdResult = E_CmdResult.Accepted, Message := 'Reset() accepted');
+AssertEquals_UINT(Expected := 2, Actual := fbPid.stSts.stCommon.uiCmdSeq, Message := 'second command');
+coUnit.TEST_FINISHED();

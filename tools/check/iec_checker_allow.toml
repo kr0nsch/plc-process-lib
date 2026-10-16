@@ -246,3 +246,24 @@ id = "UnusedVariable"
 file = "src/POUs/Devices/FB_ControlValve/FB_ControlValve.decl.st"
 match = "variable: RPOSSPAUTO_PCT$"
 reason = "Артефакт понижения: вход использует только метод SelectOutput, который сборка iec-checker выносит в отдельную функцию"
+
+# =====================================================================================================
+# Семейство ПИД: FB_PID, помощник тестов FB_FopdtModel
+# =====================================================================================================
+
+[[allow]]
+id = "PLCOPEN-CP9"
+file = "src/POUs/Control/FB_PID/*"
+reason = "Классическая цикломатическая сложность: тело 27 (шаги нормативного порядка 9.4: первый вызов, LKG, старт выхода, Reset, отклонение Auto, режим, ShedToManual и признак сброса, цель задания, план расчёта), SelectOutput 16 (таблица выбора выхода 17.5 строка в строку), CheckConfig 14 (13 проверок карты wCfgErr), CalcStep 6; iec_checker 0.4 считает завышенно (docs/fb/FB_PID.md, раздел «Статанализ»)"
+
+[[allow]]
+id = "UnusedVariable"
+file = "src/POUs/Control/FB_PID/FB_PID.decl.st"
+match = "variable: (XSATHIGH|XSATLOW|LRV_PCT|LRPVPREV_EU|XSPINIT|XINDEADBAND|XOUTRATELIM)$"
+reason = "Артефакт понижения и ложное срабатывание iec_checker 0.4: переменные пишут и читают методы CalcStep, SelectOutput, OnModeChanged (сборка iec-checker выносит их в отдельные функции), тело читает xSatHigh, xSatLow, xInDeadband, xOutRateLim только как аргументы SEL в вызове FinishCycle"
+
+[[allow]]
+id = "UnusedVariable"
+file = "tests/POUs/Helpers/FB_FopdtModel/FB_FopdtModel.decl.st"
+match = "variable: (DT_S|RING_SIZE|RU_PCT|RGAIN|RT_S|RY|ARDELAY|UIHEAD|LRY)$"
+reason = "Артефакт понижения: константы, входы, выход и состояние модели использует только метод Step, который сборка iec-checker выносит в отдельную функцию; тела у ФБ нет"

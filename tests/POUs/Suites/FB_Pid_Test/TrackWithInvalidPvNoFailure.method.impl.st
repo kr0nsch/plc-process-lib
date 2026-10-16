@@ -1,0 +1,18 @@
+coUnit.TEST('Pid_TrackWithInvalidPv_NoFailure');
+stRetain.eRemoteMode := E_DeviceMode.Auto;
+fbPid.xPvValid := FALSE;
+fbPid.xTrack := TRUE;
+fbPid.rTrack_pct := 33.0;
+fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbPid.Mode = E_DeviceMode.Auto, Message := 'Auto');
+AssertEquals_REAL(Expected := 33.0, Actual := fbPid.rOut_pct, Delta := 0.0, Message := 'output = rTrack_pct');
+AssertTrue(Condition := fbPid.Status = E_Ne107Status.Good, Message := 'no Failure while tracking');
+AssertEquals_WORD(Expected := 0, Actual := fbPid.stSts.stCommon.wFault, Message := 'wFault 0 while tracking');
+AssertFalse(Condition := fbPid.Available, Message := 'not available while tracking');
+AssertEquals_WORD(Expected := 16#0001, Actual := fbPid.stSts.stCommon.wAlmActive, Message := 'PvInvalid alarm active');
+fbPid.xTrack := FALSE;
+fbTime.Advance(tStep := T#100MS);
+fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+AssertTrue(Condition := fbPid.Status = E_Ne107Status.Failure, Message := 'Failure once tracking ends');
+AssertEquals_REAL(Expected := 33.0, Actual := fbPid.rOut_pct, Delta := 0.0, Message := 'Hold keeps tracked output');
+coUnit.TEST_FINISHED();

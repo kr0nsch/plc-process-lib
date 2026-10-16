@@ -49,3 +49,9 @@ FB_ControlValve.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034
 FB_Valve_Test.st  # вызовы FB_Valve со stCfg (VAR_IN_OUT CONSTANT): E036; FB_Valve исключён выше
 FB_ControlValve_Test.st  # вызовы FB_ControlValve со stCfg (VAR_IN_OUT CONSTANT): E036; ФБ исключён выше
 GVL_TestsValve.st  # экземпляры наборов арматуры, исключённых выше
+#
+# Семейство ПИД: stCfg (VAR_IN_OUT CONSTANT, контракт, раздел 0) и CheckConfig.stCfgIn — E034 в
+# объявлении, E036 в каждом вызове. FB_FopdtModel.st и U_TestPidEnumInt.st RuSTy проверяет.
+FB_PID.st  # stCfg и CheckConfig.stCfgIn — VAR_IN_OUT CONSTANT: E034, E036
+FB_Pid_Test.st  # вызовы FB_PID со stCfg (VAR_IN_OUT CONSTANT): E036; логику проверяют тесты в CODESYS
+GVL_TestsPid.st  # экземпляр набора FB_Pid_Test, исключённого выше
