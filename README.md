@@ -13,7 +13,7 @@
   <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
   <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
   <img alt="Язык: Structured Text" src="https://img.shields.io/badge/Structured%20Text-3A4B60?style=flat-square">
-  <a href="#тесты-и-качество"><img alt="Тесты: coUnit 453 из 453 в CODESYS Control Win, pytest 626" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20626-3A4B60?style=flat-square&labelColor=1B2736"></a>
+  <a href="#тесты-и-качество"><img alt="Тесты: coUnit — 453 из 453 в CODESYS Control Win V3; pytest — 626 тестов, все проходят при установленных iec_checker и RuSTy" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20626-3A4B60?style=flat-square&labelColor=1B2736"></a>
 </p>
 
 <p align="center">
@@ -152,16 +152,23 @@ Standard; пространство имён — `PL`.
 
 Нужны git и Python 3.11+ (в CI — 3.12). Эти проверки идут в CI на каждый коммит.
 
-1. Клонировать. В `tests/` есть пути до 106 символов: на Windows без `core.longpaths` клон в глубокий каталог
-   падает с «Filename too long».
+1. Клонировать и поставить зависимости в виртуальное окружение. **На Windows клонируйте в короткий путь,**
+   например `C:\src\plc-process-lib`: самые длинные пути в `tests/` — 106 символов, а без параметра Windows
+   `LongPathsEnabled` полный путь не может быть длиннее 260 символов. Если каталог клона длиннее ~150 символов,
+   git не может извлечь файлы («Filename too long»). С `core.longpaths` git справляется, но pytest и линтер
+   ST всё равно падают с `FileNotFoundError`. Глубокий каталог работает только при
+   `git clone -c core.longpaths=true …` и включённом `LongPathsEnabled` (нужны права администратора).
 
    ```bash
-   git config --global core.longpaths true   # только Windows
    git clone https://github.com/kr0nsch/plc-process-lib.git
    cd plc-process-lib
+   python -m venv .venv
+   source .venv/bin/activate        # Windows (cmd): .venv\Scripts\activate
    python -m pip install -r requirements-dev.txt
    ```
 
+   Увидите в конце: `Successfully installed …` — в списке `ruff-0.17.1`, `mypy-2.4.0`, `pytest-9.1.1`,
+   `hypothesis-6.170.0` (версии закреплены в [requirements-dev.txt](requirements-dev.txt)).
 2. Тесты Python: инструменты сборки, соглашения тестов ST, совпадение DUT, констант, масок и объявлений ФБ с
    контрактом, шаблоны текстов тревог.
 
@@ -169,7 +176,8 @@ Standard; пространство имён — `PL`.
    python -m pytest
    ```
 
-   Увидите: `626 passed` (около минуты).
+   Увидите: `616 passed, 10 skipped` (меньше минуты). Пропущены 10 интеграционных тестов с настоящими
+   iec_checker и RuSTy: они ждут бинарники из шагов 4–5. С обоими инструментами — `626 passed` (около минуты).
 3. Линтер ST: раскладка файлов, заголовки POU, префиксы имён, «магические числа».
 
    ```bash
@@ -232,7 +240,12 @@ HMI/SCADA и Modbus и разбором частых ошибок — [docs/USAG
 
 ```st
 // GVL_Hmi:     stLT101Cmd : PL.ST_AnalogInputCmd;  stLIC101Cmd : PL.ST_PidCmd;  stP101Cmd : PL.ST_MotorCmd;
-// GVL_Persist: stLT101Cfg, stLIC101Cfg, stLIC101Retain, stP101Cfg, stP101Retain  (объект Persistent Variables)
+// GVL_Persist (объект Persistent Variables):
+//   stLT101Cfg  : PL.ST_AnalogInputCfg := (rRangeHi_eu := 5.0);           // 4–20 мА = 0–5 м
+//   stLIC101Cfg : PL.ST_PidCfg := (eAction := PL.E_PidAction.Direct,      // уровень выше — насос быстрее
+//                                  rPvMax_eu := 5.0, rSpMax_eu := 5.0,    // диапазон PV и задания, м
+//                                  xUseOutAct := TRUE);                   // обратный расчёт по заданию ПЧ
+//   stP101Cfg   : PL.ST_MotorCfg;   stLIC101Retain, stP101Retain : PL.ST_DeviceRetain;
 // GVL_Devices: fbLT101 : PL.FB_AnalogInput;  fbLIC101 : PL.FB_PID;  fbP101 : PL.FB_MotorVfd;
 // PRG_Devices: fbJournal : FB_Journal;  xPumpDemand, xLeadAuto : BOOL;  rLeadRef : REAL;
 PL.GVL_Lib.itfAlarmSink := fbJournal;                                   // журнал тревог, каждый цикл
@@ -254,6 +267,10 @@ GVL_Devices.fbP101(xVfdRunning := GVL_IO.xP101_VfdRun, rSpeedAct_pct := GVL_IO.r
 GVL_IO.xP101_QRun         := GVL_Devices.fbP101.xQRun;                  // команда «работа» на ПЧ
 GVL_IO.rP101_SpeedRef_pct := GVL_Devices.fbP101.rSpeedRef_pct;          // задание на ПЧ, %
 ```
+
+Умолчания `ST_PidCfg` — обратное действие (`Reverse`), диапазон PV и задания 0–100 и `xUseOutAct = FALSE`;
+для контура уровня их задают, как выше. ПИД и насос после первой загрузки — в Manual: переведите их в Auto командой `stCommon.xSetAuto`, режим
+запомнится в `stRetain`. Только после этого `xPumpDemand` пускает насос.
 
 Задвижка, двигатель прямого пуска, дискретный вход, регулирующий клапан и отдельная станционная тревога
 подключаются так же — [USAGE.md, раздел 5](docs/USAGE.md#5-задвижка-и-другие-устройства) и разделы «Пример
@@ -338,9 +355,12 @@ flowchart LR
 **В реальном CODESYS** (3.5.17.30, CODESYS Control Win V3, 32 бит, 19.10.2026) прошли все **453 теста coUnit
 1.2.0.0 в 14 наборах**: основа (время, утилиты, тревоги, база устройств) — 158, устройства — 290, межсемейные —
 5, в том числе контур AI → ПИД → ПЧ. Время в тестах задаёт подменный источник `FB_FakeTime`, поэтому каждый тест
-детерминирован и проходит за один вызов. Тесты каждого семейства проверены мутациями: однострочная ошибка в коде
-роняет хотя бы один тест. Перед выпуском три независимых ревью (стандарты, ПО, потребители) нашли
-25 замечаний — все закрыты. Итоги по наборам, мутации и находки ревью — [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
+детерминирован и проходит за один вызов. Тесты каждого семейства проверены однострочными мутациями: каждую
+применённую мутацию, кроме эквивалентных, ловит хотя бы один тест; выжившие мутации закрыты новыми тестами.
+Перед выпуском три независимых ревью (стандарты, ПО, потребители) нашли 23 замечания. 22 закрыты в этом
+репозитории исправлением или новым тестом. Одно (F3: ПИД как тип устройства для генератора `iolistgen`)
+исправлено в контракте, а изменения в самом генераторе описаны в [CONSUMERS.md](docs/CONSUMERS.md#iolistgen).
+Итоги по наборам, мутации и находки ревью — [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
 **На ПЛК210 библиотека не запускалась.**
 
 | Проверка | Где | Итог |
@@ -352,7 +372,7 @@ flowchart LR
 | `st_lint --strict` | CI | 1332 файла, 0 замечаний, подавлений нет |
 | iec_checker v0.4 (`--tests`) | CI | 0 ошибок разбора, 0 необоснованных находок; 5192 обоснованных — [разбор](docs/STATIC_ANALYSIS.md) |
 | RuSTy 1.0.6 | CI, необязательно | 0 ошибок, исключённых файлов нет; 399 предупреждений — [разбор](docs/STATIC_ANALYSIS.md#rusty-plc---check) |
-| ruff, mypy, pytest | CI | пройдено; pytest — 626 тестов |
+| ruff, mypy, pytest | CI | пройдено; pytest — 626 тестов: в CI 622 пройдено, 4 интеграционных теста RuSTy пропущены (RuSTy — отдельное задание); локально с iec_checker и RuSTy — 626 из 626 |
 
 **Прогон в CODESYS.** Нужны Windows, CODESYS 3.5.17.30, Python 3.11+ и coUnit 1.2.0.0 (скачать с CODESYS Forge и
 установить или указать путь в `COUNIT_LIBRARY` — [MANUAL_STEPS.md, раздел 2](docs/MANUAL_STEPS.md#2-counit-cfunit-1200)).
@@ -411,8 +431,8 @@ python tools\codesys\cds.py test
 - **Это не ПАЗ.** Защиты и блокировки ФБ — логика управления: библиотека не сертифицирована по МЭК 61508/61511,
   защиты объекта дублируются аппаратно; в режиме Local ПЛК механизм не останавливает.
 - **Открытые вопросы v1.0** (перемежающийся обрыв AI, задержки уставок после возврата, стартовая рампа
-  регулирующего клапана и др.) закрыты правилами наладки; изменения — кандидаты в v1.1
-  ([ASSUMPTIONS.md](docs/ASSUMPTIONS.md#открытые-вопросы-семейств-решения-интеграции)).
+  регулирующего клапана и др.) остаются открытыми до v1.1. Поведение v1.0 закреплено тестами, и для каждого
+  вопроса есть решение для наладки на объекте ([ASSUMPTIONS.md](docs/ASSUMPTIONS.md#открытые-вопросы-семейств-решения-интеграции)).
 - **Дальше:** КНС на этой библиотеке (`kns-pump-station`) и генератор `iolistgen`, который создаёт `GVL_Hmi`,
   `GVL_Persist` и вызовы устройств из перечня сигналов, — оба готовятся.
 

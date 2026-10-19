@@ -335,7 +335,7 @@ _Шаги 2–3 в IDE не выполнялись: те же значения �
 2. Версия: в `tools/codesys/config.json` — `library.version` → `"1.0.0.0"`, `library.released` → `true`
    (I-09 в [ASSUMPTIONS.md](ASSUMPTIONS.md)); в `CHANGELOG.md` раздел `[Unreleased]` → `[1.0.0] - <дата>`;
    контракт [API.md](API.md) уже 1.0.0. _Выполнено на ветке `integrate` (19.10.2026): версия 1.0.0.0,
-   `released = true`, раздел `[1.0.0] - 2026-10-16`; библиотека собрана и поставлена в репозиторий `System`
+   `released = true`, раздел `[1.0.0] - 2026-10-19`; библиотека собрана и поставлена в репозиторий `System`
    (шаг 6)._ Автор в README, LICENSE, заголовках POU и Project Information библиотеки — `kr0nsch`
    (логин GitHub); компания библиотеки остаётся `plc-portfolio` (I-14 в [ASSUMPTIONS.md](ASSUMPTIONS.md)).
 3. Артефакты: `python tools\codesys\cds.py library --compiled --released` (`.library`,
