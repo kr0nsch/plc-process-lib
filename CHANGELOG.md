@@ -9,6 +9,40 @@
 
 ### Added
 
+- Устройства (этап 3), каждое со своим набором тестов, документом `docs/fb/<ФБ>.md`, эталонами
+  `tools/reference/` и мутационной проверкой тестов:
+  - `FB_AnalogInput` — мА, 0–1, инж. ед. и отсчёты; корень с отсечкой, фильтр первого порядка (точная
+    экспонента, не зависит от цикла), достоверность по NAMUR NE 43 с подтверждением, уставки HH/H/L/LL
+    через `FB_LimitMonitor`, подмена с ограничением по времени; 51 тест, эталоны `ai_reference.py`;
+  - `FB_DigitalInput` — задержки включения и отключения, инверсия, отказ канала (HoldLast, ForceFalse,
+    ForceTrue), подмена; 18 тестов;
+  - `FB_Motor` — режимы, пуск/стоп от HMI и автоматики, блокировки и разрешения с первопричиной, контроль
+    ОС (FailToStart, FeedbackLost, FailToStop, UncommandedRun), внешняя авария, окно сброса, `tMinRun`,
+    `tMinStop`, пуски в час, моточасы и пуски в `stRetain`, подхват после старта ПЛК, `I_Motor`;
+    52 теста, эталоны `motor.py`;
+  - `FB_MotorVfd EXTENDS FB_Motor` — задание 0–100 % с рампой, ОС по частоте, отказ связи с ПЧ,
+    рассогласование скорости, `I_MotorVfd`; 27 тестов;
+  - `FB_Valve` — привод и соленоиды (Eto/Etc): открыть, закрыть, стоп, концевики, время хода, «оба
+    концевика», уход с концевика, муфта и закрытие по моменту, пауза реверса, положение «по времени»;
+    41 тест, эталоны `valve_reference.py`;
+  - `FB_ControlValve` — задание положения с пределами и скоростью, плотное закрытие, токовый выход с
+    инверсией, рассогласование с ОС, отказ позиционера, положение безопасности; 24 теста;
+  - `FB_PID` — идеальная форма, D по измерению с фильтром, обратный расчёт по своему или фактическому
+    выходу, безударные переходы Manual/слежение → Auto, рампа задания, внешнее задание и слежение за PV,
+    расчёт по реальному dt и `tSample`, отказ PV (Hold, SafeOut, ShedToManual); 53 теста, модель объекта
+    `FB_FopdtModel` и эталоны `pid.py`.
+- Интеграция (этап 4):
+  - набор `FB_Integration_Test` (`GVL_TestsIntegration`) — тесты всех семи типов устройств вместе:
+    `Device_DefaultCfg_PassesCheck`, `Device_DevType_ReportedInStsCommon`,
+    `Device_AllTypes_AlarmCountThroughIDevice`; всего 420 тестов в 14 наборах, все зелёные в CODESYS
+    Control Win V3;
+  - `docs/STYLE_GUIDE.md` — стиль ST с примерами «так — не так»;
+  - `docs/ASSUMPTIONS.md` — решения семейств (AI-, DI-, M-, VFD-, VLV-, CV-, P-), открытые вопросы с
+    решениями интеграции, решения интеграции I-01…I-09;
+  - `docs/MANUAL_STEPS.md` — библиотека (`.library`, `.compiled-library`, установка), прогон тестов в IDE,
+    публикация релиза v1.0.0, правила наладки по открытым вопросам;
+  - `docs/TESTING.md` — правило NaN для `AssertEquals_REAL`, межсемейные тесты.
+
 - Основа библиотеки (этап 1, контракт API 1.0.0-rc2):
   - 50 DUT в `src/DUTs/<Семейство>/`: общие перечисления (`E_DeviceMode`, `E_DeviceType`,
     `E_Ne107Status`, `E_CmdResult`), общий заголовок `ST_DeviceCmd`/`ST_DeviceSts`, `ST_DeviceRetain`,
@@ -66,8 +100,20 @@
 
 ### Changed
 
-- **Ломающее относительно контракта rc2:** свойство `I_Alarm.Priority` названо `AlarmPriority` —
-  `PRIORITY` является ключевым словом разборщика iec_checker 0.4 (F-17, ждёт решения).
+- Контракт `docs/API.md` — редакция **1.0.0**: отклонения от rc2 (раздел 0) — имя `AlarmPriority`
+  (F-17), регистрация наборов (F-01), порядок результатов команд (F-28) и уточнения поведения семейств
+  (AI-2, AI-12, DI-1, DI-2, M-09, M-10, M-18, M-20…M-23, VFD-01, VFD-02, VLV-05, VLV-09, VLV-15, VLV-19,
+  CV-1, CV-11, P-02, P-15, P-16); нормативные разделы приведены к реализации; методы-шаги семейств
+  описаны в 22.4 как деталь реализации.
+- **Ломающее относительно контракта rc2:** свойство `I_Alarm.Priority` названо `AlarmPriority`
+  (F-17). Решение закреплено: `PRIORITY` — ключевое слово МЭК 61131-3 (объявление задачи `TASK`).
+- Инструменты синхронизированы с `plc-repo-template`: понижение iec-checker разбирает `TIME()`/`LTIME()`,
+  константы в границах массивов, `a[i].x`, вызов элемента массива ФБ, ключевые слова; RuSTy понижает
+  `VAR_IN_OUT CONSTANT`; `st_lint` понимает составные префиксы массивов и `VAR_IN_OUT CONSTANT`.
+  Обходы сняты: границы массивов — константы (F-07, F-18), `FB_SystemTime.Now` — `LTIME()` в теле
+  (F-08), `RunAlarms` вызывает слоты напрямую (F-19); RuSTy проверяет все 116 файлов без ошибок (F-24).
+- Решения семейств перенесены из `docs/fb/*.md` в `docs/ASSUMPTIONS.md`; номера `FB_MotorVfd` и
+  `FB_Valve` получили префиксы `VFD-` и `VLV-` (I-06). `README.md` — описание всей библиотеки.
 - `tools/check/iec_checker_allow.toml` — обоснования этапа 2 (PLCOPEN-L17, CP9, ложные
   «неиспользуемые» переменные); `tools/check/rusty_exclude.txt` — исключения тестов этапа 2;
   `tools/project_checks/test_conventions.py` — допускает пять имён тестов контракта из двух сегментов.
@@ -82,12 +128,18 @@
 
 ### Fixed
 
+- Тесты с неконечными входами (`FB_Util_Test`, `FB_AnalogInput_Test`, `FB_MotorVfd_Test`,
+  `FB_ControlValve_Test`, а также проверки Cfg с NaN у AI, регулирующего клапана и ПИД) проверяют
+  конечность выходов `F_IsFinite`: `AssertEquals_REAL` coUnit проходит при `Actual = NaN` и ошибку не
+  ловил.
 - `FB_DeviceBase.RunAlarms`: маска shelve в вызове, в котором устройство уходит в OutOfService, давала
   результат `Accepted`, хотя слот запрос отклонял (в OutOfService shelve не принимается). Теперь в
   OutOfService shelve у слотов не запрашивается, результат маски — `RejectedState`.
 
 ### Removed
 
+- Защищённый метод `FB_DeviceBase.CallAlarmSlot` (обход разборщика, не API), 48 подавлений
+  `lint:allow STL007`, все исключения `tools/check/rusty_exclude.txt`.
 - Пример шаблона: `FB_Example`, `F_Clamp`, `I_Resettable`, `ST_ExampleCmd`, `ST_ExampleSts`, старые
   `E_DeviceMode` и `GVL_Const`, наборы `FB_F_Clamp_Test`, `FB_Example_Test`.
 

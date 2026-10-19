@@ -189,22 +189,44 @@ setx CODESYS_PROFILE "CODESYS V3.5 SP17 Patch 3"
 Задачи и ссылки на библиотеки не правьте в IDE: их создаёт `import` по `tools/codesys/config.json`
 (лишние задачи удаляются).
 
-## 7. Релиз: `.project` и `.library`
+## 7. Библиотека: `.library`, `.compiled-library`, установка в репозиторий библиотек
 
-`.project` и `.library` в git не хранятся — прикладываются к релизу GitHub.
+`.library`, `.compiled-library` и `.project` в git не хранятся — собираются из `src/` и прикладываются к
+релизу GitHub (раздел 12). Project Information библиотеки — раздел `library` в
+`tools/codesys/config.json`: название `plc-process-lib`, компания `plc-portfolio`, версия
+(`library.version`, на одну сборку — `CDS_LIBRARY_VERSION`), пространство имён по умолчанию `PL`, автор,
+описание. В библиотеку входят все объекты `src/`, кроме служебной программы `PRG_Main` (F-02);
+`tests/` не входят.
 
-1. `python tools\codesys\cds.py build` — 0 ошибок; `python tools\codesys\cds.py test` — тесты зелёные.
-2. `.project`: приложить `build\<имя>.project` (рабочий проект; тестовый — по желанию). Для
-   переноса на другую машину удобнее архив: «Файл → Архив проекта → Сохранить/Отправить архив»
-   (`.projectarchive`).
-3. `.library` (для репозиториев-библиотек): открыть проект в IDE, заполнить «Проект → Информация о
-   проекте» (компания, название, версия; пространство имён по умолчанию — `PL`). Служебную программу
-   `PRG_Main` и конфигурацию задач в библиотеку не переносить: они нужны только рабочей сборке
-   `cds.py build` (F-02 в [ASSUMPTIONS.md](ASSUMPTIONS.md)). Выполнить «Сборка → Проверить все объекты пула» и
-   сохранить «Файл → Сохранить проект как скомпилированную библиотеку» (`.compiled-library`) или
-   «Сохранить проект как…» с типом «Библиотека» (`.library`). _Названия пунктов меню — сверить с
-   русской IDE 3.5.17.30; в этом прогоне не выполнялось._
-4. Записать в [TEST_REPORT.md](TEST_REPORT.md) итоги (`cds.py report`) и в `CHANGELOG.md` — версию.
+| Команда | Что делает |
+|---|---|
+| `python tools\codesys\cds.py library` | `build\plc-process-lib.library` и «Проверить все объекты пула»: ошибки — с файлом и строкой раскладки, код 1 (библиотека сохраняется для разбора в IDE, но не ставится) |
+| `python tools\codesys\cds.py library --compiled` | ещё `build\plc-process-lib.compiled-library` — скомпилированная, без исходного текста |
+| `python tools\codesys\cds.py library --compiled --install` | установка в репозиторий библиотек `System` (`C:\ProgramData\CODESYS\Managed Libraries`, права администратора не нужны): `plc-process-lib, <версия> (plc-portfolio)`; с `--compiled` ставится скомпилированная, та же версия заменяется |
+| `python tools\codesys\cds.py library --uninstall` | удалить из репозитория версию `library.version` (`--all-versions` — все) |
+
+Проверка пула выполнена при интеграции (19.10.2026: 78 объектов, 0 ошибок; раздел «Последний прогон» в
+[STATIC_ANALYSIS.md](STATIC_ANALYSIS.md)). _Установка `--install` из рабочей копии интеграции не
+выполнялась: репозиторий библиотек общий для машины, и версию, поставленную из другой рабочей копии,
+установка заменила бы (`cds.py` об этом предупреждает). Ставьте библиотеку из основной рабочей копии или
+с другой версией (`CDS_LIBRARY_VERSION=0.1.1.0`)._
+
+Вручную в IDE (без `cds.py`):
+
+1. Установить готовый файл: «Инструменты → Репозиторий библиотек → Установить…» (Tools → Library
+   Repository → Install) → `plc-process-lib.library` или `.compiled-library`.
+2. Проверить: в проекте приложения «Library Manager → Добавить библиотеку» → поиск `plc-process-lib`;
+   после добавления объекты видны как `PL.FB_Motor`, `PL.ST_MotorCfg`, `PL.GVL_Const.…`.
+3. Собрать библиотеку из проекта: открыть проект, «Проект → Информация о проекте» (компания, название,
+   версия, пространство имён по умолчанию `PL`), убрать `PRG_Main` и конфигурацию задач, «Сборка →
+   Проверить все объекты пула», затем «Файл → Сохранить проект как скомпилированную библиотеку»
+   (`.compiled-library`) или «Сохранить проект как…» с типом «Библиотека» (`.library`). _Названия
+   пунктов меню — сверить с русской IDE 3.5.17.30; этот путь не выполнялся, `cds.py library` делает
+   то же скриптом (проверено)._
+
+Потребитель (репозиторий на шаблоне) подключает библиотеку описанием в `libraries` своего
+`config.json` с `build_from_repo` — тогда недостающую версию `cds.py` соберёт и поставит сам
+([README](../README.md#как-подключить-библиотеку)).
 
 ## 8. Зеркало на GitVerse или GitFlic
 
@@ -274,3 +296,77 @@ persistent-данных на Control Win V3 и ПЛК210 тестами не п�
    значения применит ближайший вызов ФБ. Изменение типов `ST_MotorCfg`, `ST_VfdCfg`, `ST_DeviceRetain`
    (мажорная версия библиотеки) переинициализирует переменные целиком — до загрузки сохранить значения
    рецептом («Save Current Values to Recipe»), после — восстановить (правило 6 раздела 18.3 контракта).
+
+## 11. Прогон тестов в CODESYS Control Win из IDE
+
+`cds.py test` делает это без окна (раздел 5, проверено). Вручную — чтобы посмотреть упавший тест в
+отладчике:
+
+1. `python tools\codesys\cds.py import --tests` → `build\plc-process-lib-tests.project` (TestTask 10 мс →
+   `PRG_Tests`, coUnit 1.2.0.0); `python tools\codesys\cds.py runtime start` — рантайм (раздел 4).
+2. Открыть тестовый проект в IDE (раздел 6), «Онлайн → Логин» с пользователем из `credentials.json`,
+   согласиться на загрузку, «Отладка → Старт».
+3. В окне наблюдения: `coUnit.GVL_coUnit.coUnitRunner.AllTestSuitesFinished` (TRUE в первом цикле —
+   все тесты одноцикловые, кроме `Runtime_LTime_MonotonicAcrossTaskCycles`: 50 циклов),
+   `coUnit.GVL_coUnit.coUnitRunner.TestResults.TestSuiteResults.NumberOfFailedTestCases` — 0,
+   `….NumberOfTestCases` — 420. Имя и сообщение упавшего теста —
+   `….TestSuiteResults[i].TestCaseResults[j].TestName` / `FailureMessage` (индексы с 1).
+4. «Онлайн → Выход», закрыть IDE (иначе `cds.py` откажется открывать проект), при необходимости
+   `cds.py runtime stop`. Без лицензии рантайм работает 2 часа.
+
+_Шаги 2–3 в IDE не выполнялись: те же значения читает `cds.py test` (`read_value`, проверено)._
+
+## 12. Публикация релиза v1.0.0
+
+1. Проверки на чистой рабочей копии `main` (после слияния `integrate`), все — зелёные:
+
+   ```bat
+   python tools\codesys\cds.py build --tests
+   python tools\codesys\cds.py check --tests
+   python tools\codesys\cds.py test
+   python tools\codesys\cds.py roundtrip
+   python tools\codesys\cds.py library --compiled
+   python tools\check\st_lint.py --strict
+   python tools\check\run_iec_checker.py --tests
+   python tools\check\run_rusty.py
+   python -m ruff check . && python -m ruff format --check . && python -m mypy && python -m pytest
+   ```
+
+2. Версия: в `tools/codesys/config.json` — `library.version` → `"1.0.0.0"`, `library.released` → `true`
+   (I-09 в [ASSUMPTIONS.md](ASSUMPTIONS.md)); в `CHANGELOG.md` раздел `[Unreleased]` → `[1.0.0] - <дата>`;
+   контракт [API.md](API.md) уже 1.0.0. Заменить плейсхолдеры `<ИМЯ ФАМИЛИЯ>`, `<GITHUB_USER>` в README,
+   LICENSE и заголовках POU.
+3. Артефакты: `python tools\codesys\cds.py library --compiled --released` (`.library`,
+   `.compiled-library`), `python tools\codesys\cds.py build` (`build\plc-process-lib.project`),
+   `python tools\codesys\cds.py test` и `python tools\codesys\cds.py report` — итоги в
+   [TEST_REPORT.md](TEST_REPORT.md).
+4. Коммит `chore(release): v1.0.0`, аннотированный тег `git tag -a v1.0.0 -m "plc-process-lib 1.0.0"`,
+   `git push` и `git push --tags` — выполняет человек.
+5. GitHub → Releases → «Draft a new release» по тегу `v1.0.0`: текст — раздел 1.0.0 из `CHANGELOG.md`;
+   файлы — `plc-process-lib.library`, `plc-process-lib.compiled-library`, `plc-process-lib.project`
+   (по желанию `.projectarchive` и тестовый проект). Отметить, что проверено только на CODESYS Control
+   Win V3, не на ПЛК210.
+6. Поставить релизную версию в репозиторий библиотек машины разработки:
+   `python tools\codesys\cds.py library --compiled --install --released`. Потребители закрепляют
+   `"version": "1.0.0.0"` в `libraries.plc-process-lib` своего `config.json`.
+7. Зеркало — раздел 8.
+
+## 13. Наладка: правила v1.0 по открытым вопросам
+
+Решения интеграции по открытым вопросам семейств ([ASSUMPTIONS.md](ASSUMPTIONS.md#открытые-вопросы-семейств-решения-интеграции)),
+которые выполняет наладчик:
+
+- **Защитные уставки AI** («сухой ход», аварийный уровень; AI-Q5): `xLimitsOnFail := TRUE`,
+  `eFailValue := Substitute`, `rFailValue_eu` — по безопасную сторону уставки; либо фиксация блокировки
+  в логике станции. Иначе после возврата сигнала защита открыта на `astLimit[i].tOnDelay`.
+- **Задержка LL** (AI-Q6): `astLimit[LL].tOnDelay` не меньше времени установления входного фильтра модуля
+  AI (паспорт модуля) или `tFilter`.
+- **Смена шкалы AI** (`eInput`, диапазоны, `xSqrt`; AI-Q7) — в OutOfService: фильтр начнётся заново.
+- **Разрешающие DI**, которые должны подтвердиться после перезапуска ПЛК (DI-Q1), — своя задержка в логике
+  станции: предустановка DI-1 пропускает `tOnDelay` один раз.
+- **Регулирующий клапан «открыт при отказе» с ограничением скорости** (CV-12): проверить, что делает модуль
+  AO при перезапуске ПЛК; после старта рампа идёт от 0 %.
+- **Задание оператора ПИД** (P-Q1) не энергонезависимо: хранить его в Persistent Variables приложения или
+  задавать логикой через `xSpExt`.
+- **NaN на ПЛК210** (F-10): прогнать набор `FB_Util_Test` на контроллере — сравнения с NaN не должны давать
+  исключений.
