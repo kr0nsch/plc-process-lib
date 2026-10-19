@@ -139,7 +139,7 @@ END_IF
 // 7. Тревоги: слот 0 PvInvalid — PV негодна в Auto или после сброса в Manual по отказу PV
 axAlmCond[E_PidAlarm.PvInvalid] := NOT xPvOk AND (eMode = E_DeviceMode.Auto OR xPvShed);
 axAlmSuppress[E_PidAlarm.PvInvalid] := FALSE;
-arAlmValue[E_PidAlarm.PvInvalid] := rPv_eu;
+arAlmValue[E_PidAlarm.PvInvalid] := SEL(F_IsFinite(rIn := rPv_eu), 0.0, rPv_eu);
 RunAlarms(udiIdBase := stCfgLkg.udiAlarmIdBase, stCmd := stCmd.stCommon, astCfg := stCfgLkg.astAlarm);
 
 // 8. Состояние
@@ -151,7 +151,7 @@ ELSE
 END_IF
 stSts.rSpTarget_eu := LREAL_TO_REAL(lrSpTarget_eu);
 stSts.rSp_eu := LREAL_TO_REAL(lrSp_eu);
-stSts.rPv_eu := rPv_eu;
+stSts.rPv_eu := SEL(F_IsFinite(rIn := rPv_eu), 0.0, rPv_eu);   // NaN из Modbus — 0.0 (R6), PV_FAIL в битах
 stSts.rErr_pct := LREAL_TO_REAL(lrErr_pct);
 stSts.rOut_pct := rOut_pct;
 stSts.rP_pct := LREAL_TO_REAL(lrP_pct);

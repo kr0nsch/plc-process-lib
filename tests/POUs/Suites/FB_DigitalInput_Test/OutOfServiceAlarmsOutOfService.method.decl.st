@@ -1,4 +1,4 @@
-// OutOfService: оба слота OutOfService (wAlmShelved = 2#11), значение удерживается (TRUE), xValid = FALSE,
+// OutOfService: оба слота OutOfService (в wAlmShelved их нет — ALM-2), значение удерживается (TRUE), xValid = FALSE,
 // CheckFunction; отказ канала в OOS не даёт Failure; слежение xSubstValue действует и в OOS (2.1). После выхода
 // активная тревога State снова ActiveUnack.
 METHOD PRIVATE OutOfServiceAlarmsOutOfService

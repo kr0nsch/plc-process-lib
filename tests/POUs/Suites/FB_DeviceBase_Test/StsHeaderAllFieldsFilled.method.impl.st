@@ -20,6 +20,6 @@ AssertEquals_WORD(Expected := 16#0001, Actual := stHdr.wAlmUnack, Message := 'wA
 AssertEquals_WORD(Expected := 0, Actual := stHdr.wAlmShelved, Message := 'wAlmShelved');
 AssertTrue(Condition := stHdr.ePrioUnack = E_AlarmPriority.High, Message := 'ePrioUnack');
 AssertTrue(Condition := stHdr.eDevType = E_DeviceType.ControlValve, Message := 'eDevType');
-AssertEquals_WORD(Expected := 0, Actual := stHdr.wReserve, Message := 'wReserve');
+AssertEquals_WORD(Expected := 0, Actual := stHdr.wAlmSuppressed, Message := 'wAlmSuppressed');
 
 coUnit.TEST_FINISHED();

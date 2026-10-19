@@ -4,7 +4,7 @@ stEvent.eOldState := eState;
 stEvent.eNewState := eNew;
 stEvent.eReason := eReason;
 stEvent.ltTime := ltNow;
-stEvent.rValue := rValue;
+stEvent.rValue := SEL(F_IsFinite(rIn := rValue), 0.0, rValue);
 
 eState := eNew;
 udiSeq := udiSeq + 1;

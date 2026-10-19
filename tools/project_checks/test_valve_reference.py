@@ -25,23 +25,32 @@ def test_cv_ramp_scenarios_match_st_expectations() -> None:
     assert s["cv_return_ramp"]["10 -> 60, 1 %/s, 1 s"] == pytest.approx(11.0, abs=1e-4)
     assert s["cv_return_ramp"]["20 -> 50, 10 %/s, 1.0 s"] == pytest.approx(30.0, abs=1e-4)
     assert s["cv_bumpless"]["70 -> 60, 5 %/s, 1.0 s"] == pytest.approx(65.0, abs=1e-4)
-    assert s["cv_positioner"]["100 -> 40, 2 %/s, 1.0 s"] == pytest.approx(98.00003, abs=1e-4)
+    assert s["cv_positioner"]["100 -> 40, 2 %/s, 1.0 s"] == pytest.approx(98.0, abs=1e-4)
 
 
 def test_cv_tight_shut_ramp_is_not_stuck_below_threshold() -> None:
     s = vr.scenarios()["cv_tight_ramp"]
     assert s["ramp 4.5 s"] == pytest.approx(4.5)
     assert s["out 4.5 s"] == 0.0
-    assert s["out 5.0 s"] == pytest.approx(5.0, abs=1e-4)
+    # гистерезис CV_TIGHT_HYST_PCT (CV-13): плотное закрытие снимается на пороге + 1 %, а не на пороге
+    assert (s["out 5.0 s"], s["out 5.5 s"]) == (0.0, 0.0)
+    assert s["out 6.0 s"] == pytest.approx(6.0, abs=1e-4)
     assert s["out 10.0 s"] == pytest.approx(10.0, abs=1e-4)
     assert (s["out at sp 4"], s["out at sp 6"]) == (0.0, 6.0)
+
+
+def test_cv_slow_ramp_not_lost_in_lreal_state() -> None:
+    """CV-14, VFD-13: рампа 0,003 %/с при шаге 1 мс в REAL стоит, в LREAL — как при шаге 100 мс."""
+    s = vr.scenarios()["cv_slow_ramp"]
+    assert s["1 ms x 1000"] == pytest.approx(70.003, abs=1e-4)
+    assert s["100 ms x 10"] == pytest.approx(70.003, abs=1e-4)
+    assert s["REAL state, 1 ms x 1000"] == 70.0
 
 
 def test_cv_ramp_independent_of_cycle_time() -> None:
     s = vr.scenarios()["cv_cycle_independence"]
     assert s["10 ms x 200"] == pytest.approx(20.0, abs=1e-4)
     assert s["100 ms x 20"] == pytest.approx(20.0, abs=1e-4)
-    assert s["10 ms x 200"] != s["100 ms x 20"]  # округление REAL на шаге видно, но в допуске теста
 
 
 def test_cv_output_current() -> None:

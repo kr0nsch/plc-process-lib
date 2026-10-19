@@ -24,7 +24,7 @@ ResetFaults(xRequest := xResetReq OR stCmd.stCommon.xReset);
 // 4. Режим: вывод из работы — только когда арматура не движется
 eRes := ProcessMode(xLocalSel := xLocal, xLocalSupported := TRUE,
                     xOosAllowed := eState <> E_ValveState.Opening AND eState <> E_ValveState.Closing
-                                   AND eState <> E_ValveState.Reversing,
+                                   AND eState <> E_ValveState.Reversing AND NOT xSafeMove,
                     stCmd := stCmd.stCommon, stRetain := stRetain);
 IF eRes <> E_CmdResult.None THEN
     SetCmdResult(eResult := eRes);
@@ -45,6 +45,7 @@ SuperviseLimits();
 TrackPosition();
 DriveToTarget();
 RunTravelTimers();
+SafeMoveOnFault();
 SetOutputs();
 CountOperations(stValveRet := stRetain);
 
@@ -66,9 +67,13 @@ ELSIF xRemote AND NOT xIlkAct AND eTarget = E_ValveState.Closed AND eState <> E_
 ELSE
     wPermMiss := 0;
 END_IF
-IF eState = E_ValveState.Opening OR eState = E_ValveState.Closing THEN
-    // остаток до таймаута хода, целые секунды вверх, не больше UINT_MAX
-    lrRemain_s := F_TimeToSec(tIn := fbTravel.tRemaining);
+IF eState = E_ValveState.Opening OR eState = E_ValveState.Closing OR xSafeMove THEN
+    // остаток до таймаута хода (аварийного хода), целые секунды вверх, не больше UINT_MAX
+    IF xSafeMove THEN
+        lrRemain_s := F_TimeToSec(tIn := fbSafeMove.tRemaining);
+    ELSE
+        lrRemain_s := F_TimeToSec(tIn := fbTravel.tRemaining);
+    END_IF
     udiRemain_s := LREAL_TO_UDINT(lrRemain_s);
     IF UDINT_TO_LREAL(udiRemain_s) < lrRemain_s THEN
         udiRemain_s := udiRemain_s + 1;
@@ -94,8 +99,10 @@ wWrnBits := SEL(xMaint, 0, GVL_Const.VLV_WRN_MAINT_CYCLES)
 xAvailDev := eMode = E_DeviceMode.Auto AND wFltBits = 0 AND wIlk = 0 AND xPowerOk;
 wLowBits := SEL(xOpened, 0, GVL_Const.VLV_STS_OPENED)
             OR SEL(xClosed, 0, GVL_Const.VLV_STS_CLOSED)
-            OR SEL(eState = E_ValveState.Opening, 0, GVL_Const.VLV_STS_OPENING)
-            OR SEL(eState = E_ValveState.Closing, 0, GVL_Const.VLV_STS_CLOSING)
+            OR SEL(eState = E_ValveState.Opening OR (xSafeMove AND eSafeDir = E_ValveState.Opening), 0,
+                   GVL_Const.VLV_STS_OPENING)
+            OR SEL(eState = E_ValveState.Closing OR (xSafeMove AND eSafeDir = E_ValveState.Closing), 0,
+                   GVL_Const.VLV_STS_CLOSING)
             OR SEL(xIlkAct, 0, GVL_Const.VLV_STS_INTERLOCKED)
             OR SEL(wPermMiss <> 0, 0, GVL_Const.VLV_STS_PERMIT_MISSING)
             OR SEL(xTrqOpen OR xTrqClose, 0, GVL_Const.VLV_STS_TORQUE)

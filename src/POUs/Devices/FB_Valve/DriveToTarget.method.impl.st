@@ -10,11 +10,24 @@ xEnterMove := FALSE;
 fbRunOff(xIn := xQOpen OR xQClose, tOffDelay := stCfgLkg.tReverse, itfTime := itfTimeAct);
 xHoldOpen := xMotorized AND fbRunOff.xOut AND eLastDir = E_ValveState.Closing;
 xHoldClose := xMotorized AND fbRunOff.xOut AND eLastDir = E_ValveState.Opening;
+//     страгивание с седла (VLV-21): усилие вырыва клина из седла больше усилия хода, муфта открытия срабатывает при
+//     ещё замкнутом ZSC — это не заклинивание (в приводах — шунтирование моментного выключателя при страгивании).
+//     Муфта открытия не контролируется, пока ZSC замкнут и ещё tLimitFilter после его размыкания (без ZSC — всё
+//     окно), но не дольше VLV_UNSEAT_BYPASS от начала открытия с закрытого положения: клин, который не вышел из
+//     седла, даёт TorqueTrip. Контроль заклинивания в ходе остаётся
+IF eState <> E_ValveState.Opening THEN
+    xUnseatArmed := FALSE;
+END_IF
+fbZscOff(xIn := xAtClose, tOffDelay := stCfgLkg.tLimitFilter, itfTime := itfTimeAct);
+fbUnseat(xIn := xUnseatArmed AND eState = E_ValveState.Opening, tOnDelay := GVL_Const.VLV_UNSEAT_BYPASS,
+         itfTime := itfTimeAct);
+xUnseating := xUnseatArmed AND eState = E_ValveState.Opening AND NOT fbUnseat.xOut
+              AND (fbZscOff.xOut OR NOT stCfgLkg.xZscUsed);
 IF xDrive THEN
     IF eState = E_ValveState.Opening THEN
         IF xAtOpen THEN
             eState := E_ValveState.Open;
-        ELSIF xTrqOpen THEN
+        ELSIF xTrqOpen AND NOT xUnseating THEN
             xFltTorque := TRUE;                // момент раньше концевика: заклинивание
             eState := E_ValveState.Fault;
         ELSIF eTarget = E_ValveState.Closed THEN
@@ -53,6 +66,12 @@ IF xDrive THEN
             eState := E_ValveState.Intermediate;
         END_IF
     ELSIF eTarget = E_ValveState.Open AND eState <> E_ValveState.Open AND xMayOpen AND NOT xHoldOpen THEN
+        // открытие с закрытого положения — окно страгивания от этого вызова
+        xUnseatArmed := eState = E_ValveState.Closed;
+        IF xUnseatArmed THEN
+            fbUnseat.Preset(xValue := FALSE);
+            fbUnseat(xIn := TRUE, tOnDelay := GVL_Const.VLV_UNSEAT_BYPASS, itfTime := itfTimeAct);
+        END_IF
         eState := E_ValveState.Opening;
         xEnterMove := TRUE;
     ELSIF eTarget = E_ValveState.Closed AND eState <> E_ValveState.Closed AND xMayClose AND NOT xHoldClose THEN

@@ -1,6 +1,10 @@
-// 1. Сводный статус NE 107 (значения упорядочены по тяжести: MAX)
+// 1. Сводный статус NE 107 (значения упорядочены по тяжести: MAX). Режим даёт CheckFunction: OutOfService, подмена
+//    AI/DI (Manual) и Local — механизмом управляют по месту, выход ПЛК не действует (категория C NE 107, статус PA
+//    «function check / local override», NE107-1)
 xCfgBad := wCfgErr <> 0 OR NOT xCfgEverOk;
-IF eMode = E_DeviceMode.OutOfService OR (xManualIsCheck AND eMode = E_DeviceMode.Manual) THEN
+IF eMode = E_DeviceMode.OutOfService OR eMode = E_DeviceMode.Local
+   OR (xManualIsCheck AND eMode = E_DeviceMode.Manual)
+THEN
     eModeStatus := E_Ne107Status.CheckFunction;
 END_IF
 IF xCfgBad THEN
@@ -50,7 +54,7 @@ stCommon.wAlmUnack := wAlmUnack;
 stCommon.wAlmShelved := wAlmShelved;
 stCommon.ePrioUnack := ePrioUnack;
 stCommon.eDevType := eDevType;
-stCommon.wReserve := 0;
+stCommon.wAlmSuppressed := wAlmSuppressed;
 
 // 4. Конец цикла
 ltPrevCall := ltNow;

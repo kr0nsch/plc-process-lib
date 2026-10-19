@@ -50,3 +50,6 @@ OosExitWithBrokenSignalInvalidAtOnce();
 SubstitutionRenewedAfterTimeoutCountsFullPeriod();
 ShortGlitchFilterKeptNoFalseLimit();
 SubstitutionDuringFailureLimitsOnSubstValue();
+GuardBandLowInvalidAfterDelay();
+GuardBandHighInvalidLimitsKept();
+SubstitutionUnlimitedNoTimeout();

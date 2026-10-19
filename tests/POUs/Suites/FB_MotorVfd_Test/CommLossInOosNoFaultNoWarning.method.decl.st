@@ -8,4 +8,5 @@ VAR
     stCmd    : ST_MotorCmd;       // команды
     stRetain : ST_DeviceRetain;   // энергонезависимые данные
     stCfg    : ST_MotorCfg;       // конфигурация (умолчания)
+    itfAlm   : I_Alarm;           // тревога слота CommLoss
 END_VAR

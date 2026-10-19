@@ -5,9 +5,11 @@
 комментарии теста: «источник: tools/reference/valve_reference.py, сценарий <имя>».
 
 Модель повторяет арифметику ST:
-- рампа регулирующего клапана — шаг F_RateLimit в LREAL с округлением результата до REAL
-  (float32) на каждом шаге, шаг времени dt = F_LTimeToSec(ltDt);
-- плотное закрытие применяется к выходу, а не к состоянию рампы (FB_ControlValve, 6.5);
+- рампа регулирующего клапана — шаг F_RateLimitLr: состояние рампы в LREAL (без округления на каждом шаге,
+  CV-14), на выход — REAL (float32); шаг времени dt = F_LTimeToSec(ltDt). Для сравнения — прежняя модель
+  F_RateLimit с округлением до REAL на каждом шаге (``rate_limit_real``);
+- плотное закрытие применяется к выходу, а не к состоянию рампы (FB_ControlValve, 6.5), с гистерезисом: включается
+  ниже порога, снимается при положении не ниже порога + CV_TIGHT_HYST_PCT (CV-13);
 - ток выхода: 4 + 16 * x / 100, при инверсии x = 100 - rOut_pct (раздел 16.3 контракта);
 - остаток времени хода задвижки — целые секунды вверх от tTravel - прошедшее;
 - время работы привода — накопление MIN(dt, DT_ACCUM_MAX) по выходу прошлого вызова, в stRetain
@@ -15,7 +17,9 @@
 
 Сценарии:
 - ``cv_manual_ramp`` — задание Manual 0 -> 50 % (рост 10 %/с), затем 50 -> 10 % (спад 20 %/с), шаг 0,1 с;
-- ``cv_tight_ramp`` — плотное закрытие 5 %, рост 1 %/с, задание 0 -> 20 %, шаг 0,5 с;
+- ``cv_tight_ramp`` — плотное закрытие 5 % (гистерезис 1 %), рост 1 %/с, задание 0 -> 20 %, шаг 0,5 с;
+- ``cv_slow_ramp`` — рампа 0,003 %/с от 70 %: 1000 шагов по 1 мс и 10 шагов по 100 мс; в REAL-модели шаг 1 мс
+  стоит на месте;
 - ``cv_return_ramp`` — возврат рампы от положения безопасности 10 % к 60 % (1 %/с, шаг 1 с) и от 20 %
   к 50 % (10 %/с, шаг 0,1 с);
 - ``cv_bumpless`` — после Auto -> Manual задание 70 -> 60 % (спад 5 %/с, шаг 0,1 с);
@@ -39,6 +43,7 @@ import sys
 PCT_FULL = 100.0
 MA_ZERO = 4.0
 MA_SPAN = 16.0
+CV_TIGHT_HYST_PCT = 1.0  # GVL_Const.CV_TIGHT_HYST_PCT
 DT_ACCUM_MAX_S = 10.0  # GVL_Const.DT_ACCUM_MAX = LTIME#10S
 S_PER_H = 3600
 
@@ -54,27 +59,62 @@ def is_finite_real(value: float, sane_max: float = 1.0e30) -> bool:
 
 
 def rate_limit(current: float, target: float, rate_up: float, rate_down: float, dt_s: float) -> float:
-    """Шаг F_RateLimit: расчёт в LREAL, результат — REAL."""
+    """Шаг F_RateLimitLr: состояние и результат — LREAL (float), цель и скорости — REAL."""
+    if dt_s <= 0.0 or not is_finite_real(target):
+        return current
+    target = f32(target)
+    if target > current and rate_up > 0.0:
+        return min(target, current + f32(rate_up) * dt_s)
+    if target < current and rate_down > 0.0:
+        return max(target, current - f32(rate_down) * dt_s)
+    return target
+
+
+def rate_limit_real(current: float, target: float, rate_up: float, rate_down: float, dt_s: float) -> float:
+    """Шаг F_RateLimit (REAL): расчёт в LREAL, результат округляется до REAL на каждом шаге."""
     if dt_s <= 0.0 or not is_finite_real(target):
         return current
     if target > current and rate_up > 0.0:
-        return f32(min(target, current + rate_up * dt_s))
+        return f32(min(target, current + f32(rate_up) * dt_s))
     if target < current and rate_down > 0.0:
-        return f32(max(target, current - rate_down * dt_s))
+        return f32(max(target, current - f32(rate_down) * dt_s))
     return f32(target)
 
 
 def ramp(start: float, target: float, rate_up: float, rate_down: float, dt_s: float, steps: int) -> float:
-    """Положение рампы после steps шагов dt_s от start к target."""
+    """Выход (REAL) после steps шагов dt_s рампы F_RateLimitLr от start к target."""
     value = f32(start)
     for _ in range(steps):
         value = rate_limit(value, f32(target), rate_up, rate_down, dt_s)
+    return f32(value)
+
+
+def ramp_real(start: float, target: float, rate_up: float, rate_down: float, dt_s: float, steps: int) -> float:
+    """То же в прежней модели: состояние рампы в REAL (округление на каждом шаге)."""
+    value = f32(start)
+    for _ in range(steps):
+        value = rate_limit_real(value, f32(target), rate_up, rate_down, dt_s)
     return value
 
 
-def tight_shut(ramp_pct: float, threshold_pct: float) -> float:
-    """Плотное закрытие: выход 0, если порог > 0 и положение рампы ниже порога."""
-    return 0.0 if threshold_pct > 0.0 and ramp_pct < threshold_pct else ramp_pct
+def tight_shut(ramp_pct: float, threshold_pct: float, latched: bool = False) -> float:
+    """Плотное закрытие с гистерезисом: выход 0, если порог > 0 и положение рампы ниже порога или плотное
+    закрытие уже действует (latched) и положение ниже порога + CV_TIGHT_HYST_PCT."""
+    if threshold_pct <= 0.0:
+        return ramp_pct
+    if ramp_pct < threshold_pct or (latched and ramp_pct < threshold_pct + CV_TIGHT_HYST_PCT):
+        return 0.0
+    return ramp_pct
+
+
+def tight_ramp(threshold_pct: float, start: float, target: float, rate_up: float, dt_s: float, steps: int) -> float:
+    """Выход после steps шагов рампы с плотным закрытием: защёлка по всем шагам, начиная со start."""
+    value = f32(start)
+    latched = tight_shut(value, threshold_pct) == 0.0 and threshold_pct > 0.0
+    for _ in range(steps):
+        value = rate_limit(value, f32(target), rate_up, 0.0, dt_s)
+        latched = tight_shut(value, threshold_pct, latched) == 0.0
+    return f32(tight_shut(value, threshold_pct, latched))
 
 
 def out_ma(out_pct: float, invert: bool) -> float:
@@ -126,11 +166,18 @@ def scenarios() -> dict[str, dict[str, float]]:
     }
     result["cv_tight_ramp"] = {
         "ramp 4.5 s": ramp(0.0, 20.0, 1.0, 0.0, 0.5, 9),
-        "out 4.5 s": tight_shut(ramp(0.0, 20.0, 1.0, 0.0, 0.5, 9), 5.0),
-        "out 5.0 s": tight_shut(ramp(0.0, 20.0, 1.0, 0.0, 0.5, 10), 5.0),
-        "out 10.0 s": tight_shut(ramp(0.0, 20.0, 1.0, 0.0, 0.5, 20), 5.0),
+        "out 4.5 s": tight_ramp(5.0, 0.0, 20.0, 1.0, 0.5, 9),
+        "out 5.0 s": tight_ramp(5.0, 0.0, 20.0, 1.0, 0.5, 10),
+        "out 5.5 s": tight_ramp(5.0, 0.0, 20.0, 1.0, 0.5, 11),
+        "out 6.0 s": tight_ramp(5.0, 0.0, 20.0, 1.0, 0.5, 12),
+        "out 10.0 s": tight_ramp(5.0, 0.0, 20.0, 1.0, 0.5, 20),
         "out at sp 4": tight_shut(4.0, 5.0),
         "out at sp 6": tight_shut(6.0, 5.0),
+    }
+    result["cv_slow_ramp"] = {
+        "1 ms x 1000": ramp(70.0, 100.0, 0.003, 0.003, 0.001, 1000),
+        "100 ms x 10": ramp(70.0, 100.0, 0.003, 0.003, 0.1, 10),
+        "REAL state, 1 ms x 1000": ramp_real(70.0, 100.0, 0.003, 0.003, 0.001, 1000),
     }
     result["cv_return_ramp"] = {
         "10 -> 60, 1 %/s, 1 s": ramp(10.0, 60.0, 1.0, 1.0, 1.0, 1),

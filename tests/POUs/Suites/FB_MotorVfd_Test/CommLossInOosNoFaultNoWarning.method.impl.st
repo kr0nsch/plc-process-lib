@@ -11,7 +11,8 @@ stCfg.stVfd.xCommLossIsFault := FALSE;
 SpinVfd(fbV := fbVfd, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 2, tDt := T#100MS);
 AssertEquals_WORD(Expected := 0, Actual := fbVfd.stSts.stCommon.wWarning AND GVL_Const.MOT_WRN_COMM_LOSS,
                   Message := 'no comm warning in OOS');
-AssertTrue(Condition := (fbVfd.stSts.stCommon.wAlmShelved AND 16#0040) <> 0, Message := 'slot 6 out of service');
+itfAlm := fbVfd.GetAlarm(uiIndex := E_MotorAlarm.CommLoss);
+AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'slot 6 out of service');
 stCmd.stCommon.xSetManual := TRUE;
 SpinVfd(fbV := fbVfd, fbT := fbTime, stC := stCmd, stR := stRetain, stF := stCfg, uiN := 2, tDt := T#100MS);
 AssertTrue(Condition := (fbVfd.stSts.stCommon.wWarning AND GVL_Const.MOT_WRN_COMM_LOSS) <> 0,

@@ -16,6 +16,7 @@ TYPE E_AlarmEventReason :
     Suppressed    := 7,
     Unsuppressed  := 8,
     OosOn         := 9,
-    OosOff        := 10
+    OosOff        := 10,
+    Disabled      := 11    // тревога выключена приоритетом None: закрывающее событие
 ) INT;
 END_TYPE

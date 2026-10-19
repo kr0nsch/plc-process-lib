@@ -8,7 +8,8 @@ itfAlm := fbDev.GetAlarm(uiIndex := 2);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'slot 2 OutOfService');
 itfAlm := fbDev.GetAlarm(uiIndex := 0);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'active slot 0 OutOfService');
-AssertEquals_WORD(Expected := 16#0007, Actual := fbDev.stSts.stCommon.wAlmShelved, Message := 'three used slots');
+AssertEquals_WORD(Expected := 0, Actual := fbDev.stSts.stCommon.wAlmShelved OR fbDev.stSts.stCommon.wAlmSuppressed,
+                  Message := 'out of service is neither shelved nor suppressed');
 AssertEquals_WORD(Expected := 0, Actual := fbDev.stSts.stCommon.wAlmUnack, Message := 'no unacknowledged alarms');
 AssertEquals_WORD(Expected := 16#0001, Actual := fbDev.stSts.stCommon.wAlmActive, Message := 'condition still shown');
 stCmd.stCommon.xSetManual := TRUE;

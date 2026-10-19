@@ -6,6 +6,8 @@ fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 stCmd.xOpen := TRUE;
 fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 fbVlv.xZsc := FALSE;
+fbTime.Advance(tStep := T#3S);
+fbVlv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);   // ход 3 с: страгивание позади
 fbVlv.xTorqueOpen := TRUE;
 fbTime.Advance(tStep := T#100MS);
 // муфта в ходе

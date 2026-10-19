@@ -1,5 +1,6 @@
-// I_MotorVfd для ведущего насоса: SpeedRef, SpeedAct, SpeedAutoActive (Auto, Running, без отказа), Running и
-// Mode через интерфейс; в Manual SpeedAutoActive = FALSE.
+// I_MotorVfd для ведущего насоса: SpeedRef, SpeedAct, SpeedAutoActive, Running и Mode через интерфейс.
+// SpeedAutoActive (VFD-06) — только Auto, Running и без отказа: FALSE у стоящего в Auto насоса, в Starting (ОС ещё
+// нет), в Stopping (ОС ещё есть), при отказе связи и в Manual; TRUE — Auto и Running.
 METHOD PRIVATE ImplementsIMotorVfdLeadPumpProperties
 VAR
     fbTime   : FB_FakeTime;       // подменное время, старт 1 ч

@@ -25,3 +25,5 @@ LimitMonitorOnDelayShortExcursionIgnored();
 LimitMonitorOffDelayHoldsFlag();
 LimitMonitorNonFiniteValueKeepsState();
 LimitMonitorReenabledRestartsOnDelay();
+RateLimitLrSmallStepNotLost();
+RateLimitLrNonFiniteTargetOrZeroDtHoldsCurrent();

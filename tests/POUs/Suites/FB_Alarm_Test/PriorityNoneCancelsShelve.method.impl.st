@@ -12,7 +12,10 @@ fbAlm(xIn := TRUE, stCfg := stCfg, itfTime := fbTime);                          
 AssertTrue(Condition := fbAlm.eState = E_AlarmState.Normal, Message := 'disabled alarm is Normal');
 AssertFalse(Condition := fbAlm.xShelved, Message := 'disabling cancels the shelve');
 AssertEquals_TIME(Expected := T#0S, Actual := fbAlm.tShelveRemain, Message := 'no shelve time left');
-AssertEquals_UDINT(Expected := udiSeq, Actual := fbAlm.udiSeq, Message := 'disabling makes no transition');
+AssertEquals_UDINT(Expected := udiSeq + 1, Actual := fbAlm.udiSeq, Message := 'disabling: one closing transition');
+stEv := fbSink.Last;
+AssertTrue(Condition := stEv.eReason = E_AlarmEventReason.Disabled AND stEv.eOldState = E_AlarmState.Shelved,
+           Message := 'closing event Disabled from Shelved');
 stCfg.ePriority := E_AlarmPriority.Medium;
 fbTime.Advance(tStep := T#1M);
 fbAlm(xIn := TRUE, stCfg := stCfg, itfTime := fbTime);                                // снова включена

@@ -43,3 +43,6 @@ ImplementsIDeviceInterfaceAccess();
 AlarmSlotArraysMatchDevAlarmsMax();
 MethodRequestsProcessedOnce();
 ShelveMaskOnOosEntryRejectedState();
+OosRepeatWhileMovingInOosAccepted();
+LocalModeNe107CheckFunction();
+ShelvedAndSuppressedSeparateMasks();

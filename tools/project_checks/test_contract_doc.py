@@ -102,7 +102,7 @@ def gvl_const() -> dict[str, tuple[str, str]]:
 
 def test_constants_table_matches_gvl_const() -> None:
     rows = re.findall(r"^\| `(\w+)` \| (\w+) \| ([^|]+?) \|", section(api_text(), "### 5.1", "### 5.2"), re.M)
-    assert len(rows) == 24
+    assert len(rows) == 27
     constants = gvl_const()
     for name, type_name, value in rows:
         assert constants.get(name) == (type_name, value.strip()), f"{name}: {constants.get(name)}"
@@ -172,3 +172,143 @@ def test_known_renames_are_documented() -> None:
     for new_name in KNOWN_RENAMES.values():
         assert f"`{new_name}`" in api_text()
         assert f"`{new_name}`" in assumptions
+
+
+# ---------------------------------------------------------------------------
+# Объявления ФБ: публичный интерфейс (входы, выходы, VAR_IN_OUT) — контракт API.md и docs/fb
+# ---------------------------------------------------------------------------
+
+PUBLIC_SECTIONS = ("VAR_INPUT", "VAR_OUTPUT", "VAR_IN_OUT")
+_DIRECTIONS = {
+    "вход": "VAR_INPUT",
+    "вход (база)": "VAR_INPUT",
+    "выход": "VAR_OUTPUT",
+    "`VAR_IN_OUT`": "VAR_IN_OUT",
+    "`VAR_IN_OUT CONSTANT`": "VAR_IN_OUT CONSTANT",
+}
+
+
+def public_interface(text: str) -> dict[str, tuple[str, str, str]]:
+    """Имя -> (секция с модификаторами, тип, начальное значение) по секциям VAR_INPUT/OUTPUT/IN_OUT."""
+    result: dict[str, tuple[str, str, str]] = {}
+    for block in L.parse_var_blocks(text):
+        if block.keyword not in PUBLIC_SECTIONS:
+            continue
+        section = " ".join([block.keyword, *block.modifiers])
+        for decl in block.decls:
+            for name in decl.name_list:
+                result[name] = (section, norm(decl.type_text), norm(decl.init_text or ""))
+    return result
+
+
+def contract_fbs() -> dict[str, str]:
+    """Блоки ```st раздела API.md, начинающиеся с FUNCTION_BLOCK: имя -> текст блока."""
+    result: dict[str, str] = {}
+    for block in re.findall(r"```st\n(.*?)```", api_text(), re.S):
+        header = L.parse_header(block)
+        if header is not None and header.keyword == "FUNCTION_BLOCK" and header.name:
+            result[header.name] = block
+    return result
+
+
+def source_fbs() -> dict[str, L.StObject]:
+    return {
+        obj.name: obj
+        for obj in L.scan(REPO_ROOT, "src").objects
+        if obj.kind == L.KIND_POU and obj.header is not None and obj.header.keyword == "FUNCTION_BLOCK"
+    }
+
+
+def test_fb_declarations_match_api_doc() -> None:
+    """Блоки FUNCTION_BLOCK контракта: заголовок (ABSTRACT, EXTENDS, IMPLEMENTS) и публичные секции — имя,
+    тип и начальное значение — совпадают с исходниками. Их копируют потребители (iolistgen, заглушки тестов
+    проектов 02 и 07): правка только в коде или только в документе ловится здесь (F5)."""
+    contract = contract_fbs()
+    sources = source_fbs()
+    assert len(contract) == 14, sorted(contract)
+    for name, block in contract.items():
+        assert name in sources, f"{name}: ФБ из docs/API.md нет в src/"
+        header = L.parse_header(block)
+        source = sources[name]
+        assert header is not None and source.header is not None
+        assert list(header.modifiers) == list(source.header.modifiers), f"{name}: модификаторы"
+        assert list(header.extends) == list(source.header.extends), f"{name}: EXTENDS"
+        assert list(header.implements) == list(source.header.implements), f"{name}: IMPLEMENTS"
+        documented = public_interface(block)
+        actual = public_interface(source.decl)
+        assert documented == actual, (
+            f"{name}: публичный интерфейс отличается от docs/API.md: "
+            f"{sorted(set(documented.items()) ^ set(actual.items()))}"
+        )
+
+
+def inherited_interface(name: str, sources: dict[str, L.StObject]) -> dict[str, tuple[str, str, str]]:
+    """Публичный интерфейс ФБ с учётом базовых ФБ библиотеки (EXTENDS)."""
+    obj = sources[name]
+    result: dict[str, tuple[str, str, str]] = {}
+    assert obj.header is not None
+    for base in obj.header.extends:
+        if base in sources:
+            result.update(inherited_interface(base, sources))
+    result.update(public_interface(obj.decl))
+    return result
+
+
+def io_table_rows(fb_name: str) -> list[tuple[list[str], str, str]]:
+    """Строки таблицы «Входы и выходы» docs/fb/<ФБ>.md: (имена, секция, тип)."""
+    with open(os.path.join(REPO_ROOT, "docs", "fb", f"{fb_name}.md"), encoding="utf-8") as handle:
+        text = handle.read()
+    part = section(text, "## Входы и выходы", "\n## ")
+    rows: list[tuple[list[str], str, str]] = []
+    for line in part.splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 3 or cells[1] not in _DIRECTIONS:
+            continue
+        names = re.findall(r"`(\w+)`", cells[0])
+        type_match = re.fullmatch(r"`([^`]+)`", cells[2])
+        assert names and type_match, f"{fb_name}: строка таблицы не разобрана: {line}"
+        rows.append((names, _DIRECTIONS[cells[1]], norm(type_match.group(1))))
+    return rows
+
+
+DEVICE_DOCS = (
+    "FB_Alarm",
+    "FB_AnalogInput",
+    "FB_DigitalInput",
+    "FB_Motor",
+    "FB_MotorVfd",
+    "FB_Valve",
+    "FB_ControlValve",
+    "FB_PID",
+)
+
+
+def test_fb_io_tables_match_sources() -> None:
+    """docs/fb: каждая строка таблицы «Входы и выходы» — член ФБ (или его базы) с той же секцией и типом,
+    каждый собственный вход, выход и VAR_IN_OUT ФБ есть в таблице (F5)."""
+    sources = source_fbs()
+    for fb_name in DEVICE_DOCS:
+        interface = inherited_interface(fb_name, sources)
+        rows = io_table_rows(fb_name)
+        listed: set[str] = set()
+        for names, section_name, type_name in rows:
+            for name in names:
+                assert name in interface, f"docs/fb/{fb_name}.md: `{name}` нет среди членов ФБ"
+                actual_section, actual_type, _ = interface[name]
+                assert (section_name, type_name) == (actual_section, actual_type), (
+                    f"docs/fb/{fb_name}.md: `{name}` — {section_name} {type_name}, в src {actual_section} {actual_type}"
+                )
+                listed.add(name)
+        own = public_interface(sources[fb_name].decl)
+        missing = sorted(set(own) - listed)
+        assert not missing, f"docs/fb/{fb_name}.md: нет в таблице «Входы и выходы»: {missing}"
+
+
+def test_non_mask_constants_in_api_doc_table() -> None:
+    """Таблица 5.1 и в обратную сторону: каждая константа GVL_Const, которая не маска битов и не число
+    слотов тревог (*_ALARM_COUNT — таблица 10.4), описана в таблице 5.1 (F5)."""
+    rows = re.findall(r"^\| `(\w+)` \|", section(api_text(), "### 5.1", "### 5.2"), re.M)
+    for name in gvl_const():
+        if _MASK_RE.fullmatch("`" + name + "`") or name.endswith("_ALARM_COUNT"):
+            continue
+        assert name in rows, f"GVL_Const.{name} нет в таблице 5.1 docs/API.md"

@@ -48,6 +48,7 @@ stCmd.wUnshelveReq := 0;
 wAlmActive := 0;
 wAlmUnack := 0;
 wAlmShelved := 0;
+wAlmSuppressed := 0;
 ePrioUnack := E_AlarmPriority.None;
 FOR uiLoop := 1 TO uiUsed DO
     uiSlot := uiLoop - 1;
@@ -62,10 +63,12 @@ FOR uiLoop := 1 TO uiUsed DO
         wAlmUnack := wAlmUnack OR wBit;
         ePrioUnack := MAX(ePrioUnack, afbAlarm[uiSlot].AlarmPriority);
     END_IF
+    // наложенные состояния ISA-18.2 — раздельно (ALM-2): отложенные оператором (список отложенных тревог с
+    // остатком срока) и подавленные логикой; OutOfService слотов совпадает с режимом устройства (eMode)
     eSlotState := afbAlarm[uiSlot].State;
-    IF eSlotState = E_AlarmState.Shelved OR eSlotState = E_AlarmState.SuppressedByDesign
-       OR eSlotState = E_AlarmState.OutOfService
-    THEN
+    IF eSlotState = E_AlarmState.Shelved THEN
         wAlmShelved := wAlmShelved OR wBit;
+    ELSIF eSlotState = E_AlarmState.SuppressedByDesign THEN
+        wAlmSuppressed := wAlmSuppressed OR wBit;
     END_IF
 END_FOR

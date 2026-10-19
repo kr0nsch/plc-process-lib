@@ -54,3 +54,4 @@ PvNaNTreatedAsInvalid();
 SetAutoWithOosRequestOneCommand();
 ManualOutputClampedToLimits();
 SameTimestampNoCalcHoldsOutput();
+PvNaNEventAndStsFinite();

@@ -15,7 +15,8 @@ src/POUs/Devices/FB_AnalogInput/:
 
 Сценарии:
 - ``scale`` — масштабирование по типам входа (мА, Norm420, Norm01, Eng, Raw), корень и отсечка,
-  ограничение шкалой, экстраполяция вне 4–20 мА;
+  ограничение шкалой; в защитных полосах NE 43 (3,6…3,8 и 20,5…21 мА) — насыщение 3,8 / 20,5 мА без
+  экстраполяции (AI-13);
 - ``filter`` — реакция фильтра на ступень: одна постоянная времени (63,2 %), один и тот же интервал
   с разным шагом цикла, возврат сигнала после отказа (фильтр начинается заново), короткий провал
   (фильтр заморожен).
@@ -32,6 +33,8 @@ from dataclasses import dataclass
 
 MA_ZERO = 4.0
 MA_SPAN = 16.0
+NE43_MEAS_LOW_MA = 3.8  # GVL_Const.NE43_MEAS_LOW_MA
+NE43_MEAS_HIGH_MA = 20.5  # GVL_Const.NE43_MEAS_HIGH_MA
 PCT_FULL = 100.0
 
 
@@ -70,6 +73,11 @@ def scale(cfg: AiCfg, r_in: float) -> float:
         x = (r_in - raw_lo) / (to_real(cfg.raw_hi) - raw_lo)
     else:  # Norm420, Norm01
         x = r_in
+    if cfg.e_input in ("MilliAmp", "Norm420"):
+        # NE 43: значение не экстраполируется за насыщение 3,8 / 20,5 мА (AI-13)
+        x_lo = (to_real(NE43_MEAS_LOW_MA) - MA_ZERO) / MA_SPAN
+        x_hi = (to_real(NE43_MEAS_HIGH_MA) - MA_ZERO) / MA_SPAN
+        x = min(max(x, x_lo), x_hi)
     if cfg.sqrt:
         x = math.sqrt(max(x, 0.0))
     if cfg.low_cut_pct > 0.0 and x * PCT_FULL < to_real(cfg.low_cut_pct):
@@ -102,8 +110,10 @@ SCALE_SCENARIOS: list[tuple[str, AiCfg, float]] = [
     ("Eng 123,4, шкала -50..150", AiCfg(e_input="Eng", range_lo=-50.0, range_hi=150.0), 123.4),
     ("Raw 6000, 2000..10000 -> 0..16", AiCfg(e_input="Raw", range_hi=16.0, raw_lo=2000.0, raw_hi=10000.0), 6000.0),
     ("Raw 1000 (ниже RawLo)", AiCfg(e_input="Raw", range_hi=16.0, raw_lo=2000.0, raw_hi=10000.0), 1000.0),
-    ("3,7 мА, шкала 0..100 (экстраполяция)", AiCfg(), 3.7),
-    ("20,7 мА, шкала 0..100 (экстраполяция)", AiCfg(), 20.7),
+    ("3,7 мА, шкала 0..100 (насыщение NE 43)", AiCfg(), 3.7),
+    ("20,7 мА, шкала 0..100 (насыщение NE 43)", AiCfg(), 20.7),
+    ("3,61 мА, шкала 0..10 (насыщение NE 43)", AiCfg(range_hi=10.0), 3.61),
+    ("20,9 мА, шкала 0..10 (насыщение NE 43)", AiCfg(range_hi=10.0), 20.9),
     ("корень: 8 мА (25 % перепада), 0..100", AiCfg(sqrt=True), 8.0),
     ("корень: 4,032 мА (0,2 %), отсечка 5 %", AiCfg(sqrt=True, low_cut_pct=5.0), 4.032),
     ("корень: 4,16 мА (1 %), отсечка 5 %", AiCfg(sqrt=True, low_cut_pct=5.0), 4.16),

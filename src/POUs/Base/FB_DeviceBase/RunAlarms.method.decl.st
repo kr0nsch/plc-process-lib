@@ -1,5 +1,5 @@
 // Шаг 7 цикла: запросы тревог (квитировать всё, маски квитирования, shelve и unshelve), вызов
-// используемых слотов и сводка wAlmActive, wAlmUnack, wAlmShelved, ePrioUnack. Сбрасывает xAck,
+// используемых слотов и сводка wAlmActive, wAlmUnack, wAlmShelved, wAlmSuppressed, ePrioUnack. Сбрасывает xAck,
 // xReset и маски stCmd. Циклы — FOR uiLoop := 1 TO MIN(uiAlarmCount, DEV_ALARMS_MAX): при 0 слотов
 // беззнаковое «uiAlarmCount - 1» не возникает
 METHOD PROTECTED RunAlarms

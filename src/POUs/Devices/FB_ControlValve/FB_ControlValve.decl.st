@@ -32,7 +32,8 @@ VAR_OUTPUT
 END_VAR
 VAR
     stCfgLkg     : ST_ControlValveCfg;   // последняя корректная конфигурация (LKG, нормативно)
-    rRamp_pct    : REAL;                 // положение до плотного закрытия — состояние рампы, %
+    lrRamp_pct   : LREAL;                // положение до плотного закрытия — состояние рампы, % (LREAL, CV-14)
+    xTightAct    : BOOL;                 // плотное закрытие действует (с гистерезисом CV_TIGHT_HYST_PCT, CV-13)
     xRampingPrev : BOOL;                 // в прошлом вызове рампа была активна
     xDevLatched  : BOOL;                 // зафиксированный отказ рассогласования (xDevIsFault)
     wIlkPrev     : WORD;                 // блокировки после маски в прошлом вызове (первопричина)
@@ -63,7 +64,7 @@ VAR_TEMP
     xDevCond   : BOOL;                   // условие рассогласования до задержки
     xDevWarn   : BOOL;                   // рассогласование — предупреждение
     xManualCtl : BOOL;                   // выходом управляет оператор (Manual без блокировки и отказа)
-    xTight     : BOOL;                   // плотное закрытие
+    rTightOff  : REAL;                   // положение снятия плотного закрытия, %
     xInvert    : BOOL;                   // инверсия выхода мА
     wFltBits   : WORD;                   // wFault
     wWrnBits   : WORD;                   // wWarning

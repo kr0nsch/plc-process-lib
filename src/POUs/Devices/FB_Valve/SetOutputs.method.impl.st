@@ -7,8 +7,12 @@ ELSIF eState = E_ValveState.Closing OR (eState = E_ValveState.Closed AND eTarget
     eSolCmd := E_ValveState.Closed;
 END_IF
 xOutEn := xDrive AND eState <> E_ValveState.Fault;
-xQOpen := xOutEn AND xMotorized AND eState = E_ValveState.Opening;
-xQClose := xOutEn AND xMotorized AND eState = E_ValveState.Closing;
+//     аварийный ход в положение безопасности (VLV-20) — только при отказе (eState = Fault): с обычными выходами не
+//     пересекается
+xQOpen := (xOutEn AND xMotorized AND eState = E_ValveState.Opening)
+          OR (xSafeMove AND eSafeDir = E_ValveState.Opening);
+xQClose := (xOutEn AND xMotorized AND eState = E_ValveState.Closing)
+           OR (xSafeMove AND eSafeDir = E_ValveState.Closing);
 xQCoil := xOutEn AND ((stCfgLkg.eType = E_ValveType.SolenoidEto AND eSolCmd = E_ValveState.Open)
                       OR (stCfgLkg.eType = E_ValveType.SolenoidEtc AND eSolCmd = E_ValveState.Closed));
 xOpened := eState = E_ValveState.Open OR (eState = E_ValveState.Fault AND xAtOpen AND NOT xAtClose);

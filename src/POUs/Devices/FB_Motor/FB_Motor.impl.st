@@ -21,17 +21,27 @@ IF AcceptCfg(wErr := THIS^.CheckConfig(stCfgIn := stCfg)) THEN
     stCfgLkg := stCfg;
 END_IF
 
-// 2а. Обратная связь: из точки расширения или DI; недостоверная ОС удерживает xRunning
+// 2а. Обратная связь: из точки расширения или DI. Короткий провал недостоверной ОС удерживает xRunning (M-18);
+//     без питания или после подтверждённого отказа связи (xCommFault) устаревшая ОС работу не означает — двигатель
+//     считается остановленным: Running, бит RUNNING и счётчики по ней не идут (VFD-11)
 IF xFbOverride THEN
     xFbNow := xFbOverrideValue;
 ELSE
     xFbNow := xFbRun;
 END_IF
+xFbAssumedOff := stCfgLkg.xFbUsed AND xFbInvalid AND (NOT xPowerOk OR xCommFault);
+xFbRegain := xFbStale AND NOT xFbInvalid;
 xFbOn := stCfgLkg.xFbUsed AND NOT xFbInvalid AND xFbNow;
-xFbOff := NOT stCfgLkg.xFbUsed OR (NOT xFbInvalid AND NOT xFbNow);
+xFbOff := NOT stCfgLkg.xFbUsed OR (NOT xFbInvalid AND NOT xFbNow) OR xFbAssumedOff;
+IF xFbAssumedOff AND NOT xFbStale THEN
+    xFbStaleRun := xRunning;
+END_IF
+xFbStale := xFbAssumedOff OR (xFbStale AND xFbInvalid);
 IF stCfgLkg.xFbUsed THEN
     IF NOT xFbInvalid THEN
         xRunning := xFbNow;
+    ELSIF xFbAssumedOff THEN
+        xRunning := FALSE;
     END_IF
 ELSE
     // без ОС — по команде; уточняется после автомата состояний
@@ -230,8 +240,9 @@ IF xRemote THEN
         eState := E_MotorState.Fault;
         xManualRun := FALSE;
     ELSE
-        IF eState = E_MotorState.Fault THEN
-            // отказ снят (Reset или восстановилась связь с ПЧ): состояние — по ОС
+        IF eState = E_MotorState.Fault OR (xFbRegain AND eState = E_MotorState.Stopped) THEN
+            // отказ снят (Reset или восстановилась связь с ПЧ) или ОС снова достоверна после «считался
+            // остановленным» (VFD-11): состояние — по ОС
             IF xFbOff THEN
                 eState := E_MotorState.Stopped;
             ELSIF xFbOn AND xRunReq AND NOT xForceStop AND xPowerOk THEN
@@ -256,6 +267,7 @@ IF xRemote THEN
             eState := E_MotorState.Starting;
             xEnteredStarting := TRUE;
             xAdoptPending := FALSE;
+            xFbStaleRun := FALSE;
             fbStarts.Register(ltNow := ltNow);
             uiFirstOut := GVL_Const.NO_FIRST_OUT;
         END_IF
@@ -360,8 +372,11 @@ IF xRunCountPrev THEN
         udiRunCurrent_s := udiRunCurrent_s + udiWhole;
     END_IF
 END_IF
-// подхват после старта ПЛК — не пуск; пуск в том же вызове (без ОС) — пуск
-IF xRunCount AND NOT xRunCountPrev AND (NOT xAdoptNow OR xEnteredStarting) THEN
+// подхват после старта ПЛК и работа, найденная по вернувшейся ОС (двигатель работал до её устаревания, пуска ПЛК
+// не было, VFD-11), — не пуск; пуск в том же вызове (без ОС) — пуск
+IF xRunCount AND NOT xRunCountPrev
+   AND (NOT (xAdoptNow OR (xFbRegain AND xFbStaleRun)) OR xEnteredStarting)
+THEN
     stRetain.udiOpCount := stRetain.udiOpCount + 1;
     stRetain.udiOpCountMaint := stRetain.udiOpCountMaint + 1;
     udiRunCurrent_s := 0;
@@ -374,6 +389,9 @@ IF NOT xRunCount THEN
     udiRunCurrent_s := 0;
 END_IF
 xRunCountPrev := xRunCount;
+IF xFbRegain THEN
+    xFbStaleRun := FALSE;
+END_IF
 // пауза tMinStop отсчитывается от первого вызова без команды и без работы по ОС
 IF xRunCmd OR xRunning OR xRunOrCmdPrev THEN
     ltStopMark := ltNow;

@@ -11,7 +11,7 @@ AssertTrue(Condition := fbDi.Mode = E_DeviceMode.OutOfService, Message := 'out o
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'state slot out of service');
 itfAlm := fbDi.GetAlarm(uiIndex := E_DiAlarm.Failure);
 AssertTrue(Condition := itfAlm.State = E_AlarmState.OutOfService, Message := 'failure slot out of service');
-AssertEquals_WORD(Expected := 16#0003, Actual := fbDi.stSts.stCommon.wAlmShelved, Message := 'both slots shelved bits');
+AssertEquals_WORD(Expected := 0, Actual := fbDi.stSts.stCommon.wAlmShelved, Message := 'OOS is not shelving (ALM-2)');
 AssertTrue(Condition := fbDi.xValue, Message := 'value held');
 AssertFalse(Condition := fbDi.xValid, Message := 'invalid in OOS');
 AssertTrue(Condition := fbDi.Status = E_Ne107Status.CheckFunction, Message := 'CheckFunction');

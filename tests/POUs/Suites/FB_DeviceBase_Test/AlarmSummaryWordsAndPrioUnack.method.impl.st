@@ -19,8 +19,9 @@ AssertEquals_WORD(Expected := 16#0005, Actual := fbDev.stSts.stCommon.wAlmUnack,
                   Message := 'slots 0 and 2 unacknowledged');
 fbDev.axSuppressIn[0] := TRUE;
 fbDev(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
-AssertEquals_WORD(Expected := 16#0001, Actual := fbDev.stSts.stCommon.wAlmShelved,
-                  Message := 'suppressed slot 0 in wAlmShelved');
+AssertEquals_WORD(Expected := 16#0001, Actual := fbDev.stSts.stCommon.wAlmSuppressed,
+                  Message := 'suppressed slot 0 in wAlmSuppressed');
+AssertEquals_WORD(Expected := 0, Actual := fbDev.stSts.stCommon.wAlmShelved, Message := 'suppression is not shelving');
 AssertEquals_WORD(Expected := 16#0004, Actual := fbDev.stSts.stCommon.wAlmUnack,
                   Message := 'suppression clears unacknowledged');
 

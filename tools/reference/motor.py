@@ -4,7 +4,8 @@
 Только стандартная библиотека Python 3.11+ и tools/reference/common.py. Каждое число, которое тест
 берёт отсюда, помечено в комментарии теста: «источник: tools/reference/motor.py, сценарий <имя>».
 Модель повторяет арифметику ФБ (docs/fb/FB_Motor.md, docs/fb/FB_MotorVfd.md), а не логику
-автомата состояний: время — целые наносекунды (как LTIME), задание скорости — REAL (float32).
+автомата состояний: время — целые наносекунды (как LTIME), состояние рампы задания скорости — LREAL
+(F_RateLimitLr, VFD-13), задание на выходе — REAL (float32).
 
 Сценарии:
 - ``run_*`` — наработка: накопитель по шагам времени ltDt (не больше DT_ACCUM_MAX = 10 с),
@@ -13,7 +14,7 @@
 - ``inhibit_*`` — остаток запрета пуска uiInhibitRemain_s: MAX(остаток tMinStop, TimeToFree окна
   пусков) в секундах с округлением вверх, не больше UINT_MAX;
 - ``starts_limit_3`` — лимит пусков в час (окно FB_StartsWindow — common.window_time_to_free);
-- ``ramp_*`` — задание ПЧ: F_RateLimit по шагам (common.rate_limit) с округлением до REAL;
+- ``ramp_*`` — задание ПЧ: F_RateLimitLr по шагам (common.rate_limit) в LREAL, на выходе — REAL;
 - ``maint_runtime`` — порог ТО по наработке: udiMaintInterval_h * S_PER_H.
 
 Запуск: ``python tools/reference/motor.py`` печатает все сценарии.
@@ -103,11 +104,11 @@ def inhibit_remain_s(min_stop_s: float, since_stop_s: float, time_to_free_s: flo
 
 
 def ramp(start: float, target: float, rate_up: float, rate_down: float, dt_s: float, steps: int) -> float:
-    """Задание после steps вызовов с шагом dt_s: F_RateLimit, результат каждого шага — REAL."""
+    """Задание после steps вызовов с шагом dt_s: F_RateLimitLr — состояние в LREAL, на выходе REAL (VFD-13)."""
     value = to_real(start)
     for _ in range(steps):
-        value = to_real(common.rate_limit(value, to_real(target), rate_up, rate_down, dt_s))
-    return value
+        value = common.rate_limit(value, to_real(target), to_real(rate_up), to_real(rate_down), dt_s)
+    return to_real(value)
 
 
 # ---------------------------------------------------------------------------
@@ -158,8 +159,8 @@ SCENARIOS: dict[str, float] = {
     # FB_MotorVfd_Test.StartPresetsRampToMin: min 30 %, рост 10 %/с, цель 80 %, один шаг 100 мс
     "start_preset_first_step": ramp(30.0, 80.0, 10.0, 0.0, 0.1, 1),
     "start_preset_after_1s": ramp(30.0, 80.0, 10.0, 0.0, 0.1, 10),
-    # FB_MotorVfd_Test.SpeedDeviationDuringRampIgnored: рост 1 %/с с 0 %, 200 шагов по 100 мс (REAL копит
-    # погрешность шага 0,1: 20.00004, в тесте допуск 1E-3)
+    # FB_MotorVfd_Test.SpeedDeviationDuringRampIgnored: рост 1 %/с с 0 %, 200 шагов по 100 мс (до VFD-13 состояние
+    # в REAL копило погрешность шага 0,1: 20.00004; в LREAL — 20.0; в тесте допуск 1E-3)
     "ramp_slow_20s": ramp(0.0, 50.0, 1.0, 0.0, 0.1, 200),
 }
 

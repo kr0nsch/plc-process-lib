@@ -37,3 +37,5 @@ ShelveRequestThenOosRejected();
 PriorityNoneCancelsShelve();
 PriorityReenabledOnDelayCountsFromEnabling();
 AckWithoutEffectNotKeptForLater();
+PriorityNoneWhileActiveEmitsClosingEvent();
+NonFiniteValueEventValueFinite();

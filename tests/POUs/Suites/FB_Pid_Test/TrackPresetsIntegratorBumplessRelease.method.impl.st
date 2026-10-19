@@ -26,6 +26,7 @@ AssertEquals_REAL(Expected := 25.0, Actual := fbPid.rOut_pct, Delta := 1.0E-4, M
 // ref: track.i_track
 AssertEquals_REAL(Expected := 19.0, Actual := fbPid.stSts.rI_pct, Delta := 1.0E-4, Message := 'I preset = 25 - 6');
 AssertEquals_REAL(Expected := 25.0, Actual := stCmd.rManualOut_pct, Delta := 1.0E-4, Message := 'Cmd tracks output');
+AssertFalse(Condition := fbPid.Available, Message := 'not available while tracking, PV valid in Auto');
 fbPid.xTrack := FALSE;
 fbTime.Advance(tStep := T#100MS);
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);       // слежение снято
@@ -40,4 +41,5 @@ AssertEquals_REAL(Expected := 25.0, Actual := rOutRel, Delta := 1.0E-4, Message 
 AssertEquals_REAL(Expected := 25.6, Actual := fbPid.rOut_pct, Delta := 1.0E-4, Message := 'then integral action');
 AssertEquals_WORD(Expected := 0, Actual := fbPid.stSts.stCommon.wStatus AND GVL_Const.PID_STS_TRACKING,
                   Message := 'TRACKING cleared');
+AssertTrue(Condition := fbPid.Available, Message := 'available after release');
 coUnit.TEST_FINISHED();

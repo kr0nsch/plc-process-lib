@@ -17,9 +17,9 @@ STRUCT
     uiCmdSeq    : UINT;              // +1 на каждую обработанную команду (по кругу)
     wAlmActive  : WORD;              // бит i: условие тревоги слота i активно (после задержек)
     wAlmUnack   : WORD;              // бит i: тревога слота i не квитирована
-    wAlmShelved : WORD;              // бит i: слот в Shelved, SuppressedByDesign или OutOfService
+    wAlmShelved : WORD;              // бит i: слот отложен оператором (Shelved, ISA-18.2)
     ePrioUnack  : E_AlarmPriority := E_AlarmPriority.None;   // наивысший приоритет среди неквитированных
     eDevType    : E_DeviceType := E_DeviceType.None;         // тип устройства
-    wReserve    : WORD;              // резерв; держит размер кратным 4 байтам
+    wAlmSuppressed : WORD;           // бит i: слот подавлен логикой (SuppressedByDesign); размер кратен 4 байтам
 END_STRUCT
 END_TYPE

@@ -28,6 +28,6 @@ FOR iStep := 1 TO 10 DO
     fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 END_FOR
 // источник: tools/reference/valve_reference.py, сценарий cv_positioner (100 -> 40, 2 %/s, 1.0 s)
-AssertEquals_REAL(Expected := 98.00003, Actual := fbCv.rOut_pct, Delta := 1.0E-4, Message := '98 % after 1 s');
+AssertEquals_REAL(Expected := 98.0, Actual := fbCv.rOut_pct, Delta := 1.0E-4, Message := '98 % after 1 s');
 
 coUnit.TEST_FINISHED();

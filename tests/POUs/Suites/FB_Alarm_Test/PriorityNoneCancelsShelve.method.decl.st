@@ -1,5 +1,5 @@
-// Выключение тревоги (приоритет None) снимает действующий shelve: Normal без события, xShelved =
-// FALSE, остаток 0. После включения при активном условии — Activated (ActiveUnack), а не Shelved:
+// Выключение тревоги (приоритет None) снимает действующий shelve: Normal с событием Disabled (ALM-1),
+// xShelved = FALSE, остаток 0. После включения при активном условии — Activated (ActiveUnack), а не Shelved:
 // shelve выключенной тревоги не «доживает» до её включения. Контракт 10.2, F-21 (б)
 METHOD PRIVATE PriorityNoneCancelsShelve
 VAR

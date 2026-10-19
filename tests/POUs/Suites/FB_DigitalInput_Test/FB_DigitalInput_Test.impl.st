@@ -17,3 +17,4 @@ ChannelFaultDuringOnDelayRestartsDelay();
 SubstitutionRenewedAfterTimeoutCountsFullPeriod();
 AlarmEventsValueIsZeroOrOne();
 ChannelFaultRecoveredForcedValueReleasedThroughDelay();
+SubstitutionUnlimitedNoTimeout();

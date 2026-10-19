@@ -29,8 +29,14 @@ AssertEquals_REAL(Expected := 0.0, Actual := fbCv.rOut_pct, Delta := 0.0, Messag
 fbTime.Advance(tStep := T#500MS);
 // 5,0 с
 fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
-AssertEquals_REAL(Expected := 5.0, Actual := fbCv.rOut_pct, Delta := 1.0E-4, Message := 'ramp reached threshold');
-FOR iStep := 11 TO 20 DO                                                // 10,0 с
+// источник: tools/reference/valve_reference.py, сценарий cv_tight_ramp (out 5.0 s, out 6.0 s); гистерезис CV-13
+AssertEquals_REAL(Expected := 0.0, Actual := fbCv.rOut_pct, Delta := 0.0, Message := 'at threshold: still tight shut');
+FOR iStep := 11 TO 12 DO                                                // 6,0 с
+    fbTime.Advance(tStep := T#500MS);
+    fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
+END_FOR
+AssertEquals_REAL(Expected := 6.0, Actual := fbCv.rOut_pct, Delta := 1.0E-4, Message := 'released at +1 pct');
+FOR iStep := 13 TO 20 DO                                                // 10,0 с
     fbTime.Advance(tStep := T#500MS);
     fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 END_FOR

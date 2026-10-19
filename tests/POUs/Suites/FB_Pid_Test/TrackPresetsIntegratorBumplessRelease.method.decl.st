@@ -1,6 +1,6 @@
 // Слежение в Auto (Kp = 2, Ti = 10 с, нижний предел 10 %): выход = rTrack_pct без пределов (0 %),
 // интегратор I = u - P - D, бит TRACKING, Cmd следит за выходом; после снятия xTrack выход
-// продолжается с 25 % без рывка.
+// продолжается с 25 % без рывка. Available = FALSE при слежении (PV годна, Auto), TRUE после снятия.
 METHOD PRIVATE TrackPresetsIntegratorBumplessRelease
 VAR
     fbTime    : FB_FakeTime;       // подменное время, старт 1 ч

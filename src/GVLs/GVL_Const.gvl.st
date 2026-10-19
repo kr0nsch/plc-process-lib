@@ -45,6 +45,11 @@ VAR_GLOBAL CONSTANT
     PID_DFILTER_N_MAX    : REAL := 50.0;           // допустимый rDFilterN, верхняя граница
     PID_DEADBAND_MAX_PCT : REAL := 10.0;           // предел зоны нечувствительности, %
 
+    // --- параметры устройств вне Cfg (Cfg заморожена в 1.x, A-13; кандидаты в поля Cfg 2.0) ---
+    VLV_UNSEAT_BYPASS    : TIME := T#2S;           // FB_Valve: страгивание с седла без контроля муфты
+    CV_TIGHT_HYST_PCT    : REAL := 1.0;            // FB_ControlValve: гистерезис снятия плотного закрытия, %
+    VFD_POWER_UP_DELAY   : TIME := T#10S;          // FB_MotorVfd: готовность ПЧ к обмену после возврата питания
+
     // --- число используемых слотов тревог по типам (uiAlarmCount в первом вызове) ---
     AI_ALARM_COUNT       : UINT := 6;              // FB_AnalogInput: HH, H, L, LL, Failure, OutOfRange
     DI_ALARM_COUNT       : UINT := 2;              // FB_DigitalInput: State, Failure

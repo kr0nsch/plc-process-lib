@@ -18,10 +18,13 @@ ELSE
 END_IF
 
 IF ePrioAct = E_AlarmPriority.None THEN
-    // 3. Тревога выключена: Normal без события, все выходы FALSE, udiSeq не меняется, запросы
-    //    и shelve снимаются. Отсчёт задержки начнётся заново после включения приоритета
+    // 3. Тревога выключена: Normal, все выходы FALSE, запросы и shelve снимаются. Если тревога была не в
+    //    Normal — один переход с событием Disabled (ALM-1): журнал и сводка по событиям закрывают её; дальше
+    //    событий нет. Отсчёт задержки начнётся заново после включения приоритета
     fbDelay.Preset(xValue := FALSE);
-    eState := E_AlarmState.Normal;
+    IF eState <> E_AlarmState.Normal THEN
+        Transit(eNew := E_AlarmState.Normal, eReason := E_AlarmEventReason.Disabled);
+    END_IF
     xActive := FALSE;
     xShelved := FALSE;
     xAckReq := FALSE;

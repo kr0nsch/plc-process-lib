@@ -1,5 +1,5 @@
 SUPER^.OnModeChanged(eOld := eOld, eNew := eNew);
-rRamp_pct := rOut_pct;
+lrRamp_pct := REAL_TO_LREAL(rOut_pct);
 IF eNew = E_DeviceMode.OutOfService THEN
     xDevLatched := FALSE;
     fbDev.Preset(xValue := FALSE);

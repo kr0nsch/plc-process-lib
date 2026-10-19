@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Статус | **Контракт.** Команды, которые пишут код параллельно, опираются только на этот документ. Изменения вносятся через PR в этот файл с записью в «Журнал изменений» (раздел 26) |
-| Версия | 1.0.0, 2026-10-16 — реализация всех семейств и интеграция; отличия от 1.0.0-rc2 — [раздел 0, «Отклонения от rc2»](#отклонения-от-rc2). rc2 — проверка реализуемости в 3.5.17 и потребностей проектов 02/07 ([Проверено компиляцией и на рантайме](#проверено-компиляцией-и-на-рантайме)) |
+| Версия | 1.0.0, 2026-10-16 — реализация всех семейств и интеграция; отличия от 1.0.0-rc2 — [раздел 0, «Отклонения от rc2»](#отклонения-от-rc2); исправления по ревью перед выпуском — [«Изменения по ревью перед выпуском»](#изменения-по-ревью-перед-выпуском). rc2 — проверка реализуемости в 3.5.17 и потребностей проектов 02/07 ([Проверено компиляцией и на рантайме](#проверено-компиляцией-и-на-рантайме)) |
 | Платформа | CODESYS V3.5 SP17 Patch 3 (3.5.17.30). Таргет — ОВЕН ПЛК210, без железа — CODESYS Control Win V3 |
 | Пространство имён | `PL` (Project Information → Default namespace) |
 | Тесты | coUnit 1.2.0.0 (бывший CfUnit), namespace `coUnit` |
@@ -84,6 +84,33 @@
 | P-15 | 17.5 | слот 0 PvInvalid: `NOT xPvValid AND eMode = Auto` | после `ShedToManual` тревога держится и в Manual, пока PV негодна; признак снимают годная PV и OutOfService (иначе тревоги при `ShedToManual` не было бы никогда) |
 | P-16 | 17.5 | цель не конечна → прежняя цель | удерживаемая цель тоже ограничивается `rSpMin_eu…rSpMax_eu` |
 
+### Изменения по ревью перед выпуском
+
+Три независимых ревью выпуска (стандарты NE 43, NE 107, ISA-18.2 и практика арматуры; ПО и мутации тестов;
+потребители — проекты 02 и 07), 19.10.2026. Каждое изменение сначала воспроизведено тестом, который падал до
+исправления; подробности и обоснования — [ASSUMPTIONS.md](ASSUMPTIONS.md) по номеру, все находки —
+[TEST_REPORT.md](TEST_REPORT.md#ревью-перед-выпуском-находки-и-мутации).
+
+| № | Раздел | Было | Стало |
+|---|---|---|---|
+| AI-13 | 11.3 | ток 3,6…3,8 и 20,5…21 мА — значение экстраполируется, `xValid = TRUE` | значение — насыщение NE 43 (3,8 / 20,5 мА), без экстраполяции; подтверждённый выход за диапазон (`xOor`) — `xValid = FALSE`; уставки считаются |
+| F-30 | 2.2, 2.5 | Local — вклад в NE 107 «—» (Good) | Local — `CheckFunction` (местное управление, категория C) |
+| F-31 | 4.1, 10.2 | приоритет None — Normal без события | тревога не в Normal закрывается событием `Disabled` (новое значение `E_AlarmEventReason`) |
+| F-32 | 4.2, 10.5 | `wAlmShelved` — Shelved, SuppressedByDesign и OutOfService; `wReserve` | `wAlmShelved` — только Shelved; `wAlmSuppressed` (бывший `wReserve`, раскладка та же) — только SuppressedByDesign; OutOfService — по `eMode` |
+| F-33 | 10.3, 14, 16, 17 | значение процесса в событии и Sts могло быть NaN | `ST_AlarmEvent.rValue` и поля Sts ПИД, клапана, ПЧ конечны (NaN, ±Inf → 0.0); сырое — только `stSts.rIn` AI |
+| VFD-09, VFD-10 | 14.3 | подхват — задание от 0; пуск в провал связи — предустановка терялась | подхват — задание от фактической скорости (в Manual — и задание оператора); предустановки ждут связи |
+| VFD-11 | 13.2, 13.7, 13.8 | недостоверная ОС удерживает `xRunning` бессрочно | без питания или после отказа связи — «не работает»: счётчики, `Running` и бит RUNNING стоят |
+| VFD-12 | 14.4, 21.1 | без питания станции — отказ связи каждого ПЧ | без питания и `VFD_POWER_UP_DELAY` после его возврата связь не контролируется |
+| VFD-13, CV-14 | 14.3, 16.3 | рампы ПЧ и клапана — состояние в REAL | состояние рампы в LREAL (`F_RateLimitLr`, 8.1) |
+| CV-13 | 16.3 | плотное закрытие без гистерезиса | снимается на `rTightShut_pct + CV_TIGHT_HYST_PCT` |
+| VLV-20 | 2.4, 2.6, 15.4 | при любом отказе блокировка задвижку не двигала | при одних отказах контроля — аварийный ход в положение безопасности |
+| VLV-21 | 15.4 | муфта открытия при страгивании с седла — TorqueTrip | при страгивании (ZSC замкнут, `tLimitFilter` после размыкания, не дольше `VLV_UNSEAT_BYPASS`) не контролируется |
+| I-11, I-13 | 18.3, 19 | `docs/alarm_templates.csv` не было; ПИД в `GVL_Persist` без типа генератора | шаблоны есть; Pid — тип устройства iolistgen, данные приложения — `persist_extra` ([CONSUMERS.md](CONSUMERS.md)) |
+
+Новые константы `GVL_Const` (5.1): `VLV_UNSEAT_BYPASS`, `CV_TIGHT_HYST_PCT`, `VFD_POWER_UP_DELAY` — параметры вне
+Cfg, потому что типы Cfg заморожены в 1.x (A-13). Новая функция `F_RateLimitLr` (8.1), защищённый метод
+`FB_Valve.SafeMoveOnFault` (22.4). Энергонезависимые типы не менялись.
+
 **Реализация сверх контракта (не API).** Защищённые методы-шаги, которых нет в 22.4, — деталь
 реализации: их имена зарезервированы так же, как переменные базы (повтор имени в наследнике — C0097),
 вызывать их потребителю не нужно ([22.4](#224-srcpous)).
@@ -151,7 +178,7 @@ GVL_IO.xP101_QRun := GVL_Devices.fbP101.xQRun;
 |---|---|---|---|---|---|
 | `Auto` | `xSetAuto` / `RequestMode(Auto)` | да, по запросам автоматики | да | да | — |
 | `Manual` | `xSetManual`, «Стоп» в Auto, `RequestMode(Manual)` | да, по командам оператора | да | да | AI/DI: подмена → `CheckFunction` |
-| `Local` | аппаратный переключатель `xLocal = TRUE` | нет: выходы сняты, ПЛК следит за ОС | только внешняя авария | да | — |
+| `Local` | аппаратный переключатель `xLocal = TRUE` | нет: выходы сняты, ПЛК следит за ОС | только внешняя авария | да | `CheckFunction` (местное управление, F-30) |
 | `OutOfService` | `xSetOos` / `RequestMode(OutOfService)` | нет (выход в безопасном состоянии; CV и PID — удержание) | нет | все слоты в состоянии `OutOfService` | `CheckFunction` |
 
 - Приоритет: `OutOfService` > `Local` > дистанционный (`Auto`/`Manual`).
@@ -183,7 +210,7 @@ GVL_IO.xP101_QRun := GVL_Devices.fbP101.xQRun;
 |---|---|---|---|---|
 | Отказ механизма | нет ОС пуска, пропала ОС в работе, не остановился, самопроизвольный пуск, внешняя авария, не дошла арматура, муфта в ходе, уход с концевика | да | Reset при снятой причине (окно `tResetWindow`) | безопасное состояние, пуск запрещён, `Failure` |
 | Отказ сигнала или связи | обрыв 4–20 мА, отказ канала, NaN, потеря связи с ПЧ, «оба концевика», отказ позиционера | нет | сам, когда причина ушла | удержание значения или безопасное состояние, `Failure`; тревога остаётся `RtnUnack` до квитирования |
-| Защитная блокировка | бит `wInterlock` под маской | нет | — | останов / положение безопасности в Auto и Manual; первопричина в `uiFirstOut` |
+| Защитная блокировка | бит `wInterlock` под маской | нет | — | останов / положение безопасности в Auto и Manual; первопричина в `uiFirstOut`. Задвижка с приводом идёт в положение безопасности и при отказе средств контроля (концевики, таймаут хода), но не при неисправном приводе (VLV-20) |
 | Нет разрешения | бит `wPermit…` под маской | нет | — | пуск или движение запрещены, работающий механизм не останавливается |
 | Нет напряжения | `xPowerOk = FALSE` | нет | — | останов без отказа, ручной запрос снимается, после восстановления — пауза `tMinStop` (двигатель) |
 | Неверная Cfg | `wCfgErr <> 0` | нет | исправить Cfg | раздел 2.3 |
@@ -194,7 +221,7 @@ GVL_IO.xP101_QRun := GVL_Devices.fbP101.xQRun;
 
 `eNe107 := MAX(eDevStatus, eModeStatus, eCfgStatus)` (порядок значений — раздел 4.1):
 - `eDevStatus` — от логики устройства (F, S, M);
-- `eModeStatus` — `CheckFunction` в `OutOfService`, а у AI/DI ещё и в `Manual` (подмена); иначе `Good`;
+- `eModeStatus` — `CheckFunction` в `OutOfService` и `Local` (механизмом управляют с места, выход ПЛК не действует: категория C NE 107, статус PA «function check / local override», F-30), а у AI/DI ещё и в `Manual` (подмена); иначе `Good`;
 - `eCfgStatus` — `CheckFunction`, если `wCfgErr <> 0` или `NOT xCfgEverOk`.
 
 `I_Device.Fault` = (`eNe107 = Failure`). Выведенное из работы устройство с отказом показывает `Failure`: режим виден отдельно в `eMode`.
@@ -207,7 +234,7 @@ GVL_IO.xP101_QRun := GVL_Devices.fbP101.xQRun;
 | `FB_AnalogInput` | `rValue_eu := 0.0`, `xValid := FALSE`, флаги уставок FALSE | подтверждён: `HoldLast` или `rFailValue_eu`, `xValid := FALSE` | удержание, `xValid := FALSE` | — |
 | `FB_DigitalInput` | `xValue := FALSE`, `xValid := FALSE` | канал: по `eFailValue`, `xValid := FALSE` | удержание, `xValid := FALSE` | — |
 | `FB_Motor`, `FB_MotorVfd` | `xQRun := FALSE`, `rSpeedRef_pct := 0` | выходы сняты | выходы сняты | выходы сняты |
-| `FB_Valve` | выходы сняты: привод стоит, катушка обесточена (положение пружины) | то же | то же | то же |
+| `FB_Valve` | выходы сняты: привод стоит, катушка обесточена (положение пружины) | то же; при блокировке и одних отказах контроля задвижка с приводом идёт в `eSafePos` (VLV-20) | то же | то же |
 | `FB_ControlValve` | `rOut_pct := LIMIT(0, rSafePos_pct, 100)` (NaN → 0) | `eFaultAction`: `SafePos` → `rSafePos_pct` без рампы; `Hold` → удержание | удержание | следит за ОС |
 | `FB_PID` | расчёта нет, `rOut_pct := LIMIT(0, stCmd.rManualOut_pct, 100)` | PV негодна: `ePvFailAction` | удержание | — |
 
@@ -458,7 +485,8 @@ TYPE E_AlarmEventReason :
     Suppressed    := 7,
     Unsuppressed  := 8,
     OosOn         := 9,
-    OosOff        := 10
+    OosOff        := 10,
+    Disabled      := 11    // тревога выключена приоритетом None: закрывающее событие (F-31)
 ) INT;
 END_TYPE
 ```
@@ -509,14 +537,17 @@ STRUCT
     uiCmdSeq    : UINT;              // +1 на каждую обработанную команду (по кругу)
     wAlmActive  : WORD;              // бит i: условие тревоги слота i активно (после задержек)
     wAlmUnack   : WORD;              // бит i: тревога слота i не квитирована
-    wAlmShelved : WORD;              // бит i: слот в Shelved, SuppressedByDesign или OutOfService
+    wAlmShelved : WORD;              // бит i: слот отложен оператором (Shelved, ISA-18.2)
     ePrioUnack  : E_AlarmPriority := E_AlarmPriority.None;   // наивысший приоритет среди неквитированных
     eDevType    : E_DeviceType := E_DeviceType.None;         // тип устройства (4.1)
-    wReserve    : WORD;              // резерв; держит размер кратным 4 байтам (4.6)
+    wAlmSuppressed : WORD;           // бит i: слот подавлен логикой (SuppressedByDesign); размер кратен 4 байтам (4.6)
 END_STRUCT
 END_TYPE
 ```
 Все 14 полей 16-битные: 28 байт, 14 регистров Modbus подряд. `SIZEOF = 28` подтверждён зондом Q14.
+Наложенные состояния ISA-18.2 видны раздельно (F-32): `wAlmShelved` — отложенные оператором (список отложенных с
+остатком срока), `wAlmSuppressed` — подавленные логикой; OutOfService слотов совпадает с режимом устройства и
+виден по `eMode`. Поле `wAlmSuppressed` в 1.0.0-rc2 было резервом `wReserve` — раскладка и размер те же.
 
 ### 4.3 Энергонезависимые данные устройства
 
@@ -636,6 +667,9 @@ END_TYPE
 | `PID_DEADBAND_MAX_PCT` | REAL | 10.0 | предел зоны нечувствительности |
 | `REAL_EXP_MASK` | DWORD | 16#7F800000 | биты экспоненты REAL (`F_IsFinite`) |
 | `WORD_LOW_BYTE` | WORD | 16#00FF | младший байт `wStatus` (`FinishCycle`) |
+| `VLV_UNSEAT_BYPASS` | TIME | T#2S | `FB_Valve`: муфта открытия при страгивании с седла не контролируется не дольше этого (VLV-21; сверить с паспортом привода) |
+| `CV_TIGHT_HYST_PCT` | REAL | 1.0 | `FB_ControlValve`: гистерезис снятия плотного закрытия, % (CV-13; сверить с паспортом позиционера) |
+| `VFD_POWER_UP_DELAY` | TIME | T#10S | `FB_MotorVfd`: после возврата питания связь с ПЧ не контролируется — ПЧ загружается (VFD-12; сверить с паспортом ПЧ) |
 
 Маски битов (тип `WORD`, значение = 2^бит) объявлены в той же GVL. Имена — по правилу `<ПРЕФИКС>_<СЛОВО>_<ИМЯ>`. Префиксы: `DEV` (общие), `AI`, `DI`, `MOT`, `VLV`, `CV`, `PID`. Слова: `STS` (`wStatus`), `FLT` (`wFault`), `WRN` (`wWarning`), `CFG` (`wCfgErr`). Полный список — в картах битов разделов 9–17.
 Пример: `AI_STS_HH : WORD := 16#0001;`, `DEV_STS_FAILURE : WORD := 16#2000;`.
@@ -837,6 +871,7 @@ stateDiagram-v2
 | `F_IsFinite` | `FUNCTION F_IsFinite : BOOL` + `VAR_INPUT rIn : REAL;` | FALSE для NaN и ±Inf (биты экспоненты через `U_RealBits`, маска `GVL_Const.REAL_EXP_MASK = 16#7F800000`) и для `ABS(rIn) > REAL_SANE_MAX` |
 | `F_Ne107Worst` | `FUNCTION F_Ne107Worst : E_Ne107Status` + `VAR_INPUT eA, eB : E_Ne107Status;` | `MAX(eA, eB)` (зонд P13) |
 | `F_RateLimit` | `FUNCTION F_RateLimit : REAL` + `VAR_INPUT rCurrent, rTarget, rRateUp_ups, rRateDown_ups : REAL; lrDt_s : LREAL;` | `lrDt_s <= 0` или `rTarget` не конечно → `rCurrent`. Рост ограничен `rRateUp_ups·dt`, спад — `rRateDown_ups·dt`; скорость 0 → без ограничения. «Up» — рост значения |
+| `F_RateLimitLr` | `FUNCTION F_RateLimitLr : LREAL` + `VAR_INPUT lrCurrent : LREAL; rTarget, rRateUp_ups, rRateDown_ups : REAL; lrDt_s : LREAL;` | то же, но текущее значение и результат — `LREAL`: приращение медленной рампы при коротком цикле не теряется округлением до `REAL` (рампы `FB_ControlValve`, `FB_MotorVfd`; CV-14, VFD-13) |
 
 Дополнительные константы `GVL_Const`: `REAL_EXP_MASK : DWORD := 16#7F800000`, `WORD_LOW_BYTE : WORD := 16#00FF`, `WORD_ALL : WORD := 16#FFFF`, `UINT_MAX : UINT := 65535`.
 
@@ -947,7 +982,8 @@ VAR
     arAlmValue     : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF REAL;   // значение для события
     wAlmActive     : WORD;
     wAlmUnack      : WORD;
-    wAlmShelved    : WORD;
+    wAlmShelved    : WORD;                   // отложенные оператором (Shelved)
+    wAlmSuppressed : WORD;                   // подавленные логикой (SuppressedByDesign), F-32
     ePrioUnack     : E_AlarmPriority := E_AlarmPriority.None;
 END_VAR
 // тело пустое: порядок цикла задаёт наследник (9.4); наследники тело базы через SUPER^ не вызывают
@@ -1118,11 +1154,12 @@ stateDiagram-v2
 | SuppressedByDesign | `xSuppress` ↓ | Shelved, если shelve ещё действует; иначе условие ? ActiveUnack : Normal | Unsuppressed |
 | любое | `xOutOfService` ↑ | OutOfService | OosOn |
 | OutOfService | `xOutOfService` ↓ | по старшинству ниже | OosOff |
+| любое, кроме Normal | `stCfg.ePriority` := None | Normal | Disabled (F-31) |
 
 Правила:
 - При входе в наложенное состояние неквитированность сбрасывается. При выходе активная тревога снова `ActiveUnack`: оператор увидит её заново. По ISA-18.2 после снятия shelve нужно повторное оповещение — **сверить с ANSI/ISA-18.2-2016**.
 - `Ack` в `Normal`, `ActiveAck` и наложенных состояниях — без эффекта, метод возвращает FALSE.
-- `stCfg.ePriority = None` — тревога выключена: `eState = Normal`, все выходы FALSE, событий нет, `udiSeq` не меняется. Если сменить приоритет `None` на другой при активном условии, будет `Activated`.
+- `stCfg.ePriority = None` — тревога выключена: `eState = Normal`, все выходы FALSE, shelve снят. Тревога, которая была не в Normal, закрывается одним переходом с событием `Disabled` (приоритет события — None, `udiSeq` + 1): журнал и список тревог по событиям не держат «призрак» (1.0.0, F-31). Дальше событий нет. Если сменить приоритет `None` на другой при активном условии, будет `Activated`.
 - Смена приоритета активной тревоги действует сразу и события не порождает.
 - Срок shelve отсчитывается от команды независимо от наложенных состояний.
 - Ни одна комбинация параметров не выключает тревогу, кроме явного `ePriority = None`. Значения вне перечисления считаются `Medium`.
@@ -1130,6 +1167,7 @@ stateDiagram-v2
 ### 10.3 События
 
 На каждом переходе: `udiSeq := udiSeq + 1; ltLastChange := ltNow;`. Затем, если `GVL_Lib.itfAlarmSink <> 0`, вызывается `GVL_Lib.itfAlarmSink.OnAlarmEvent(stEvent := ...)` с полями `ST_AlarmEvent`.
+`stEvent.rValue` всегда конечно: неконечное значение процесса (NaN, ±Inf, `|x| > REAL_SANE_MAX`) передаётся как 0.0 (1.0.0, F-33).
 Очерёдность событий внутри цикла — порядок вызова ФБ.
 
 ### 10.4 Тревоги внутри устройств
@@ -1153,7 +1191,7 @@ stateDiagram-v2
    - Затем `xAck`, `xReset`, `wAckReq`, `wShelveReq`, `wUnshelveReq` обнуляются.
 2. **Вызов слотов.** `FOR ui := 1 TO MIN(uiAlarmCount, GVL_Const.DEV_ALARMS_MAX) DO i := ui - 1; ...`. Запись `FOR i := 0 TO uiAlarmCount - 1` **запрещена**: при `uiAlarmCount = 0` беззнаковое `0 - 1` может дать 65535 (зависит от правил расширения типов в выражении границы цикла) и выход за границы массива. То же правило — для всех циклов по слотам и маскам (`AckAll`, сводка).
    `afbAlarm[i](xIn := axAlmCond[i], xSuppress := axAlmSuppress[i], xOutOfService := eMode = E_DeviceMode.OutOfService, udiId := udiIdBase + i, rValue := arAlmValue[i], stCfg := astCfg[i], itfTime := itfTimeAct);`
-3. **Сводка.** Собираются `wAlmActive`, `wAlmUnack`, `wAlmShelved` (Shelved, SuppressedByDesign, OutOfService) и `ePrioUnack`.
+3. **Сводка.** Собираются `wAlmActive`, `wAlmUnack`, `wAlmShelved` (Shelved), `wAlmSuppressed` (SuppressedByDesign) и `ePrioUnack`; слоты в OutOfService — ни в одном из двух слов (1.0.0, F-32).
 
 Массив в базе выбран вместо именованных экземпляров. Так «квитировать всё», маски и `GetAlarm(i)` реализованы один раз, а Cfg тревог у всех типов одной формы. У DI теряется около 6 × ~100 байт ОЗУ на экземпляр; это допустимо.
 
@@ -1299,19 +1337,20 @@ END_VAR
    | `NOT F_IsFinite(rIn)` | NotFinite | `tFailDelay` | Failure | удержание |
    | `xChannelFault` | ChannelFault | `tFailDelay` | Failure | удержание |
    | I ≤ 3,6 мА | FailLow | `tFailDelay` | Failure | удержание |
-   | 3,6 < I < 3,8 мА | UnderRange | `tFailDelay` | OutOfSpecification | считается (экстраполяция) |
+   | 3,6 < I < 3,8 мА | UnderRange | `tFailDelay` | OutOfSpecification | насыщение 3,8 мА (без экстраполяции); подтверждено — `xValid = FALSE` |
    | 3,8 ≤ I ≤ 20,5 мА | Good | — | Good | считается |
-   | 20,5 < I < 21,0 мА | OverRange | `tFailDelay` | OutOfSpecification | считается |
+   | 20,5 < I < 21,0 мА | OverRange | `tFailDelay` | OutOfSpecification | насыщение 20,5 мА; подтверждено — `xValid = FALSE` |
    | I ≥ 21,0 мА | FailHigh | `tFailDelay` | Failure | удержание |
 
    Для `Norm01`, `Eng` и `Raw` действуют только первые две строки и `Good`. `xRawFail` = {NotFinite, ChannelFault, FailLow, FailHigh}, `xRawOor` = {UnderRange, OverRange}.
    Подтверждение: `fbFail(xIn := xRawFail, tOnDelay := tFailDelay, tOffDelay := tFailDelay)` → `xFail`; `fbOor(xIn := xRawOor AND NOT xRawFail, ...)` → `xOor`. Возврат в норму тоже идёт через `tFailDelay`.
-   Границы 3,6 и 21,0 мА **включены** в отказ (A-02, сверить с NE 43).
+   Границы 3,6 и 21,0 мА **включены** в отказ (A-02, сверить с NE 43). Защитные полосы 3,6…3,8 и 20,5…21 мА исправный датчик NE 43 не выдаёт: там насыщение (значение известно только как граница) или ток отказа NAMUR, прочитанный с погрешностью канала. Поэтому значение не экстраполируется дальше насыщения, а подтверждённый выход за диапазон для управления непригоден (1.0.0, AI-13).
 2. **Нормировка** `x`:
    - `MilliAmp`: `(rIn - MA_ZERO) / MA_SPAN`;
    - `Norm420`, `Norm01`: `rIn`;
    - `Eng`: `(rIn - rRangeLo_eu) / (rRangeHi_eu - rRangeLo_eu)`;
    - `Raw`: `(rIn - rRawLo_cnt) / (rRawHi_cnt - rRawLo_cnt)`. Так генератор заводит целые регистры Modbus (`INT`/`UINT` с масштабом прибора) без расчётов в `GVL_IO` (20.3).
+   - `MilliAmp`, `Norm420`: `x := LIMIT((3,8 − 4)/16, x, (20,5 − 4)/16)` — насыщение NE 43 (1.0.0, AI-13).
 3. **Корень и отсечка.**
    - При `xSqrt`: `x := SQRT(MAX(x, 0))`.
    - Затем, если `rLowCut_pct > 0` и `x·100 < rLowCut_pct`: `x := 0` и бит `AI_STS_LOW_CUT`. Отсечка действует и без корня.
@@ -1325,7 +1364,8 @@ END_VAR
    | Режим | Сигнал | `rValue_eu` | `xValid` |
    |---|---|---|---|
    | нет корректной Cfg | любой | 0.0 | FALSE |
-   | Auto | норма / вне диапазона | `lrFlt` | TRUE |
+   | Auto | норма | `lrFlt` | TRUE |
+   | Auto | вне диапазона (UnderRange, OverRange), не подтверждено / подтверждено (`xOor`) | `lrFlt` от значения насыщения | TRUE / FALSE (1.0.0, AI-13) |
    | Auto | `xRawFail`, отказ ещё не подтверждён | последнее хорошее (бит `AI_STS_FAIL_PENDING`) | TRUE |
    | Auto | `xRawFail` без свежего хорошего значения (старт ПЛК, первый вызов после OutOfService, до первой корректной Cfg), отказ не подтверждён | как при подтверждённом отказе (`HoldLast` — 0.0 после старта, последнее хорошее до вывода из работы — после OutOfService), бита `AI_STS_FAIL_PENDING` нет (1.0.0, AI-2) | FALSE |
    | Auto | отказ подтверждён (`xFail`) | `HoldLast` — последнее хорошее; `Substitute` — `rFailValue_eu` | FALSE |
@@ -1744,12 +1784,13 @@ stateDiagram-v2
   - Starting, Running, Stopping → Stopped без отказа, если ОС = 0; пока ОС ещё есть (выбег, ПЧ пережил провал) — Stopping с контролем `tFbStop` (1.0.0, M-10); ручная защёлка снимается;
   - пуск запрещён (`MOT_STS_START_INHIBIT`, `MOT_WRN_POWER_LOST`);
   - момент пропадания считается остановом — отсюда отсчитывается `tMinStop`. После провала питания столб воды раскручивает погружной насос в обратную сторону, пуск в это время опасен для вала.
+- **ОС недостоверна** (`xFbInvalid`, ПЧ по связи): короткий провал удерживает `xRunning`; без питания (`xPowerOk = FALSE`) или после подтверждённого отказа связи (`xCommFault`) двигатель считается остановленным — `xRunning := FALSE`, Running/Starting/Stopping → Stopped без питания, наработка и текущая работа стоят. ОС снова достоверна: решение — как при выходе из отказа (работает и есть запрос → Running, иначе → Stopping), найденная работа без пуска ПЛК — не пуск (1.0.0, VFD-11).
 - **Старт ПЛК**: работающий по ОС двигатель подхватывается по первой **достоверной** ОС (у ПЧ по Modbus — когда слово состояния прочитано; 1.0.0, M-18), подхват — не пуск, `UncommandedRun` до этого не формируется, `tMinStop` отсчитывается от старта ПЛК.
   Последовательный пуск после восстановления питания делает станция задержками `xAutoRun`.
 
 ### 13.8 Счётчики, ТО, статус
 
-- **Наработка.** Пока `xRunning` (в любом режиме, включая Local и OOS), `MIN(ltDt, DT_ACCUM_MAX)` копится во внутреннем накопителе. Целые секунды переносятся в `stRetain.udiOpTime_s` и `udiOpTimeMaint_s`. При отключении питания теряется меньше 1 с.
+- **Наработка.** Пока `xRunning` (в любом режиме, включая Local и OOS; при устаревшей ОС — нет, 13.7), `MIN(ltDt, DT_ACCUM_MAX)` копится во внутреннем накопителе. Целые секунды переносятся в `stRetain.udiOpTime_s` и `udiOpTimeMaint_s`. При отключении питания теряется меньше 1 с.
 - **Пуски.** Фронт `xRunning` → `stRetain.udiOpCount` и `udiOpCountMaint` +1.
 - **Текущая непрерывная работа.** На фронте `xRunning` счётчик обнуляется, пока `xRunning` — растёт по тому же накопителю, что и наработка (целые секунды). При снятии `xRunning` — 0. Значение — `stSts.udiRunCurrent_s` и `I_Motor.CurrentRunSeconds`. Не энергонезависимо: после перезапуска ПЛК подхваченный двигатель считает с нуля.
 - `stCmd.xResetMaint` обнуляет счётчики «с ТО» (`Accepted` в любом режиме).
@@ -1833,7 +1874,9 @@ END_VAR
 ResolveTime();
 // 1. До тела FB_Motor: точки расширения. stCfgLkg — с предыдущего вызова; в первом — stCfg, если она корректна (1.0.0, VFD-01).
 xVfdCommValid    := xCommOk AND F_IsFinite(rSpeedAct_pct);
-fbVfdCommLoss(xIn := NOT xVfdCommValid, tOnDelay := stCfgLkg.stVfd.tCommLoss, itfTime := itfTimeAct);
+// без питания и VFD_POWER_UP_DELAY после его возврата связь не контролируется (1.0.0, VFD-12)
+fbVfdPowerUp(xIn := xPowerOk, tOnDelay := GVL_Const.VFD_POWER_UP_DELAY, itfTime := itfTimeAct);
+fbVfdCommLoss(xIn := NOT xVfdCommValid AND fbVfdPowerUp.xOut, tOnDelay := stCfgLkg.stVfd.tCommLoss, itfTime := itfTimeAct);
 xFbOverride      := stCfgLkg.stVfd.xFbFromComm;
 xFbOverrideValue := xVfdRunning AND xVfdCommValid;
 xFbInvalid       := stCfgLkg.stVfd.xFbFromComm AND NOT xVfdCommValid;   // сразу, без задержки
@@ -1841,7 +1884,7 @@ xCommFault       := fbVfdCommLoss.xOut AND stCfgLkg.stVfd.xCommLossIsFault;
 xExtFaultAdd     := xVfdFault AND xVfdCommValid;                        // слово состояния достоверно только при связи
 xStartBlockAdd   := xVfdCommValid AND NOT xVfdReady;
 eDevType         := E_DeviceType.MotorVfd;
-rVfdSpeedAct_pct := rSpeedAct_pct;
+rVfdSpeedAct_pct := SEL(F_IsFinite(rSpeedAct_pct), 0.0, rSpeedAct_pct);   // конечное для Sts и SpeedAct (F-33)
 // рассогласование скорости — по заданию предыдущего вызова; wWarningAdd, eDevStatusAdd, axAlmCond[6], axAlmCond[7]
 // 2. Тело FB_Motor. Все VAR_IN_OUT передаются явно: SUPER^(); без них — ошибка C0039 (зонд Q1)
 SUPER^(stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
@@ -1859,7 +1902,8 @@ SUPER^(stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 | Manual | `stCmd.rSpeedSp_pct` | ограничивается пределами и записывается обратно |
 | Local, OOS | — | := `rSpeedAct_pct` (возврат без рывка) |
 
-- Есть команда работы (`xRunCmd`): `rSpeedRef_pct := F_RateLimit(rSpeedRef_pct, LIMIT(rSpeedMin_pct, цель, rSpeedMax_pct), rRampUp_pctps, rRampDown_pctps, dt)`. При `xEnteredStarting` рампа начинается с `rSpeedMin_pct`.
+- Есть команда работы (`xRunCmd`): `lrVfdRef_pct := F_RateLimitLr(lrVfdRef_pct, LIMIT(rSpeedMin_pct, цель, rSpeedMax_pct), rRampUp_pctps, rRampDown_pctps, dt)`, `rSpeedRef_pct := LREAL_TO_REAL(lrVfdRef_pct)` — состояние рампы в LREAL (1.0.0, VFD-13). При `xEnteredStarting` рампа начинается с `rSpeedMin_pct`; если связи в этот момент нет, предустановка выполняется, когда связь появится (1.0.0, VFD-10).
+- **Подхват** (команда работы появилась без входа в Starting: работающий ПЧ после старта ПЛК, выход из отказа, возврат из Local): задание := `LIMIT(rSpeedMin_pct, rSpeedAct_pct, rSpeedMax_pct)`, дальше — рампа к цели; в Manual то же значение пишется в `stCmd.rSpeedSp_pct` (оно не энергонезависимо). Без связи предустановка ждёт её (1.0.0, VFD-09).
 - Нет команды работы: `rSpeedRef_pct := 0.0` (торможение — рампой ПЧ); в Local и OutOfService `rSpeedRef_pct` следит за `rSpeedAct_pct` (1.0.0, VFD-02). Связь потеряна: задание удерживается, передать его всё равно нельзя.
 - Цель не конечна (NaN из Modbus/ПИД): задание удерживается, `MOT_WRN_SPEED_SP_INVALID`.
 - **Рассогласование.** Условия: `rSpeedDev_pct > 0`, Running, рампа завершена, связь есть, `|ref − act| > rSpeedDev_pct` дольше `tSpeedDev`.
@@ -1869,6 +1913,7 @@ SUPER^(stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 
 - `xCommLossIsFault = TRUE`: потеря связи — нефиксируемый отказ, `Available = FALSE`, станция запускает резерв. После восстановления состояние берётся по ОС (13.7): если ПЧ работает без запроса — штатный останов с контролем.
 - `xCommLossIsFault = FALSE` (рекомендуемая схема: пуск/стоп и «авария» ПЧ проводами, по Modbus задание и диагностика): только `MOT_WRN_COMM_LOSS`, NE 107 S, тревога слота 6. Двигатель управляется дальше.
+- **Нет питания** (`xPowerOk = FALSE`) и `VFD_POWER_UP_DELAY` после его возврата: связь не контролируется — нет отказа CommLoss, тревоги слота 6 и NE 107 Failure, бит `MOT_WRN_COMM_LOSS` — как сведение; фильтр `tCommLoss` начинается после этого окна. Двигатель с ОС по связи без питания считается остановленным (13.7). Пропадание питания станции — останов без отказа, а не отказ связи каждого ПЧ (1.0.0, VFD-12).
 - Во время потери связи ПЛК **не может** остановить ПЧ, если команда идёт по Modbus. Поведение задаёт сторожевой таймер связи в самом ПЧ (A-05). Это решение проекта 02, его нужно описать в `docs/MANUAL_STEPS.md` проекта 02.
 
 ---
@@ -2037,7 +2082,8 @@ END_VAR
 - **Таймаут хода:** от включения выхода (или от смены цели у соленоида) до концевика прошло `tTravel` (ровно на границе, как `FB_Delay`; 1.0.0, VLV-09) → FailToOpen/FailToClose (фиксируется), выходы сняты. Положение «по времени» сбрасывается в Local и OutOfService и у соленоида без тока катушки (1.0.0, VLV-15).
 - **Оба концевика** дольше `tLimitFilter` → BothLimits (не фиксируется), выходы сняты.
 - **Уход с концевика:** в Open/Closed без команды концевик пропал дольше `tLimitFilter` → PositionLost (фиксируется). В Local и OOS не контролируется: там арматуру двигают руками.
-- **Муфта в ходе** (момент раньше концевика, кроме закрытия по моменту) → TorqueTrip (фиксируется): заклинивание, посторонний предмет.
+- **Муфта в ходе** (момент раньше концевика, кроме закрытия по моменту) → TorqueTrip (фиксируется): заклинивание, посторонний предмет. **Страгивание с седла:** при открытии из Closed муфта открытия не контролируется, пока ZSC замкнут и ещё `tLimitFilter` после размыкания (без ZSC — всё окно), но не дольше `VLV_UNSEAT_BYPASS` от начала хода (1.0.0, VLV-21).
+- **Блокировка при отказе контроля** (`Motorized`, `eSafePos` Open или Closed): если действуют только отказы средств контроля — BothLimits, PositionLost, FailToOpen, FailToClose, — задвижка идёт в положение безопасности (аварийный ход); не при ExtFault, TorqueTrip, без напряжения и без корректной Cfg. Концевикам при таком отказе верить нельзя: ход заканчивается по согласованному концевику положения безопасности (свой есть, встречного нет), по муфте в этом направлении или через `tTravel`; пока блокировка и отказ держатся, ход не повторяется. Состояние — Fault, биты `OPENING`/`CLOSING` показывают ход (1.0.0, VLV-20).
 - **Внешняя авария** → ExtFault (фиксируется), выходы сняты.
 - Reset — с окном `tResetWindow`, как у двигателя, но без выходного импульса.
 - **Нет напряжения:** выходы сняты, контроль хода приостановлен, движущаяся арматура → Intermediate (`VLV_WRN_POWER_LOST`). После восстановления Auto снова ведёт к цели; Manual стоит, цель снята.
@@ -2194,10 +2240,10 @@ END_VAR
 | 4 | блокировка | `rSafePos_pct` (мимо пределов `rOutMin/Max`) | нет — безопасность важнее плавности |
 | 5 | отказ и `eFaultAction = SafePos` | `rSafePos_pct` | нет |
 | 5а | отказ и `eFaultAction = Hold` | удерживается | — |
-| 6 | Auto | `F_RateLimit(..., LIMIT(rOutMin_pct, rPosSpAuto_pct, rOutMax_pct), ...)`; задание не конечно → удержание и `CV_WRN_SP_INVALID` | да |
-| 7 | Manual | `F_RateLimit(..., LIMIT(rOutMin_pct, stCmd.rPosSpMan_pct, rOutMax_pct), ...)` | да |
+| 6 | Auto | `F_RateLimitLr(..., LIMIT(rOutMin_pct, rPosSpAuto_pct, rOutMax_pct), ...)` — состояние рампы в LREAL (1.0.0, CV-14); задание не конечно → удержание и `CV_WRN_SP_INVALID` | да |
+| 7 | Manual | `F_RateLimitLr(..., LIMIT(rOutMin_pct, stCmd.rPosSpMan_pct, rOutMax_pct), ...)` | да |
 
-- После выбора: если `rTightShut_pct > 0` и `rOut_pct < rTightShut_pct`, то `rOut_pct := 0` (бит `CV_STS_TIGHT_SHUT`).
+- После выбора — плотное закрытие с гистерезисом: при `rTightShut_pct > 0` включается, когда положение ниже `rTightShut_pct`, и снимается, когда оно не ниже `MIN(rTightShut_pct + CV_TIGHT_HYST_PCT, rOutMax_pct)`; пока действует — `rOut_pct := 0` (бит `CV_STS_TIGHT_SHUT`, 1.0.0, CV-13).
 - `rOut_mA := MA_ZERO + MA_SPAN·(xOutInvert ? (PCT_FULL − rOut_pct) : rOut_pct) / PCT_FULL`.
 - При переключениях рампа начинается с текущего выхода (без рывка). Слежение: везде, кроме Manual, `stCmd.rPosSpMan_pct := rOut_pct`.
 
@@ -2205,7 +2251,7 @@ END_VAR
 
 - **Рассогласование.** Условия: `xFbUsed`, ОС достоверна, Auto/Manual, рампа не активна, `|rOut_pct − rPosFb_pct| > rDevMax_pct` дольше `tDev`.
   Реакция: при `xDevIsFault` — отказ (фиксируется, Reset); иначе `CV_WRN_DEVIATION` и NE 107 S.
-- **Отказ ОС** (`xFbUsed AND NOT xPosFbValid`): `CV_WRN_FB_INVALID`, слот FbFailure, NE 107 M; клапан управляется дальше.
+- **Отказ ОС** (`xFbUsed AND NOT xPosFbValid`): `CV_WRN_FB_INVALID`, слот FbFailure, NE 107 M; клапан управляется дальше. `stSts.rPosFb_pct` — конечное (NaN → 0.0), значения событий тоже (1.0.0, F-33).
 - **Отказ позиционера** (`xPositionerFault`): `wFault` бит 1 (не фиксируется), Failure, действие по `eFaultAction`.
 - `xAvailableDev = xAutoActive = (eMode = Auto) AND (wFault = 0) AND` нет блокировки (для `xAutoActive` дополнительно `xCfgEverOk`).
 - Безударность (`OnModeChanged`): рампа предустанавливается текущим выходом. Вход в OOS снимает фиксацию рассогласования.
@@ -2374,7 +2420,7 @@ GVL_Devices.fbLIC101(
     rTrack_pct  := rLeadRef,
     rOutAct_pct := rLeadRef,
     stCmd       := GVL_Hmi.stLIC101Cmd,
-    stCfg       := GVL_Persist.stLIC101Cfg,                  // eAction := Direct, xUseOutAct := TRUE
+    stCfg       := GVL_Persist.stLIC101Cfg,                  // eAction := Direct, xUseOutAct := TRUE (тип Pid iolistgen, 18.3)
     stRetain    := GVL_Persist.stLIC101Retain);
 // одинаковое задание всем работающим насосам — по имени экземпляра (R5)
 GVL_Devices.fbP101.rSpeedSpAuto_pct := GVL_Devices.fbLIC101.rOut_pct;
@@ -2430,6 +2476,7 @@ Tt     = rTt_s, если > 0;  иначе SQRT(Ti · Td) при Td > 0;  ина�
   - При `xSpExt` ФБ пишет цель в `stCmd.rSp_eu`: переход на операторское задание без рывка.
   - В Manual с `xSpTrackPv` рампа начинается со значения PV.
 - `eDevStatus`: Failure, если PV негодна в Auto (без `xTrack`); иначе Good. `xAvailableDev = (eMode = Auto) AND xPvValid AND NOT xTrack`.
+- `stSts.rPv_eu` и значение события PvInvalid — конечные: NaN из Modbus → 0.0, негодность — бит `PID_STS_PV_FAIL` (1.0.0, F-33).
 - Слот 0 PvInvalid: условие `NOT xPvValid AND (eMode = Auto OR` признак `ShedToManual)`, суффикс `PVF`. После `ShedToManual` тревога держится и в Manual, пока PV негодна; признак снимают годная PV и OutOfService (1.0.0, P-15).
 
 ### 17.6 Карты битов
@@ -2524,6 +2571,7 @@ END_VAR
 6. **Обновление библиотеки с изменением persistent-типов** (только мажорная версия, 18.1): до загрузки — команда «Save Current Values to Recipe» объекта Persistent Variables; после загрузки — «Restore Values from Recipe» (справка «Preserving Data with Persistent Variables»). Восстанавливаются ли значения компонентов с прежними именами после смены типа — проверить в CODESYS (R14).
 7. «Reorder List and Clear Gaps» сбрасывает все persistent-данные (справка). Выполнять только по процедуре правила 6.
 8. Скриптом объект Persistent Variables не создаётся (R6). Если он создан вручную, импорт заменяет только его текст. Замена текста скриптом не проверена (R6).
+9. **ПИД и данные приложения** (1.0.0, I-13). `stCfg`/`stRetain` регуляторов (`ST_PidCfg`, `ST_DeviceRetain`) — тоже переменные `GVL_Persist`: Pid — тип устройства генератора без ролей ввода-вывода (строка перечня с `device_type = Pid`, `dev_no` и параметрами), его Cmd и Sts идут в `GVL_Hmi`, карту Modbus и SCADA, слот PVF — в `TL_Alarm`. Энергонезависимые данные самого приложения (задание оператора ПИД — P-Q1, уставки станции) генератор добавляет после устройств из списка проекта (`persist_extra`) в том же порядке и с той же проверкой порядка. Руками сгенерированный `GVL_Persist` не правится. Нужные изменения генератора — [CONSUMERS.md](CONSUMERS.md#iolistgen).
 
 ---
 
@@ -2531,7 +2579,7 @@ END_VAR
 
 - В ПЛК — только числа: `udiId` тревоги, номер слота, номер бита блокировки. В коде библиотеки нет строковых констант на русском (только комментарии) и нет `WSTRING`.
 - Почему так: в 3.5.17 `STRING` — Windows-1252, кириллица в нём не представима; UTF-8 для `STRING` и префикс `UTF8#` появились в 3.5.18 (справка «UTF-8 Encoding»). Русский текст в ПЛК возможен только как `WSTRING` (2 байта на символ). Справка не советует `WSTRING` на системах с малой памятью.
-- Источник истины — перечень сигналов проекта и шаблоны текстов библиотеки `docs/alarm_templates.csv` (`type;slot;suffix;text_ru;operator_action`). Генератор iolistgen формирует:
+- Источник истины — перечень сигналов проекта и шаблоны текстов библиотеки [`docs/alarm_templates.csv`](alarm_templates.csv) (`type;slot;suffix;text_ru;operator_action;cause;consequence`, UTF-8, по строке на каждый используемый слот; у `MotorVfd` — свои строки слотов 6–7, слоты 0–5 — общие с `Motor`). Состав сверяет `tools/project_checks/test_alarm_templates.py` (1.0.0, I-11). Генератор iolistgen формирует:
   - `docs/alarms.csv` проекта (`id;code;tag;slot;priority;text_ru;cause;consequence;operator_action;setpoint;delay_s`);
   - текстовый список CODESYS `TL_Alarm` (ID = десятичный `udiId`, текст — русский) для WebVisu. Формат импорта — проверить в CODESYS (R11);
   - импорт тревог в SCADA (универсальный CSV, проект 07).
@@ -2694,11 +2742,11 @@ GVL_IO.rP101_SpeedRef_pct := GVL_Devices.fbP101.rSpeedRef_pct;
 | PT давление, FT расход | `FB_AnalogInput` | `xSuppressLimitAlarms := NOT` (насос работает) для «низкого давления»; FT с `xSqrt` — только если расход по перепаду |
 | Насосы 1–3 с ПЧ | `FB_MotorVfd` | `wInterlock.0` — сухой ход; `xPowerOk` — напряжение на вводе (`link_power`); `xLocal` — переключатель М/Д; `tMinStop` — обратное вращение; ПЧ по Modbus RTU — адаптер приложения, `xCommOk` от статуса слейва |
 | Чередование, ограничение непрерывной работы | логика станции | `ARRAY[1..3] OF PL.I_MotorVfd`: `RunSeconds`, `CurrentRunSeconds`, `Starts`, `Available`, `ReadyToStart`, `Running` |
-| АВР (нет ОС, авария ПЧ, потеря связи, сухой ход насоса) | логика станции | фронт `Fault` у работающего или запрошенного насоса → `xAutoRun` резервному + станционная тревога; причина — `stSts.stCommon.wFault` (`MOT_FLT_*`); общий сброс — `I_Device.Reset()` |
+| АВР (нет ОС, авария ПЧ, потеря связи, сухой ход насоса) | логика станции | фронт `Fault` у работающего или запрошенного насоса → `xAutoRun` резервному + станционная тревога; причина — `stSts.stCommon.wFault` (`MOT_FLT_*`); общий сброс — `I_Device.Reset()`. Без питания станции отказа связи у ПЧ нет (VFD-12): АВР и последовательный пуск станция стробирует по `xPowerOk` и `Available` |
 | Местное/дистанционное по насосу | `FB_MotorVfd` | `Mode = Local`: станция не считает насос резервом, но учитывает `Running` в откачке |
 | Поддержание уровня | `FB_PID` | `eAction := Direct`, `xUseOutAct := TRUE`; слежение и фактический выход — от `itfLeadPump : PL.I_MotorVfd` (17.3) |
 | Отказ уровнемера (NE 43) | `FB_AnalogInput` + станция | подтверждённый отказ: `xValid = FALSE`, `Fault` → станция переходит на поплавки, ПИД — по `ePvFailAction`; до подтверждения значение удерживается (нет ложного LL) |
-| Пуск после восстановления питания | станция | фронт `fbPWR1.xValue` → `xAutoRun` насосам по очереди через `FB_Delay`; пауза `tMinStop` и `MOT_WRN_POWER_LOST` — в ФБ |
+| Пуск после восстановления питания | станция | фронт `fbPWR1.xValue` → `xAutoRun` насосам по очереди через `FB_Delay`; пауза `tMinStop` и `MOT_WRN_POWER_LOST` — в ФБ; связь с ПЧ контролируется через `VFD_POWER_UP_DELAY` + `tCommLoss` после возврата питания |
 | Тревоги и журнал | `FB_Alarm` внутри устройств + станционные `FB_Alarm` («нет резерва», номера от 100 000, 20.5) | приёмник `I_AlarmSink` (кольцо на 200 записей) присваивается в `PL.GVL_Lib.itfAlarmSink` каждый цикл |
 | Тесты станции | `PL.FB_FakeTime` | сценарии АВР и чередования без реального времени |
 
@@ -2758,7 +2806,7 @@ UTF-8 без BOM, LF, 4 пробела. Имя файла совпадает с 
 | `Time/` | `FB_SystemTime` | `Now` | — |
 | `Time/` | `FB_FakeTime` | `Advance`, `AdvanceL`, `Now`, `SetNow` | — |
 | `Time/` | `FB_Delay` | `Preset` | — |
-| `Util/` | `F_IsFinite`, `F_LTimeToSec`, `F_Ne107Worst`, `F_RateLimit`, `F_TimeToSec` | — | — |
+| `Util/` | `F_IsFinite`, `F_LTimeToSec`, `F_Ne107Worst`, `F_RateLimit`, `F_RateLimitLr`, `F_TimeToSec` | — | — |
 | `Util/` | `FB_StartsWindow` | `Clear`, `Count`, `Register`, `TimeToFree` | — |
 | `Util/` | `FB_LimitMonitor` | — | — |
 | `Alarm/` | `FB_Alarm` | `Ack`, `Shelve`, `Unshelve` | `Active`, `AlarmPriority`, `Id`, `Seq`, `State`, `Unacked` |
@@ -2783,7 +2831,7 @@ UTF-8 без BOM, LF, 4 пробела. Имя файла совпадает с 
 | `FB_Alarm` | `Transit`, `ReleaseState`, `UpdateShelve`, `UpdateState` | F-20 |
 | `FB_AnalogInput` | `CallLimit`, `ClassifySignal`, `ComputeValue`, `SelectValue`, `FaultBits`, `WarningBits`, `SubstRemainSec` | AI-1 |
 | `FB_DigitalInput` | `SelectValue`, `SubstRemainSec` | DI-5 |
-| `FB_Valve` | `ResetFaults`, `HandleCommands`, `SelectTarget`, `CurrentTarget`, `SuperviseLimits`, `LimitPosition`, `TrackPosition`, `DriveToTarget`, `RunTravelTimers`, `SetOutputs`, `CountOperations` | VLV-18 |
+| `FB_Valve` | `ResetFaults`, `HandleCommands`, `SelectTarget`, `CurrentTarget`, `SuperviseLimits`, `LimitPosition`, `TrackPosition`, `DriveToTarget`, `RunTravelTimers`, `SafeMoveOnFault`, `SetOutputs`, `CountOperations` | VLV-18, VLV-20 |
 | `FB_ControlValve` | `SelectOutput` | CV-10 |
 | `FB_PID` | `CalcStep`, `SelectOutput`, `RateStep` | P-05, P-06 |
 
@@ -2978,7 +3026,7 @@ coUnit.TEST_FINISHED();
 | Версия | Дата | Изменение |
 |---|---|---|
 | 1.0.0-rc1 | 2026-10-16 | Первая редакция контракта: основа — эксплуатационный вариант A, идеи объектного варианта B (DECISIONS.md, раздел 3), факты компиляционных зондов |
-| 1.0.0 | 2026-10-16 | Реализация семейств и интеграция. Ломающее относительно rc2: `I_Alarm.Priority` → `AlarmPriority` (F-17). Уточнения поведения AI-2, AI-12, DI-1, DI-2, M-09, M-10, M-18, M-20…M-23, VFD-01, VFD-02, VLV-05, VLV-09, VLV-15, VLV-19, CV-1, CV-11, P-02, P-15, P-16 и правила тестов F-01, F-04, F-26, F-28 — [раздел 0](#отклонения-от-rc2); методы реализации сверх 22.4 — 22.4. Типы DUT, константы, карты битов и раскладка Sts не менялись |
+| 1.0.0 | 2026-10-16 | Исправления по ревью перед выпуском (19.10.2026): AI-13, F-30…F-33, VFD-09…VFD-13, CV-13, CV-14, VLV-20, VLV-21, I-11, I-13 — [«Изменения по ревью перед выпуском»](#изменения-по-ревью-перед-выпуском). `ST_DeviceSts.wReserve` → `wAlmSuppressed` (раскладка та же), `E_AlarmEventReason.Disabled`, `F_RateLimitLr`, три константы `GVL_Const`. Энергонезависимые типы не менялись. Реализация семейств и интеграция. Ломающее относительно rc2: `I_Alarm.Priority` → `AlarmPriority` (F-17). Уточнения поведения AI-2, AI-12, DI-1, DI-2, M-09, M-10, M-18, M-20…M-23, VFD-01, VFD-02, VLV-05, VLV-09, VLV-15, VLV-19, CV-1, CV-11, P-02, P-15, P-16 и правила тестов F-01, F-04, F-26, F-28 — [раздел 0](#отклонения-от-rc2); методы реализации сверх 22.4 — 22.4. Типы DUT, константы, карты битов и раскладка Sts не менялись |
 | 1.0.0-rc2 | 2026-10-16 | Проверка реализуемости в 3.5.17 и потребностей проектов 02/07. Ломающие изменения относительно rc1: `SUPER^` с параметрами; `RequestMode(eNewMode)`; `iModeReq` → `xModeReq`/`eModeReq`; Retain по переменной на устройство; `ST_DeviceSts` 14 полей (`eDevType`, `wReserve`); `bFirstOut : BYTE` → `uiFirstOut : UINT`; удалены `xIsVfd`, `ST_DigitalInputSts.xValue/xRaw`. Добавлены `I_MotorVfd`, `CurrentRunSeconds`, `E_DeviceType`, `E_AiInputType.Raw`, `ResolveTime`, раздел 2.8, 4.6, 20.1–20.6. Подробности — раздел «Проверено компиляцией и на рантайме» |
 
 ---

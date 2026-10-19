@@ -23,3 +23,7 @@ RampIndependentOfCycleTime();
 LocalFeedbackOutOfRangeOutputClamped();
 DeviationFaultResetStuckValveRetripsAfterTDev();
 InterlockInManualStaysAtSafePosition();
+TightShutHysteresisNoChatter();
+SlowRamp1msCycleNotStalled();
+FbNaNEventAndStsFinite();
+InterlockFirstOutKeptUntilResetOrOos();

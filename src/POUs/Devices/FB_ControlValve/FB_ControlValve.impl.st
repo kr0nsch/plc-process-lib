@@ -67,12 +67,21 @@ xFaultAny := xDevLatched OR xPosFault;
 // 6.4 Выбор выхода по старшинству (метод SelectOutput)
 SelectOutput(rManSp_pct := stCmd.rPosSpMan_pct, rCfgSafePos_pct := stCfg.rSafePos_pct);
 
-// 6.5 Плотное закрытие, мА с инверсией (без корректной Cfg — инверсия из поданной Cfg)
-xTight := stCfgLkg.rTightShut_pct > 0.0 AND rRamp_pct < stCfgLkg.rTightShut_pct;
-IF xTight THEN
+// 6.5 Плотное закрытие с гистерезисом (CV-13): включается ниже rTightShut_pct, снимается при положении не ниже
+//     rTightShut_pct + CV_TIGHT_HYST_PCT (не выше rOutMax_pct) — задание, шумящее у порога, не «стучит» клапаном о
+//     седло. Затем мА с инверсией (без корректной Cfg — инверсия из поданной Cfg)
+rTightOff := MIN(stCfgLkg.rTightShut_pct + GVL_Const.CV_TIGHT_HYST_PCT, stCfgLkg.rOutMax_pct);
+IF stCfgLkg.rTightShut_pct <= 0.0 THEN
+    xTightAct := FALSE;
+ELSIF lrRamp_pct < REAL_TO_LREAL(stCfgLkg.rTightShut_pct) THEN
+    xTightAct := TRUE;
+ELSIF lrRamp_pct >= REAL_TO_LREAL(rTightOff) THEN
+    xTightAct := FALSE;
+END_IF
+IF xTightAct THEN
     rOut_pct := 0.0;
 ELSE
-    rOut_pct := rRamp_pct;
+    rOut_pct := LREAL_TO_REAL(lrRamp_pct);
 END_IF
 IF xCfgEverOk THEN
     xInvert := stCfgLkg.xOutInvert;
@@ -97,7 +106,7 @@ axAlmCond[E_CvAlarm.Deviation] := xDevWarn OR xDevLatched;
 axAlmCond[E_CvAlarm.FbFailure] := xFbInvalid;
 axAlmCond[E_CvAlarm.PositionerFault] := xPosFault;
 axAlmCond[E_CvAlarm.InterlockAct] := xIlkAct;
-arAlmValue[E_CvAlarm.Deviation] := rOut_pct - rPosFb_pct;
+arAlmValue[E_CvAlarm.Deviation] := SEL(xFbOk, 0.0, rOut_pct - rPosFb_pct);
 arAlmValue[E_CvAlarm.FbFailure] := rPosFb_pct;
 arAlmValue[E_CvAlarm.PositionerFault] := rOut_pct;
 arAlmValue[E_CvAlarm.InterlockAct] := rOut_pct;
@@ -116,7 +125,7 @@ wLowBits := SEL(xAtSp, 0, GVL_Const.CV_STS_AT_SETPOINT)
             OR SEL(xLimMin, 0, GVL_Const.CV_STS_LIMITED_MIN)
             OR SEL(xLimMax, 0, GVL_Const.CV_STS_LIMITED_MAX)
             OR SEL(xIlkAct, 0, GVL_Const.CV_STS_INTERLOCKED)
-            OR SEL(xTight, 0, GVL_Const.CV_STS_TIGHT_SHUT)
+            OR SEL(xTightAct, 0, GVL_Const.CV_STS_TIGHT_SHUT)
             OR SEL(xSafe, 0, GVL_Const.CV_STS_SAFE_POS)
             OR SEL(xAutoActive, 0, GVL_Const.CV_STS_AVAILABLE);
 IF wFltBits <> 0 THEN
@@ -131,7 +140,8 @@ END_IF
 stSts.rPosSp_pct := rSpAct;
 stSts.rOut_pct := rOut_pct;
 stSts.rOut_mA := rOut_mA;
-stSts.rPosFb_pct := rPosFb_pct;
+// ОС в Sts — конечная (NaN из Modbus — 0.0, R6); достоверность — в битах
+stSts.rPosFb_pct := SEL(F_IsFinite(rIn := rPosFb_pct), 0.0, rPosFb_pct);
 IF xFbOk THEN
     stSts.rDeviation_pct := rOut_pct - rPosFb_pct;
 ELSE

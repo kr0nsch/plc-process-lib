@@ -48,6 +48,7 @@ VAR
     arAlmValue     : ARRAY[0..GVL_Const.DEV_ALARMS_MAX - 1] OF REAL;       // значение для события
     wAlmActive     : WORD;                   // бит i: условие слота i активно (после задержек)
     wAlmUnack      : WORD;                   // бит i: слот i не квитирован
-    wAlmShelved    : WORD;                   // бит i: слот в Shelved, SuppressedByDesign или OutOfService
+    wAlmShelved    : WORD;                   // бит i: слот отложен оператором (Shelved)
+    wAlmSuppressed : WORD;                   // бит i: слот подавлен логикой (SuppressedByDesign)
     ePrioUnack     : E_AlarmPriority := E_AlarmPriority.None;   // наивысший приоритет неквитированных
 END_VAR

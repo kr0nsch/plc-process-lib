@@ -201,6 +201,9 @@ CONTRACT_CONSTANTS: dict[str, tuple[str, str]] = {
     "PID_DEADBAND_MAX_PCT": ("REAL", "10.0"),
     "REAL_EXP_MASK": ("DWORD", "16#7F800000"),
     "WORD_LOW_BYTE": ("WORD", "16#00FF"),
+    "VLV_UNSEAT_BYPASS": ("TIME", "T#2S"),
+    "CV_TIGHT_HYST_PCT": ("REAL", "1.0"),
+    "VFD_POWER_UP_DELAY": ("TIME", "T#10S"),
 }
 
 
@@ -350,6 +353,7 @@ CONTRACT_ENUMS: dict[str, tuple[list[tuple[str, int]], str, bool]] = {
             "Unsuppressed",
             "OosOn",
             "OosOff",
+            "Disabled",
         ),
         "INT",
         True,

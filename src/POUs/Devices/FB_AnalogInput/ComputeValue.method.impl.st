@@ -15,6 +15,15 @@ IF xCompute THEN
         // Norm420, Norm01: вход уже в долях шкалы
         lrX := REAL_TO_LREAL(rIn);
     END_IF
+    // NE 43: за насыщением 3,8 / 20,5 мА измерения нет — это защитные полосы до порогов отказа (ток отказа с
+    // погрешностью канала или насыщение датчика). Значение не экстраполируется дальше насыщения (AI-13)
+    IF stCfgLkg.eInput = E_AiInputType.MilliAmp OR stCfgLkg.eInput = E_AiInputType.Norm420 THEN
+        lrXLo := (REAL_TO_LREAL(GVL_Const.NE43_MEAS_LOW_MA) - REAL_TO_LREAL(GVL_Const.MA_ZERO))
+                 / REAL_TO_LREAL(GVL_Const.MA_SPAN);
+        lrXHi := (REAL_TO_LREAL(GVL_Const.NE43_MEAS_HIGH_MA) - REAL_TO_LREAL(GVL_Const.MA_ZERO))
+                 / REAL_TO_LREAL(GVL_Const.MA_SPAN);
+        lrX := LIMIT(lrXLo, lrX, lrXHi);
+    END_IF
 
     // корень (расход по перепаду давления), затем отсечка — она действует и без корня
     IF stCfgLkg.xSqrt THEN

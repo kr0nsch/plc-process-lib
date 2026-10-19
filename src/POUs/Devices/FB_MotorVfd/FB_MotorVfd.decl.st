@@ -23,6 +23,7 @@ END_VAR
 VAR
     // нормативные имена (контракт 14.1); все внутренние имена содержат «Vfd» (L2)
     fbVfdCommLoss     : FB_Delay;      // фильтр потери связи tCommLoss
+    fbVfdPowerUp      : FB_Delay;      // питание есть дольше VFD_POWER_UP_DELAY: ПЧ загрузился, связь контролируется
     fbVfdSpeedDev     : FB_Delay;      // задержка рассогласования tSpeedDev
     xVfdCommValid     : BOOL;          // xCommOk AND F_IsFinite(rSpeedAct_pct)
     rVfdSpeedAct_pct  : REAL;          // rSpeedAct_pct последнего вызова (SpeedAct)
@@ -35,4 +36,9 @@ VAR
     rVfdTargetLim_pct : REAL;          // цель в пределах rSpeedMin_pct…rSpeedMax_pct
     xVfdTargetOk      : BOOL;          // цель конечна
     lrVfdDt_s         : LREAL;         // шаг времени вызова, с
+    lrVfdRef_pct      : LREAL;         // состояние рампы задания (LREAL: медленная рампа при коротком цикле, VFD-13)
+    xVfdRunCmdPrev    : BOOL;          // xRunCmd прошлого вызова (подхват)
+    xVfdStartPending  : BOOL;          // предустановка пуска (rSpeedMin) ждёт связи (VFD-10)
+    xVfdPickPending   : BOOL;          // предустановка подхвата (фактическая скорость) ждёт связи (VFD-09)
+    xVfdNoPowerComm   : BOOL;          // связи нет, но не контролируется: нет питания или ПЧ загружается (VFD-12)
 END_VAR

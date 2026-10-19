@@ -51,3 +51,6 @@ FeedbackDropoutWithinFilterNotCountedAsStart();
 ReadyToStartFalseWhileStarting();
 OosRequestWhileRunningByFeedbackRejected();
 ResetFailToStopClearedOnlyAfterMotorStops();
+TimeBackwardsDuringMinStopPauseRestarts();
+TimeBackwardsDuringMinRunKeepsRunning();
+TimeBackwardsDuringResetPulsePulseRestarts();
