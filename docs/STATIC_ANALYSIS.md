@@ -13,12 +13,14 @@
 | `tools/codesys/cds.py library` | то же | `src/` без `PRG_Main` — проверка пула библиотеки | `build/library.log`, `build/library.json` |
 | `tools/check/st_lint.py --strict` | локально и в CI | `src/`, `tests/` | вывод в консоль, код выхода ≠ 0 при нарушениях |
 | `tools/check/run_iec_checker.py --tests` | локально и в CI (обязательно): iec_checker v0.4 | `build/assembled/iec-checker/` (вариант сборки `iec-checker`) | `build/iec_checker.json`, `build/iec_checker.md` |
-| то же с `--docker` | CI, необязательное задание: образ `jubnzv1/iec-checker:nightly` | то же | артефакт `iec-checker-nightly-reports` |
+| то же с `--docker` | CI, необязательное задание: образ `jubnzv1/iec-checker:nightly` (закреплён по дайджесту в `ci.yml`); обоснования — записи без ключа `checker` и с `checker = "nightly"` | то же | артефакт `iec-checker-nightly-reports` |
 | `tools/check/run_rusty.py` | локально и в CI (необязательное задание): RuSTy 1.0.6 `plc --check` | `build/assembled/rusty/` (`src/` и `tests/`) | `build/rusty.log`, `build/rusty.json` |
 
 Обоснования iec_checker — `tools/check/iec_checker_allow.toml`; тест шаблона
 `test_integration_repository_sources` требует, чтобы при прогоне с `--tests` использовалась каждая
-запись, а без `--tests` и с ним — 0 необоснованных находок (иначе красный `pytest`).
+запись, а без `--tests` и с ним — 0 необоснованных находок (иначе красный `pytest`). Тест идёт с v0.4,
+поэтому записи с `checker = "nightly"` (только для образа nightly) он не проверяет; записи с
+`checker = "v0.4"` при прогоне образом nightly не применяются.
 
 ## Последний прогон
 
@@ -33,7 +35,8 @@
 | 2026-10-19 | `run_iec_checker.py --tests` | 116 объектов `src/` и `tests/` | ошибок разбора нет; необоснованных 0; обоснованных 5192; артефактов 522; неиспользованных обоснований нет |
 | 2026-10-19 | `run_rusty.py` (RuSTy 1.0.6) | 117 файлов `build/assembled/rusty/`, исключённых нет | 0 ошибок; 399 предупреждений (разбор ниже) |
 | 2026-10-19 | iec_checker 0.4 (CI, Linux) | 116 объектов `src/` и `tests/` | ошибок разбора нет; необоснованных 0; обоснованных 5192; артефактов сборки 522 ([прогон](https://github.com/kr0nsch/plc-process-lib/actions/runs/39248620351)) |
-| 2026-10-19 | iec_checker `nightly` (CI, необязательно) | то же | необоснованных 78 — все PLCOPEN-CP17 (неиспользуемый параметр), нового правила nightly-образа; обоснованных 4744. Задание необязательное, разбор CP17 — в планах ([прогон](https://github.com/kr0nsch/plc-process-lib/actions/runs/39248620351)) |
+| 2026-10-19 | iec_checker `nightly` (CI, необязательно) | то же | в прогоне CI необоснованных 78 — все PLCOPEN-CP17 (неиспользуемый параметр), нового правила образа; обоснованных 4744 ([прогон](https://github.com/kr0nsch/plc-process-lib/actions/runs/39250365882)). Дефектов в коде нет, все 78 обоснованы записями `checker = "nightly"` (разбор — «iec_checker nightly: PLCOPEN-CP17») |
+| 2026-10-19 | находки того же прогона nightly, пересчитанные локально с новым файлом обоснований | то же (сборка совпадает с CI побайтно) | необоснованных 0; обоснованных 4822; артефактов 490; неиспользованных обоснований нет. Сам образ локально не запускался (Docker не установлен) — итог подтвердит следующий прогон CI |
 <!-- /static-analysis:last-run -->
 
 ## Компилятор CODESYS
@@ -83,6 +86,29 @@ CONSTANT` принимало за секцию констант. Линтер ш
 | PLCOPEN-L17 | `src/*`, `tests/*` | «Each IF instruction should have an ELSE clause» | Обосновано (общие записи). Правило стиля PLCopen; где `ELSE` нет, состояние в этом вызове сознательно не меняется. Заглушка `x := x;` хуже для чтения |
 | UnusedVariable | `FB_Alarm`, `FB_DeviceBase`, устройства: переменные, которые используют только методы | то же | Артефакт понижения: методы вынесены сборкой в функции; тело `FB_DeviceBase` и хук `OnModeChanged` пусты по контракту (9.1, 9.3). Списки имён — в записях `iec_checker_allow.toml` |
 | UnusedVariable | тесты: `FB_TestDevice` (константы, журнал хука), `FB_TestDeviceExt`, `FB_Runtime_Test` (состояние многоциклового теста), `FB_FopdtModel`, индексы помощников (`SetSlotCfg.uiSlot`, `SetLimit.uiIdx` …), объединения `uBad`, `uEnum`, `uPrio` | то же | Артефакт понижения (используют методы) или ложное срабатывание: индекс массива, граница цикла `FOR` и поля объединения iec_checker использованием не считает |
+
+## iec_checker nightly: PLCOPEN-CP17
+
+Образ `nightly` добавил правило PLCOPEN-CP17: вход, выход или `VAR_IN_OUT`, который в теле POU ни разу
+не прочитан (не записан). В v0.4 такого правила нет. Каждая из 78 находок прогона CI сверена с
+исходниками: где параметр читается и пишется. Дефектов в коде нет: параметры, которые нигде не
+используются, есть только у пустого по контракту хука базы. Записи в `iec_checker_allow.toml` —
+в последнем разделе, с `checker = "nightly"`; правило CP17 в них указано явно, имена параметров —
+списком.
+
+| Правило | Где | Находок | Решение / обоснование |
+|---|---|---|---|
+| PLCOPEN-CP17 | `src/*`: `stCmd`, `stSts`, `stCfg`, `stCfgIn`, `stCommon`, `stRetain`, `stValveCmd`, `stValveRet`, `astCfg`, `fbLimit` | 28 | Ложное срабатывание: структуры используются через поля (`stSts.rOut_pct := …`), элементы (`astCfg[uiLoop - 1].ePriority`), вызов экземпляра (`fbLimit(...)`) и передачу поля аргументом в методы (`stCmd := stCmd.stCommon`). Такое обращение CP17 не считает ни чтением, ни записью |
+| PLCOPEN-CP17 | `tests/*`: `stCmd`, `stSts`, `stCfgIn` тестового устройства, `stCfgAi`/`stCfgDev`/`stCfgDi`/`stCfgMot` помощников, экземпляры под тестом `fbAi`, `fbPid`, `fbVfd`, `fbV`, `fbM`, `fbDevice` | 14 | То же: поля структур, вызов экземпляра (`VAR_IN_OUT`) и чтение его выходов |
+| PLCOPEN-CP17 | `FB_Alarm`: `xSuppress`, `xOutOfService`, `udiId`, `rValue`, `eState`, `ltLastChange`, `udiSeq` | 7 | Артефакт понижения: входы читают методы `UpdateState`, `UpdateShelve`, `Transit` и свойство `Id`, выходы пишет `Transit`; сборка выносит методы и свойства в отдельные функции |
+| PLCOPEN-CP17 | `FB_DeviceBase`: `itfTime` | 1 | Артефакт понижения: вход читает только метод `ResolveTime` |
+| PLCOPEN-CP17 | `FB_DeviceBase.OnModeChanged`: `eOld`, `eNew` | 2 | Хук пуст в базе по контракту (9.3), сигнатуру задаёт контракт, параметры используют переопределения наследников (`FB_Motor`, `FB_Valve`, `FB_ControlValve`, `FB_PID`, тестовые `FB_TestDevice`, `FB_TestDeviceExt`) |
+| PLCOPEN-CP17 | `FB_PID`: `rOut_pct`, `xSatHigh`, `xSatLow` | 3 | Артефакт понижения: выходы пишет метод `SelectOutput`, тело их только читает |
+| PLCOPEN-CP17 | `FB_AnalogInput`: `xChannelFault`, `rValue_eu`, `rValue_pct`, `xValid`; `FB_DigitalInput`: `xValue`, `xValid` | 6 | Артефакт понижения: вход `xChannelFault` читает `ClassifySignal`, выходы пишет `SelectValue` |
+| PLCOPEN-CP17 | `FB_ControlValve`: `rPosSpAuto_pct`; `FB_Valve`: `xAutoOpen`, `xExtFault`, `xQOpen`, `xQClose`, `xQCoil`, `xOpened`, `xClosed` | 8 | Артефакт понижения: входы читают методы-шаги (`SelectOutput`, `SelectTarget`, `SuperviseLimits`, `ResetFaults`), выходы пишет `SetOutputs` |
+| PLCOPEN-CP17 | `FB_FopdtModel` (тесты): `rU_pct`, `rGain`, `rT_s`, `rY` | 4 | Артефакт понижения: тела у модели нет, всё делает метод `Step` |
+| PLCOPEN-CP17 | помощники тестов `Set*`: `uiSlot`, `uiIdx` | 5 | Ложное срабатывание: вход — только индекс массива (`stCfgAi.astAlarm[uiSlot]`) |
+| UnusedVariable | `uBits`, `uBad`; `uEnum`, `uPrio` | — | Образ nightly обращение к полю объединения считает использованием и этих находок не выдаёт: записи помечены `checker = "v0.4"` и при прогоне образом не применяются |
 
 ## Обходы разборщика: что снято после синхронизации с шаблоном
 

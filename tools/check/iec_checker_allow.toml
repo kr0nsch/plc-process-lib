@@ -7,12 +7,16 @@
 #   file   — шаблон fnmatch пути исходника (src/POUs/...) или имени собранного файла (FB_X.st);
 #            '*' захватывает и '/';
 #   match  — необязательно: регулярное выражение по тексту сообщения;
-#   reason — обязательно: почему находка допустима.
+#   reason — обязательно: почему находка допустима;
+#   checker — необязательно: "v0.4" (обязательная проверка, бинарник) или "nightly" (необязательное
+#            задание CI, Docker-образ, закреплённый по дайджесту в ci.yml). Запись с этим ключом
+#            применяется и проверяется на использование только при прогоне своей версией.
 # ParserError и LexingError обосновать нельзя: их исправляют в коде или в понижении iec-checker.
 #
 # Тест tools/tests/test_run_iec_checker.py::test_integration_repository_sources требует, чтобы при
-# прогоне с --tests использовалась каждая запись. Записи семейства ФБ — в его разделе; новое
-# семейство добавляет свой раздел в конец файла.
+# прогоне с --tests (v0.4) использовалась каждая запись, кроме записей checker = "nightly". Записи
+# семейства ФБ — в его разделе; новое семейство добавляет свой раздел перед разделом nightly. Записи
+# для образа nightly — в последнем разделе: их пересматривают вместе с дайджестом образа.
 
 # =====================================================================================================
 # Общие (все семейства)
@@ -55,7 +59,8 @@ reason = "Ложное срабатывание iec_checker 0.4: массив с
 id = "UnusedVariable"
 file = "*"
 match = "variable: (UBITS|UBAD)$"
-reason = "Ложное срабатывание iec_checker 0.4: объединения используются только через поля (uBits.rValue / uBits.dwValue — U_RealBits, uBad.iValue / uBad.eMode — тестовое U_TestEnumInt)"
+checker = "v0.4"
+reason = "Ложное срабатывание iec_checker 0.4: объединения используются только через поля (uBits.rValue / uBits.dwValue — U_RealBits, uBad.iValue / uBad.eMode — тестовое U_TestEnumInt). Образ nightly обращение к полю объединения считает использованием"
 
 [[allow]]
 id = "PLCOPEN-L17"
@@ -193,7 +198,8 @@ reason = "Артефакт понижения: вход xChannelFault читае
 id = "UnusedVariable"
 file = "tests/POUs/Suites/FB_*Input_Test/*"
 match = "variable: (UENUM|UPRIO)$"
-reason = "Ложное срабатывание iec_checker 0.4: объединения U_AiDiTestEnum и U_TestEnumInt используются только через поля (uEnum.iValue / uEnum.eInput, uPrio.iValue / uPrio.ePriority) — значение вне строгого перечисления для тестов CheckConfig"
+checker = "v0.4"
+reason = "Ложное срабатывание iec_checker 0.4: объединения U_AiDiTestEnum и U_TestEnumInt используются только через поля (uEnum.iValue / uEnum.eInput, uPrio.iValue / uPrio.ePriority) — значение вне строгого перечисления для тестов CheckConfig. Образ nightly обращение к полю объединения считает использованием"
 
 [[allow]]
 id = "UnusedVariable"
@@ -283,3 +289,96 @@ id = "UnusedVariable"
 file = "tests/POUs/Suites/FB_Integration_Test/LevelLoopStep.method.decl.st"
 match = "variable: UIN$"
 reason = "Ложное срабатывание iec_checker 0.4: вход помощника используется только как верхняя граница цикла FOR uiLoop := 1 TO uiN"
+
+# =====================================================================================================
+# Только образ nightly (checker = "nightly"): правило PLCOPEN-CP17 «неиспользуемый параметр» — входа,
+# выхода или VAR_IN_OUT. В v0.4 этого правила нет. Каждая находка проверена по исходникам
+# (docs/STATIC_ANALYSIS.md, раздел «iec_checker nightly: PLCOPEN-CP17»): дефектов в коде нет — это
+# артефакты понижения (параметр читают или пишут только методы и свойства, которые сборка iec-checker
+# выносит в отдельные функции), обращения, которые CP17 не считает использованием, и пустой по
+# контракту хук базы
+# =====================================================================================================
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/*"
+checker = "nightly"
+match = "parameter '(STCMD|STSTS|STCFG|STCFGIN|STCOMMON|STRETAIN|STVALVECMD|STVALVERET|ASTCFG|FBLIMIT)'"
+reason = "Ложное срабатывание CP17: структуры команд, состояний, конфигурации и сохраняемых данных устройства, массив конфигураций сигнализаций и экземпляр FB_LimitMonitor используются через поля (stSts.rOut_pct := ..., stCmd.xReset), элементы (astCfg[uiLoop - 1].ePriority), вызов экземпляра (fbLimit(...)) и передачу поля аргументом в методы (ProcessMode(..., stCmd := stCmd.stCommon, ...)); такое обращение CP17 не считает ни чтением, ни записью"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "tests/*"
+checker = "nightly"
+match = "parameter '(STCMD|STSTS|STCFGIN|STCFG(AI|DEV|DI|MOT)|FB(AI|PID|VFD|V|M|DEVICE))'"
+reason = "Как для src/: тестовое устройство и помощники наборов обращаются к структурам через поля (stCfgAi.astAlarm[uiSlot] := stSlot), а к экземплярам ФБ под тестом (VAR_IN_OUT) — вызовом и чтением выходов (fbM(...), fbVfd.stSts); CP17 это использованием не считает"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Alarm/FB_Alarm/FB_Alarm.decl.st"
+checker = "nightly"
+match = "parameter '(XSUPPRESS|XOUTOFSERVICE|UDIID|RVALUE|ESTATE|LTLASTCHANGE|UDISEQ)'"
+reason = "Артефакт понижения: входы xSuppress, xOutOfService, udiId, rValue читают методы UpdateState, UpdateShelve, Transit и свойство Id, выходы eState, ltLastChange, udiSeq пишет метод Transit — сборка iec-checker выносит их в отдельные функции"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Base/FB_DeviceBase/FB_DeviceBase.decl.st"
+checker = "nightly"
+match = "parameter 'ITFTIME'"
+reason = "Артефакт понижения: вход itfTime читает только метод ResolveTime (выбор источника времени), который сборка iec-checker выносит в отдельную функцию"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Base/FB_DeviceBase/OnModeChanged.method.decl.st"
+checker = "nightly"
+match = "parameter '(EOLD|ENEW)'"
+reason = "Хук OnModeChanged в базе пуст по контракту (9.3): параметры использует переопределение наследника; сигнатура задана контрактом"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Control/FB_PID/FB_PID.decl.st"
+checker = "nightly"
+match = "parameter '(ROUT_PCT|XSATHIGH|XSATLOW)'"
+reason = "Артефакт понижения: выходы rOut_pct, xSatHigh, xSatLow пишет метод SelectOutput (сборка iec-checker выносит его в отдельную функцию), тело их только читает"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Devices/FB_AnalogInput/FB_AnalogInput.decl.st"
+checker = "nightly"
+match = "parameter '(XCHANNELFAULT|RVALUE_EU|RVALUE_PCT|XVALID)'"
+reason = "Артефакт понижения: вход xChannelFault читает метод ClassifySignal, выходы rValue_eu, rValue_pct, xValid пишет метод SelectValue — сборка iec-checker выносит их в отдельные функции"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Devices/FB_DigitalInput/FB_DigitalInput.decl.st"
+checker = "nightly"
+match = "parameter '(XVALUE|XVALID)'"
+reason = "Артефакт понижения: выходы xValue и xValid пишет метод SelectValue, который сборка iec-checker выносит в отдельную функцию"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Devices/FB_ControlValve/FB_ControlValve.decl.st"
+checker = "nightly"
+match = "parameter 'RPOSSPAUTO_PCT'"
+reason = "Артефакт понижения: вход rPosSpAuto_pct читает только метод SelectOutput, который сборка iec-checker выносит в отдельную функцию"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "src/POUs/Devices/FB_Valve/FB_Valve.decl.st"
+checker = "nightly"
+match = "parameter '(XAUTOOPEN|XEXTFAULT|XQOPEN|XQCLOSE|XQCOIL|XOPENED|XCLOSED)'"
+reason = "Артефакт понижения: входы xAutoOpen и xExtFault читают методы SelectTarget, SuperviseLimits, ResetFaults, выходы xQOpen, xQClose, xQCoil, xOpened, xClosed пишет метод SetOutputs — сборка iec-checker выносит их в отдельные функции"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "tests/POUs/Helpers/FB_FopdtModel/FB_FopdtModel.decl.st"
+checker = "nightly"
+match = "parameter '(RU_PCT|RGAIN|RT_S|RY)'"
+reason = "Артефакт понижения: входы и выход модели использует только метод Step, который сборка iec-checker выносит в отдельную функцию; тела у ФБ нет"
+
+[[allow]]
+id = "PLCOPEN-CP17"
+file = "tests/POUs/Suites/*/Set*.method.decl.st"
+checker = "nightly"
+match = "parameter '(UISLOT|UIIDX)'"
+reason = "Ложное срабатывание CP17: вход помощника используется только как индекс массива (stCfgAi.astAlarm[uiSlot], stCfgAi.astLimit[uiIdx])"
