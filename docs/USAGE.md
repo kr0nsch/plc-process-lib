@@ -13,7 +13,8 @@
 7. [Связь с HMI/SCADA](#7-связь-с-hmiscada)
 8. [Энергонезависимые данные](#8-энергонезависимые-данные)
 9. [Частые ошибки](#9-частые-ошибки)
-10. [Проект на шаблоне plc-repo-template](#10-проект-на-шаблоне-plc-repo-template)
+10. [Целевые ПЛК: ОВЕН ПЛК210 и REGUL R500](#10-целевые-плк-овен-плк210-и-regul-r500)
+11. [Проект на шаблоне plc-repo-template](#11-проект-на-шаблоне-plc-repo-template)
 
 ## 1. Установка
 
@@ -422,7 +423,63 @@ IF fbP101Reset.Q THEN GVL_Hmi.stP101Cmd.stCommon.xReset := TRUE; END_IF
 | после онлайн-изменения в журнал не приходят события | `itfAlarmSink` присвоен один раз при старте | присваивать каждый цикл (раздел 6) |
 | двигатели и ПИД после первой загрузки в Manual | так задано умолчание `ST_DeviceRetain.eRemoteMode` | перевести в Auto командой `xSetAuto` (режим запомнится) или задать `(eRemoteMode := PL.E_DeviceMode.Auto)` в инициализаторе Retain |
 
-## 10. Проект на шаблоне plc-repo-template
+## 10. Целевые ПЛК: ОВЕН ПЛК210 и REGUL R500
+
+Устройство проекта меняется переменными окружения — `config.json` и исходники остаются прежними. Проект
+удобно собирать в отдельный файл (`CDS_PROJECT`, `CDS_TEST_PROJECT`), чтобы не пересоздавать проект Control Win
+(`import` отказывается работать с проектом другого устройства).
+
+| Целевой ПЛК | Среда | `CDS_DEVICE_TYPE` / `CDS_DEVICE_ID` / `CDS_DEVICE_VERSION` | Ещё |
+|---|---|---|---|
+| ОВЕН ПЛК210-11…15, -4G | CODESYS 3.5.17.30 + пакет OwenTargets 3.5.17.36 | `4096` / `1628 0083` / `3.5.17.35` | `CDS_DEVICE_TITLE="ОВЕН ПЛК210"` (подпись в отчётах) |
+| ОВЕН СПК210 | то же | `4096` / `1628 0073` / `3.5.17.34` | не собиралось |
+| REGUL R500 61 | Astra.IDE 1.7.2.2 | `4096` / `109B 0008` / `11.7.2.60` | `CODESYS_EXE` = `Astra.IDE.exe`, `CODESYS_PROFILE=Astra.IDE_V1.7.2.2`, свои `CDS_LIBRARY_REGISTRY` и `CDS_LIBRARY_LOCK` |
+
+Пакет таргетов ОВЕН — с `https://ftp.owen.ru/CoDeSys3/03_Targets/` (версию под прошивку — по матрице
+`https://ftp.owen.ru/CoDeSys3/96_CdsVersionSelector/cds_version_selector.json`), установка — «Инструменты →
+Менеджер пакетов» или `PackageManagerCLI.exe --profile="CODESYS V3.5 SP17 Patch 3" --install="<файл>.package"`
+(права администратора). У Astra.IDE свой репозиторий библиотек (`C:\ProgramData\Astra.IDE_64_1.7.2.2\Managed
+Libraries`): учёт установок `cds.py` для неё — отдельными файлами, иначе он смешается с учётом CODESYS.
+
+```bat
+:: ОВЕН ПЛК210 (cmd)
+set CDS_DEVICE_ID=1628 0083
+set CDS_DEVICE_VERSION=3.5.17.35
+set CDS_DEVICE_TITLE=ОВЕН ПЛК210
+set CDS_PROJECT=build\plc210\plc-process-lib.project
+set CDS_TEST_PROJECT=build\plc210\plc-process-lib-tests.project
+python tools\codesys\cds.py build
+python tools\codesys\cds.py check --tests
+
+:: REGUL R500 61 в Astra.IDE (новая консоль)
+set CODESYS_EXE=C:\Program Files\AstraRegul\Astra.IDE_64_1.7.2.2\Astra.IDE\Common\Astra.IDE.exe
+set CODESYS_PROFILE=Astra.IDE_V1.7.2.2
+set CDS_DEVICE_ID=109B 0008
+set CDS_DEVICE_VERSION=11.7.2.60
+set CDS_DEVICE_TITLE=REGUL R500 61
+set CDS_LIBRARY_REGISTRY=%LOCALAPPDATA%\plc-tools\astra-libraries.json
+set CDS_LIBRARY_LOCK=%LOCALAPPDATA%\plc-tools\astra-library-repo.lock
+set CDS_PROJECT=build\r500\plc-process-lib.project
+python tools\codesys\cds.py build
+python tools\codesys\cds.py check
+```
+
+Устройство ПЛК210 само создаёт задачу `OwenCloudTask` (облако ОВЕН): импорт её не удаляет — ключ
+`device.keep_tasks` в `config.json`; без него сборка даёт предупреждение C0373. Тесты coUnit выполняются только в
+CODESYS Control Win: на ПЛК210 тестовый проект лишь собирается (`check --tests`), в Astra.IDE coUnit не
+установлена.
+
+Проверено 20.10.2026 (только компиляция, в ПЛК не загружалось):
+
+| Устройство | `cds.py build` (демо-приложение `PRG_Main`) | `cds.py check` |
+|---|---|---|
+| ОВЕН ПЛК210 (CODESYS 3.5.17.30, OwenTargets 3.5.17.36) | 0 ошибок, 0 предупреждений | `--tests`: 116 объектов `src/` и `tests/`, 0 ошибок |
+| REGUL R500 61 (Astra.IDE 1.7.2.2) | 0 ошибок, 0 предупреждений | 80 объектов `src/`, 0 ошибок |
+
+Перенос библиотеки в Astra.IDE с проверкой каждого места, где поведение REGUL не подтверждено, — в
+[kns-port-domestic](https://github.com/kr0nsch/kns-port-domestic) (`targets/astra/lib`).
+
+## 11. Проект на шаблоне plc-repo-template
 
 Если ваш репозиторий собран на шаблоне [plc-repo-template](https://github.com/kr0nsch/plc-repo-template)
 (сборка `tools/codesys/cds.py` из текстов ST), библиотеку подключает запись в `tools/codesys/config.json` и

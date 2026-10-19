@@ -226,7 +226,7 @@ setx CODESYS_PROFILE "CODESYS V3.5 SP17 Patch 3"
 
 Потребитель (репозиторий на шаблоне) подключает библиотеку описанием в `libraries` своего
 `config.json` с `build_from_repo` — тогда недостающую версию `cds.py` соберёт и поставит сам
-([USAGE.md, раздел 10](USAGE.md#10-проект-на-шаблоне-plc-repo-template)).
+([USAGE.md, раздел 11](USAGE.md#11-проект-на-шаблоне-plc-repo-template)).
 
 ## 8. Зеркало на GitVerse или GitFlic
 
