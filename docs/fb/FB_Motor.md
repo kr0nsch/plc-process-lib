@@ -29,7 +29,7 @@
 | `stRetain` | `VAR_IN_OUT` | `ST_DeviceRetain` | — | режим, OOS, наработка и пуски (`GVL_Persist.st<TAG>Retain`) |
 | `xQRun` | выход | `BOOL` | — | команда «работа» на КМ/УПП (удерживаемая) |
 | `xQReset` | выход | `BOOL` | — | импульс сброса аварии УПП/ПЧ по Reset, длительность `tResetPulse` |
-| `xRunning` | выход | `BOOL` | — | работает: по ОС; без ОС (`xFbUsed = FALSE`) — по команде; ОС недостоверна (ПЧ без связи) — удерживается |
+| `xRunning` | выход | `BOOL` | — | работает: по ОС; без ОС (`xFbUsed = FALSE`) — по команде; ОС недостоверна (ПЧ без связи) — удерживается, а без питания или после отказа связи — FALSE (VFD-11) |
 | `stSts` | выход | `ST_MotorSts` | — | состояние для HMI/SCADA (раскладка — ниже) |
 
 Общие методы и свойства (`Reset`, `AckAll`, `RequestMode`, `GetAlarm`, `Mode`, `Status`, `Fault`,
@@ -256,6 +256,13 @@ stateDiagram-v2
   ПЛК теряется меньше 1 с. Зависание задачи на час засчитывается как 10 с.
 - **Пуски.** Фронт `xRunning` → `stRetain.udiOpCount` и `udiOpCountMaint` + 1 (подхват при старте ПЛК —
   не пуск). Попытка пуска без ОС — отметка в окне пусков, но не пуск.
+- **Устаревшая ОС** (VFD-11, наследник `FB_MotorVfd`): ОС недостоверна (`xFbInvalid`) и нет питания или
+  подтверждён отказ связи (`xCommFault`) — двигатель считается остановленным: `xRunning := FALSE`, наработка,
+  счётчик ТО и текущая работа стоят, `tMinStop` — от этого момента; без питания Starting, Running и Stopping →
+  Stopped. Короткий провал ОС по-прежнему удерживает `xRunning` (M-18). ОС снова достоверна: состояние — как при
+  выходе из отказа (M-11): работает и есть запрос — Running, иначе Stopping; работа, найденная без пуска ПЛК
+  (двигатель работал до устаревания ОС), — не пуск. Тесты `MotorVfd_CommLoss_CountersFrozen`,
+  `MotorVfd_PowerLossCommLoss_NoFaultNotRunning`.
 - **Провал ОС в работе короче `tFbLossFilter`** (дребезг блок-контакта, Auto/Manual, Running) для счётчиков —
   не останов: наработка идёт, пуск не считается, текущая непрерывная работа не обнуляется (M-21). Выход
   `xRunning` при этом показывает ОС как есть. Дребезг в Local и OOS (контроля ОС нет) фильтрует задержка
@@ -325,7 +332,7 @@ stateDiagram-v2
 | Переменная | Кто пишет | Смысл |
 |---|---|---|
 | `xFbOverride`, `xFbOverrideValue` | наследник | ОС берётся из `xFbOverrideValue` вместо `xFbRun` (при `xFbUsed`) |
-| `xFbInvalid` | наследник | ОС недостоверна: контроль ОС приостановлен, `xRunning` удерживается |
+| `xFbInvalid` | наследник | ОС недостоверна: контроль ОС приостановлен, `xRunning` удерживается; вместе с `NOT xPowerOk` или `xCommFault` — двигатель считается остановленным (VFD-11) |
 | `xExtFaultAdd` | наследник | доп. внешняя авария (фиксируется как ExtFault) |
 | `xCommFault` | наследник | нефиксируемый отказ связи: `wFault` бит 5, Fault (кроме OOS) |
 | `xStartBlockAdd` | наследник | доп. запрет пуска: `MOT_STS_PERMIT_MISSING`, `RejectedPermit` |
@@ -421,7 +428,7 @@ GVL_IO.xM201_QReset := GVL_Devices.fbM201.xQReset;
 `Motor_NoFeedbackConfigured_RunsOnCommand`, ★ `Motor_InvalidCfgAtStartup_StaysStoppedCheckFunction`,
 ★ `Motor_InvalidCfgAtRuntime_KeepsRunningWithLastValid`, `Motor_CurrentRunSeconds_CountsAndResetsOnStop`.
 
-Сверх контракта (18, чек-лист устройства, граничные и полевые случаи): `Motor_FirstCall_SetsTypeSlotsAndPassesDefaultCfg`,
+Сверх контракта (21, чек-лист устройства, граничные и полевые случаи): `Motor_FirstCall_SetsTypeSlotsAndPassesDefaultCfg`,
 `Motor_OosEntry_ClearsLatchedFaultsAndFirstOut`, `Motor_CfgChecks_SetEachCfgErrBit`,
 `Motor_ManualStart_RejectionReasonByPrecedence`, `Motor_StopAndStartSameCall_StopWins`,
 `Motor_PlcRestart_AutoWithoutDemand_Stops`, `Motor_ExtFaultInLocal_Latches`,
@@ -430,7 +437,10 @@ GVL_IO.xM201_QReset := GVL_Devices.fbM201.xQReset;
 приёмочная проверка (полевые сценарии и мутации): `Motor_StartWhileStopping_PermitLostCancelsLatch`,
 `Motor_PowerDipFeedbackStays_StoppingWithoutUncommandedRun`, `Motor_FeedbackStaysAfterTrip_RaisesFailToStop`,
 `Motor_FeedbackDropoutWithinFilter_NotCountedAsStart`, `Motor_ReadyToStart_FalseWhileStarting`,
-`Motor_OosRequestWhileRunningByFeedback_Rejected`, `Motor_ResetFailToStop_ClearedOnlyAfterMotorStops`.
+`Motor_OosRequestWhileRunningByFeedback_Rejected`, `Motor_ResetFailToStop_ClearedOnlyAfterMotorStops`;
+ревью перед выпуском (мутанты «время назад» M1 и аналоги для `tMinRun` и окна Reset выживали):
+`Motor_TimeBackwardsDuringMinStop_PauseRestarts`, `Motor_TimeBackwardsDuringMinRun_KeepsRunning`,
+`Motor_TimeBackwardsDuringResetPulse_PulseRestarts`.
 
 Числа — `tools/reference/motor.py` (сценарии `run_*`, `inhibit_*`, `starts_limit_3_*`, `maint_runtime_*`,
 `current_run_*`, `dropout_bridged_*`), сверка модели с тестами — `tools/project_checks/test_motor_reference.py`. Тесты

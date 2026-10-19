@@ -309,7 +309,7 @@ persistent-данных на Control Win V3 и ПЛК210 тестами не п�
 3. В окне наблюдения: `coUnit.GVL_coUnit.coUnitRunner.AllTestSuitesFinished` (TRUE в первом цикле —
    все тесты одноцикловые, кроме `Runtime_LTime_MonotonicAcrossTaskCycles`: 50 циклов),
    `coUnit.GVL_coUnit.coUnitRunner.TestResults.TestSuiteResults.NumberOfFailedTestCases` — 0,
-   `….NumberOfTestCases` — 420. Имя и сообщение упавшего теста —
+   `….NumberOfTestCases` — 453. Имя и сообщение упавшего теста —
    `….TestSuiteResults[i].TestCaseResults[j].TestName` / `FailureMessage` (индексы с 1).
 4. «Онлайн → Выход», закрыть IDE (иначе `cds.py` откажется открывать проект), при необходимости
    `cds.py runtime stop`. Без лицензии рантайм работает 2 часа.
@@ -334,7 +334,9 @@ _Шаги 2–3 в IDE не выполнялись: те же значения �
 
 2. Версия: в `tools/codesys/config.json` — `library.version` → `"1.0.0.0"`, `library.released` → `true`
    (I-09 в [ASSUMPTIONS.md](ASSUMPTIONS.md)); в `CHANGELOG.md` раздел `[Unreleased]` → `[1.0.0] - <дата>`;
-   контракт [API.md](API.md) уже 1.0.0. Заменить плейсхолдеры `<ИМЯ ФАМИЛИЯ>`, `<GITHUB_USER>` в README,
+   контракт [API.md](API.md) уже 1.0.0. _Выполнено на ветке `integrate` (19.10.2026): версия 1.0.0.0,
+   `released = true`, раздел `[1.0.0] - 2026-10-16`; библиотека собрана и поставлена в репозиторий `System`
+   (шаг 6)._ Заменить плейсхолдеры `<ИМЯ ФАМИЛИЯ>`, `<GITHUB_USER>` в README,
    LICENSE и заголовках POU.
 3. Артефакты: `python tools\codesys\cds.py library --compiled --released` (`.library`,
    `.compiled-library`), `python tools\codesys\cds.py build` (`build\plc-process-lib.project`),
@@ -370,3 +372,13 @@ _Шаги 2–3 в IDE не выполнялись: те же значения �
   задавать логикой через `xSpExt`.
 - **NaN на ПЛК210** (F-10): прогнать набор `FB_Util_Test` на контроллере — сравнения с NaN не должны давать
   исключений.
+- **Параметры вне Cfg** (Cfg заморожена в 1.x, A-13) сверить с паспортами оборудования объекта:
+  `GVL_Const.VLV_UNSEAT_BYPASS` = 2 с — окно страгивания клина задвижки (VLV-21, паспорт привода: время
+  шунтирования моментного выключателя); `CV_TIGHT_HYST_PCT` = 1 % — гистерезис плотного закрытия (CV-13,
+  паспорт позиционера); `VFD_POWER_UP_DELAY` = 10 с — время готовности ПЧ к обмену после подачи питания (VFD-12,
+  паспорт ПЧ: время загрузки и инициализации интерфейса). Другие значения — только новой версией библиотеки
+  (правка `GVL_Const`), поля Cfg — кандидаты 2.0.
+- **Задвижка с электроприводом и блокировкой** (VLV-20): при отказе концевиков блокировка ведёт задвижку в
+  положение безопасности по времени хода `tTravel` — `tTravel` должно быть не меньше полного хода по паспорту
+  привода с запасом, а моментный выключатель (если он заведён в ПЛК) — настроен: при отказе концевиков ход
+  заканчивается муфтой или по времени.

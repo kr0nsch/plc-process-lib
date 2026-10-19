@@ -184,13 +184,14 @@ xDryRun := GVL_Devices.fbLSL102.xValue;
 `DigitalInput_ChannelFault_HoldLast` · `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` ·
 `DigitalInput_OutOfService_AlarmsOutOfService` · `DigitalInput_SubstitutionTimeout_ReturnsToAuto`.
 
-Сверх контракта (9): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
+Сверх контракта (10): `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` (умолчания Cfg, тип, слоты,
 DI-1), `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` (безопасное значение без Cfg, биты
 `wCfgErr`), `DigitalInput_ResetCmd_AcceptedAndAcksAlarms`, `DigitalInput_ChannelFault_ForceFalse`,
 `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` (DI-1: предустановка по первой корректной Cfg),
 `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` (DI-2), `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod`
 (DI-6), `DigitalInput_AlarmEvents_ValueIsZeroOrOne` (DI-7), `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay`
-(DI-2: значение отказа после возврата канала снимается через задержку). Контрактный
+(DI-2: значение отказа после возврата канала снимается через задержку), `DigitalInput_SubstitutionUnlimited_NoTimeout`
+(`tSubstMax = T#0S` — без ограничения, ревью перед выпуском). Контрактный
 `DigitalInput_OutOfService_AlarmsOutOfService` дополнен проверкой слежения `xSubstValue` в OutOfService (DI-8).
 
 Проверено в CODESYS (Control Win V3, 16.10.2026, `cds.py test`): 18 из 18.

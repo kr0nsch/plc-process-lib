@@ -158,7 +158,8 @@ SuppressedByDesign > Shelved, приоритет, задержки появле�
 таймаутом. В каждом устройстве восемь слотов `afbAlarm[0..7]` базы, индекс — `E_<Dev>Alarm`, номер —
 `udiAlarmIdBase + слот`; каждая `ST_<Dev>Cfg` заканчивается полями `udiAlarmIdBase` и `astAlarm[0..7]`.
 Квитирование всех тревог, маски квитирования и shelve из HMI и сводка `wAlmActive`/`wAlmUnack`/
-`wAlmShelved`/`ePrioUnack` реализованы один раз в `FB_DeviceBase.RunAlarms`. События уходят в
+`wAlmShelved` (отложенные оператором)/`wAlmSuppressed` (подавленные логикой)/`ePrioUnack` реализованы один раз в
+`FB_DeviceBase.RunAlarms`. События уходят в
 `PL.GVL_Lib.itfAlarmSink` — единственную изменяемую глобальную переменную библиотеки; приложение
 присваивает её каждый цикл. Тексты тревог в ПЛК не хранятся (A-11).
 

@@ -7,7 +7,8 @@
 запорная и регулирующая арматура, ПИД-регулятор и тревоги ISA-18.2. У каждого устройства — режимы
 (авто, ручной, местный, вывод из работы), безопасное состояние, диагностика NAMUR NE 107 (у AI — и
 NE 43), квитирование и обмен с HMI/SCADA через структуры команд и состояний; поведение закреплено
-контрактом [docs/API.md](docs/API.md) и проверено 420 тестами coUnit в CODESYS Control Win V3.
+контрактом [docs/API.md](docs/API.md) и проверено 453 тестами coUnit в CODESYS Control Win V3. Версия —
+**1.0.0** ([CHANGELOG.md](CHANGELOG.md)).
 
 ## Демонстрация
 
@@ -184,22 +185,25 @@ python tools/reference/pid.py                   # эталоны тестов: c
 
 ## Тесты и проверки
 
-coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.2026 — **420 тестов в 14
+coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.2026 — **453 теста в 14
 наборах, все пройдены**:
 
 | Набор | Тестов | | Набор | Тестов |
 |---|---|---|---|---|
 | `FB_Time_Test` | 24 | | `FB_AnalogInput_Test` | 51 |
-| `FB_Util_Test` | 26 | | `FB_DigitalInput_Test` | 18 |
-| `FB_Common_Test` | 11 | | `FB_Motor_Test` | 52 |
-| `FB_Alarm_Test` | 38 | | `FB_MotorVfd_Test` | 27 |
-| `FB_DeviceBase_Test` | 44 | | `FB_Valve_Test` | 41 |
-| `FB_Runtime_Test` | 8 | | `FB_ControlValve_Test` | 24 |
-| `FB_Integration_Test` | 3 | | `FB_Pid_Test` | 53 |
+| `FB_Util_Test` | 28 | | `FB_DigitalInput_Test` | 19 |
+| `FB_Common_Test` | 11 | | `FB_Motor_Test` | 55 |
+| `FB_Alarm_Test` | 40 | | `FB_MotorVfd_Test` | 33 |
+| `FB_DeviceBase_Test` | 47 | | `FB_Valve_Test` | 47 |
+| `FB_Runtime_Test` | 8 | | `FB_ControlValve_Test` | 28 |
+| `FB_Integration_Test` | 5 | | `FB_Pid_Test` | 54 |
 
-Основа — 151 тест, устройства — 266, межсемейные — 3. Тесты каждого семейства проверены мутациями
-(однострочная ошибка в коде — хотя бы один тест падает): разделы «Тесты» в [docs/fb/](docs/fb/) и
-[docs/TEST_REPORT.md](docs/TEST_REPORT.md).
+Основа — 158 тестов, устройства — 290, межсемейные — 5 (в том числе контур AI → ПИД → ПЧ). Тесты каждого
+семейства проверены мутациями (однострочная ошибка в коде — хотя бы один тест падает): разделы «Тесты» в
+[docs/fb/](docs/fb/) и [docs/TEST_REPORT.md](docs/TEST_REPORT.md). Перед выпуском три независимых ревью
+(стандарты, ПО, потребители) нашли 25 замечаний — все закрыты: исправления с тестами, которые падали до них,
+и тесты на выжившие мутации ([TEST_REPORT.md](docs/TEST_REPORT.md#ревью-перед-выпуском-находки-и-мутации)).
+Что изменить у потребителей (генератор iolistgen, КНС) — [docs/CONSUMERS.md](docs/CONSUMERS.md).
 
 | Проверка | Где | Итог |
 |---|---|---|
@@ -223,6 +227,7 @@ coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.202
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md), [DECISIONS.md](docs/DECISIONS.md) — обзор типов и рассмотренные варианты API
 - [TEST_REPORT.md](docs/TEST_REPORT.md), [STATIC_ANALYSIS.md](docs/STATIC_ANALYSIS.md), [BUILD_ERRORS.md](docs/BUILD_ERRORS.md) — отчёты
 - [MANUAL_STEPS.md](docs/MANUAL_STEPS.md) — шаги в IDE: библиотека, тесты, Persistent Variables, релиз
+- [CONSUMERS.md](docs/CONSUMERS.md) — что изменить у потребителей (iolistgen, КНС); [alarm_templates.csv](docs/alarm_templates.csv) — шаблоны текстов тревог
 - [LAYOUT.md](docs/LAYOUT.md) — раскладка исходников; правила кода — [CONTRIBUTING.md](CONTRIBUTING.md); изменения — [CHANGELOG.md](CHANGELOG.md)
 
 ## Ограничения и дальнейшие шаги
@@ -252,7 +257,7 @@ PLC210 target, namespace `PL`): analog and digital inputs (NAMUR NE 43 signal va
 and VFD motors, on/off and control valves, a PID controller with back-calculation anti-windup and
 bumpless transfer, and ISA-18.2 alarms. Every device shares an abstract base with operating modes,
 last-known-good configuration, NAMUR NE 107 status and HMI/SCADA command/status structures laid out as a
-Modbus register map. The behaviour is fixed by an API contract (`docs/API.md`, v1.0.0) and covered by 420
+Modbus register map. The behaviour is fixed by an API contract (`docs/API.md`, v1.0.0) and covered by 453
 coUnit tests that pass in CODESYS Control Win V3, deterministic through an injectable time source and
 mutation-checked per family. Sources are plain-text ST, built, tested and packaged as a `.library`
 headlessly by `tools/codesys/cds.py`; CI lints the code and runs iec_checker. Not yet verified on PLC210

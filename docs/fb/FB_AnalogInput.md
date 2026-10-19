@@ -107,9 +107,9 @@ flowchart LR
    | NaN, ±Inf, \|rIn\| > 1E30 | NotFinite | отказ | Failure | удерживается |
    | `xChannelFault` | ChannelFault | отказ | Failure | удерживается |
    | I ≤ 3,6 мА | FailLow | отказ | Failure | удерживается |
-   | 3,6 < I < 3,8 мА | UnderRange | вне диапазона | OutOfSpecification | считается (экстраполяция) |
+   | 3,6 < I < 3,8 мА | UnderRange | вне диапазона | OutOfSpecification | насыщение 3,8 мА, без экстраполяции; подтверждено — `xValid = FALSE` (AI-13) |
    | 3,8 ≤ I ≤ 20,5 мА | Good | — | Good | считается |
-   | 20,5 < I < 21,0 мА | OverRange | вне диапазона | OutOfSpecification | считается |
+   | 20,5 < I < 21,0 мА | OverRange | вне диапазона | OutOfSpecification | насыщение 20,5 мА; подтверждено — `xValid = FALSE` (AI-13) |
    | I ≥ 21,0 мА | FailHigh | отказ | Failure | удерживается |
 
    Границы 3,6 и 21,0 мА включены в отказ, 3,8 и 20,5 мА — в норму (A-02). **Сверить с
@@ -134,7 +134,8 @@ flowchart LR
 | Режим | Сигнал | `rValue_eu` | `xValid` | Уставки |
 |---|---|---|---|---|
 | корректной Cfg ещё не было | любой | 0.0 | FALSE | сняты |
-| Auto | норма или вне диапазона | фильтрованное значение | TRUE | считаются |
+| Auto | норма | фильтрованное значение | TRUE | считаются |
+| Auto | вне диапазона NE 43 (защитная полоса), ещё не подтверждено / подтверждено (`xOor`) | фильтрованное значение насыщения (3,8 или 20,5 мА) | TRUE / FALSE (AI-13) | считаются (по значению насыщения) |
 | Auto | отказ, ещё не подтверждён (бит `AI_STS_FAIL_PENDING`) | последнее хорошее | TRUE | считаются по удержанному |
 | Auto | отказ, ещё не подтверждён, хорошего значения после старта ПЛК или после выхода из OutOfService не было (AI-2) | как при подтверждённом отказе; бита `AI_STS_FAIL_PENDING` нет | FALSE | как при подтверждённом отказе |
 | Auto | отказ подтверждён (и пока подтверждается возврат) | `HoldLast` — последнее хорошее; `Substitute` — `rFailValue_eu` | FALSE | сняты; при `xLimitsOnFail` — по значению отказа |
@@ -143,6 +144,15 @@ flowchart LR
 
 Удержание на время подтверждения важно для объекта: ток 0 мА при обрыве дал бы −25 % шкалы и
 мгновенный ложный LL раньше, чем сработает отказ.
+
+**Защитные полосы NE 43** (AI-13). Исправный датчик NE 43 токов 3,6…3,8 и 20,5…21 мА не выдаёт: там либо
+насыщение (процесс за пределом шкалы — известна только граница), либо ток отказа NAMUR (номинально 3,6 мА),
+прочитанный с погрешностью канала как 3,61 мА. Поэтому значение не экстраполируется дальше насыщения, а
+подтверждённый выход за диапазон для управления непригоден: ПИД, получающий `xValid`, фиксирует отказ PV и
+удерживает выход, а не уводит его к пределу (тест `LevelLoop_GuardBandCurrent_PidHoldsOutput`). Уставки не
+снимаются: для LL и HH значение насыщения — «не выше» или «не ниже» границы, а снятие уставок отключило бы
+защиту по верхнему уровню, когда уровень выше шкалы. Тесты `AnalogInput_GuardBandLow_InvalidAfterDelay`,
+`AnalogInput_GuardBandHigh_InvalidLimitsKept`.
 
 ## Режимы
 
@@ -268,7 +278,7 @@ stFT201Cfg : PL.ST_AnalogInputCfg := (rRangeHi_eu := 400.0, xSqrt := TRUE, rLowC
 
 ## Допущения и отклонения
 
-Решения реализации AI-1…AI-12 и открытые вопросы AI-Q1…AI-Q7 с решениями интеграции — [ASSUMPTIONS.md, «FB_AnalogInput»](../ASSUMPTIONS.md#fb_analoginput) и
+Решения реализации AI-1…AI-13 (AI-13 — по ревью перед выпуском) и открытые вопросы AI-Q1…AI-Q7 с решениями интеграции — [ASSUMPTIONS.md, «FB_AnalogInput»](../ASSUMPTIONS.md#fb_analoginput) и
 [«Открытые вопросы семейств»](../ASSUMPTIONS.md#открытые-вопросы-семейств-решения-интеграции). Изменения нормативного поведения
 контракта rc2 — AI-2 (старт с оборванной линией), AI-3 и AI-10 (контроль и слежение по режимам), AI-12 (фильтр
 после провала) — [API.md, «Отклонения от rc2»](../API.md#отклонения-от-rc2). Общие решения: A-01 (LKG), A-02 (границы
@@ -280,7 +290,7 @@ NE 43), A-06 (подмена не энергонезависима), F-17 (`Alar
 |---|---|
 | CODESYS 3.5.17.30, `cds.py build --tests`, `cds.py check --tests` | 0 ошибок, 0 предупреждений (C0371 нет) |
 | `st_lint --strict` | 0 ошибок, подавлений нет (составные префиксы массивов и `VAR_IN_OUT CONSTANT` линтер шаблона понимает, F-13 снято) |
-| iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; обоснованы в `tools/check/iec_checker_allow.toml` (раздел семейства входов): PLCOPEN-CP9 — классическая сложность тела 10, `CheckConfig` 12, `ComputeValue` 12, `ClassifySignal` 9, `SelectValue` 8; UnusedVariable `xChannelFault`, `lrFlt`, `xFltInit`, `rGood_eu`, `xClamped` — артефакт понижения (их используют методы, вынесенные в функции); в тестах — объединения `uEnum`, `uPrio` и индексы помощников `SetLimit`, `SetAlarmPriority` |
+| iec_checker 0.4 (`run_iec_checker.py --tests`) | ошибок разбора нет; обоснованы в `tools/check/iec_checker_allow.toml` (раздел семейства входов): PLCOPEN-CP9 — классическая сложность тела 10, `CheckConfig` 12, `ComputeValue` 13, `ClassifySignal` 9, `SelectValue` 8; UnusedVariable `xChannelFault`, `lrFlt`, `xFltInit`, `rGood_eu`, `xClamped` — артефакт понижения (их используют методы, вынесенные в функции); в тестах — объединения `uEnum`, `uPrio` и индексы помощников `SetLimit`, `SetAlarmPriority` |
 | RuSTy 1.0.6 (`run_rusty.py`) | проверяются все файлы, ошибок нет: `VAR_IN_OUT CONSTANT` вариант сборки `rusty` понижает до `VAR_IN_OUT` (замена R13 шаблона); исключений нет |
 
 Ошибок разбора нет. Копия элемента в `CheckConfig` (`stLim := stCfgIn.astLimit[uiIdx]`) и метод
@@ -311,7 +321,7 @@ NE 43), A-06 (подмена не энергонезависима), F-17 (`Alar
 `AnalogInput_OutOfService_HoldsValueInvalid` · ★ `AnalogInput_InvalidRangeAtStartup_CheckFunctionSafeValue` ·
 ★ `AnalogInput_LimitOrderInvalidAtRuntime_KeepsLastValidCfg`.
 
-Сверх контракта (11): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
+Сверх контракта (14): `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` (умолчания Cfg, тип, слоты,
 режим после старта — пункты 1 и 4 чек-листа), `AnalogInput_ResetCmd_AcceptedAndAcksAlarms`,
 `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` (AI-2), `AnalogInput_AlarmEvents_FailureValueIsRawInput`,
 `AnalogInput_CfgErrBits_MatchContractMap` (каждый бит `wCfgErr`), `AnalogInput_TimeBackwards_FilterHoldsWithoutJump`,
@@ -319,7 +329,11 @@ NE 43), A-06 (подмена не энергонезависима), F-17 (`Alar
 OutOfService), `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` (AI-7: новый срок подмены, округление
 `uiSubstRemain_s` вверх), `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` (AI-12: короткий провал не сбрасывает
 фильтр, ложного HH нет), `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` (подмена при оборванной линии:
-уставки по подменённому значению, тревоги уставок подавлены, при возврате в Auto уставки сняты сразу).
+уставки по подменённому значению, тревоги уставок подавлены, при возврате в Auto уставки сняты сразу);
+по ревью перед выпуском: `AnalogInput_GuardBandLow_InvalidAfterDelay`, `AnalogInput_GuardBandHigh_InvalidLimitsKept`
+(AI-13), `AnalogInput_SubstitutionUnlimited_NoTimeout` (`tSubstMax = T#0S` — без ограничения; мутант ревью M2
+выживал). Контрактные `AnalogInput_At3p7mA_IsOutOfSpecification` и `AnalogInput_At20p7mA_IsOutOfSpecification`
+проверяют значение насыщения и `xValid = FALSE` (AI-13).
 
 Контрактные тесты дополнены проверками на границах, которые раньше не ловили мутации: отсечка ровно на
 `rLowCut_pct` не срабатывает (`AnalogInput_LowCut_BelowCut_ReturnsZero`), бит `AI_STS_FAIL_PENDING` снимается

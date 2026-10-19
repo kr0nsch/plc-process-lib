@@ -102,8 +102,9 @@ stateDiagram-v2
   SuppressedByDesign, событие — при снятии подавления); повторный Shelve отсчитывает срок заново;
   shelve нормальной тревоги тоже допустим (Normal → Shelved). Запрос, принятый методом до вывода из
   работы, тело отклоняет, если в том же вызове поднялся `xOutOfService`.
-- **Приоритет None** выключает тревогу: Normal без события, все выходы FALSE, `udiSeq` не меняется,
-  shelve снимается. После включения приоритета при активном условии — Activated (задержка
+- **Приоритет None** выключает тревогу: все выходы FALSE, shelve снимается. Тревога не в Normal закрывается
+  одним переходом в Normal с событием `Disabled` (приоритет события — None, `udiSeq` + 1): журнал и список по
+  событиям не держат «призрак» (F-31); выключение нормальной тревоги и дальнейшие вызовы событий не дают. После включения приоритета при активном условии — Activated (задержка
   появления отсчитывается от включения). Смена приоритета у активной тревоги действует сразу и
   события не порождает.
 - **«Время назад»** (`FB_FakeTime.SetNow` назад, сбой источника): задержки начинают отсчёт заново
@@ -125,7 +126,7 @@ stateDiagram-v2
 | `eOldState`, `eNewState` | состояния до и после перехода |
 | `eReason` | причина (таблица выше) |
 | `ltTime` | монотонная отметка этого вызова; астрономическое время ставит приёмник |
-| `rValue` | значение процесса в момент события |
+| `rValue` | значение процесса в момент события; всегда конечно: NaN, ±Inf и `|x| > REAL_SANE_MAX` — 0.0 (F-33) |
 
 Ответ приёмника FALSE (буфер переполнен) ФБ не повторяет. Очерёдность событий внутри цикла —
 порядок вызова ФБ. Приложение присваивает `PL.GVL_Lib.itfAlarmSink` **каждый цикл** до вызова
@@ -140,7 +141,8 @@ stateDiagram-v2
 |---|---|
 | `wAlmActive` | `xActive` (условие после задержек, в любом состоянии) |
 | `wAlmUnack` | `xUnacked` (ActiveUnack или RtnUnack) |
-| `wAlmShelved` | в Shelved, SuppressedByDesign или OutOfService |
+| `wAlmShelved` | в Shelved (отложен оператором) |
+| `wAlmSuppressed` | в SuppressedByDesign (подавлен логикой); OutOfService — ни в одном слове, он виден по `eMode` (F-32) |
 | `ePrioUnack` | наивысший `AlarmPriority` среди неквитированных слотов |
 
 ## Пример
@@ -172,7 +174,7 @@ fbNoStandby(xIn := NOT xStandbyAvailable,
 `Alarm_PriorityNone_NeverActivates`, `Alarm_AckInNormal_ReturnsFalse`,
 `Alarm_SeqIncrementsOnEachTransition`, `Alarm_Transition_SendsEventToSink`.
 
-Сверх контракта (20): `Alarm_AckAndClearSameCall_TwoEventsInOrder`,
+Сверх контракта (22): `Alarm_AckAndClearSameCall_TwoEventsInOrder`,
 `Alarm_PriorityNoneToMedium_ActiveCondition_Activates`, `Alarm_PriorityChangeWhileActive_NoEvent`,
 `Alarm_PriorityOutOfEnum_TreatedAsMedium`, `Alarm_SuppressClearsUnack_ReleaseWithoutCondition_GoesNormal`,
 `Alarm_ShelveWhileSuppressed_ShelvedAfterRelease`, `Alarm_ShelveExpiresDuringSuppress_ReleaseGoesToBase`,
@@ -182,7 +184,8 @@ fbNoStandby(xIn := NOT xStandbyAvailable,
 `Alarm_InterfaceProperties_MatchOutputs`, `Alarm_NoTimeSource_FallsBackToSystemTime`,
 `Alarm_Unshelve_ReturnsTrueOnlyWhenShelved`, `Alarm_ShelveRequestThenOos_Rejected`,
 `Alarm_PriorityNone_CancelsShelve`, `Alarm_PriorityReenabled_OnDelayCountsFromEnabling`,
-`Alarm_AckWithoutEffect_NotKeptForLater`.
+`Alarm_AckWithoutEffect_NotKeptForLater`; ревью перед выпуском: `Alarm_PriorityNoneWhileActive_EmitsClosingEvent`
+(F-31), `Alarm_NonFiniteValue_EventValueFinite` (F-33).
 
 Описания — в [TEST_REPORT.md](../TEST_REPORT.md). Тревоги в составе устройства (маски, OutOfService
 устройства, номера) проверяет `FB_DeviceBase_Test`.

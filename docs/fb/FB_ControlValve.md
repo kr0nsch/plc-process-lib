@@ -57,7 +57,7 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
 | `rOutMax_pct` | `REAL` | 100.0 | верхний предел задания, % | бит 0 — `> 100` или не конечен |
 | `rRateUp_pctps` | `REAL` | 0.0 | скорость роста выхода, %/с; 0 — без ограничения | бит 1 `CV_CFG_RATE` — `< 0` или не конечна |
 | `rRateDown_pctps` | `REAL` | 0.0 | скорость спада, %/с; 0 — без ограничения | бит 1 |
-| `rTightShut_pct` | `REAL` | 0.0 | порог плотного закрытия: выход ниже — 0 %; 0 — выключено | бит 4 `CV_CFG_TIGHT_SHUT` — `< 0`, не конечен или `>= rOutMax_pct` |
+| `rTightShut_pct` | `REAL` | 0.0 | порог плотного закрытия: выход ниже — 0 %, снимается на пороге + `CV_TIGHT_HYST_PCT` (1 %); 0 — выключено | бит 4 `CV_CFG_TIGHT_SHUT` — `< 0`, не конечен или `>= rOutMax_pct` |
 | `xOutInvert` | `BOOL` | FALSE | TRUE: 100 % хода = 4 мА | — |
 | `rSafePos_pct` | `REAL` | 0.0 | положение по блокировке и отказу (не путать с механическим при потере воздуха) | бит 2 `CV_CFG_SAFE_POS` — вне 0…100 или не конечно |
 | `eFaultAction` | `E_CvFaultAction` | `Hold` | реакция на отказ: `Hold` — удержание, `SafePos` — `rSafePos_pct` без рампы | бит 5 `CV_CFG_FAULT_ACTION` — вне перечисления |
@@ -87,11 +87,14 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
 | 6 | Auto | `LIMIT(rOutMin, rPosSpAuto_pct, rOutMax)` через рампу; задание не число — удержание и `CV_WRN_SP_INVALID` | да | `CV_STS_RAMPING`, `LIMITED_MIN/MAX` |
 | 7 | Manual | `LIMIT(rOutMin, stCmd.rPosSpMan_pct, rOutMax)` через рампу (не число — так же) | да | то же |
 
-- После выбора: `rTightShut_pct > 0` и положение ниже порога → `rOut_pct := 0` (`CV_STS_TIGHT_SHUT`).
-  Плотное закрытие действует на выход, а не на состояние рампы: рампа от 0 проходит порог и не
-  «залипает» (тест `ControlValve_TightShut_BelowThresholdGivesZero`).
-- Рампа — `F_RateLimit` по фактическому шагу времени `ltDt`: результат не зависит от цикла задачи
-  (тест `ControlValve_Ramp_IndependentOfCycleTime`). В первом вызове (шаг 0) при неограниченной скорости
+- После выбора — плотное закрытие с гистерезисом (CV-13): включается, когда положение ниже `rTightShut_pct`,
+  снимается, когда оно не ниже `rTightShut_pct + CV_TIGHT_HYST_PCT` (1 %, но не выше `rOutMax_pct`); пока действует
+  — `rOut_pct := 0` (`CV_STS_TIGHT_SHUT`). Задание, шумящее у порога, не переключает выход каждый цикл (тест
+  `ControlValve_TightShutHysteresis_NoChatter`). Плотное закрытие действует на выход, а не на состояние рампы:
+  рампа от 0 проходит порог и не «залипает» (тест `ControlValve_TightShut_BelowThresholdGivesZero`).
+- Рампа — `F_RateLimitLr` по фактическому шагу времени `ltDt`, состояние `lrRamp_pct` — LREAL (CV-14): результат не
+  зависит от цикла задачи и при медленной рампе и коротком цикле (0,003 %/с при 1 мс; тесты
+  `ControlValve_Ramp_IndependentOfCycleTime`, `ControlValve_SlowRamp1msCycle_NotStalled`). В первом вызове (шаг 0) при неограниченной скорости
   в нужную сторону выход сразу равен заданию. После старта ПЛК рампа начинается от 0 % (CV-12).
 - При переключениях рампа начинается с текущего выхода: `OnModeChanged` предустанавливает её
   `rOut_pct`; после блокировки и отказа с `SafePos` рампа идёт от положения безопасности.
@@ -131,7 +134,8 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
   `ControlValve_FbInvalid_MaintenanceRequiredKeepsControl`).
 - **Отказ позиционера** не фиксируется: ушёл — выход возвращается к заданию по рампе (тест
   `ControlValve_PositionerFault_SafePosAction`).
-- `arAlmValue`: Deviation — `rOut_pct − rPosFb_pct`, FbFailure — `rPosFb_pct`, остальные — `rOut_pct`.
+- `arAlmValue`: Deviation — `rOut_pct − rPosFb_pct` (0 без достоверной ОС), FbFailure — `rPosFb_pct`, остальные —
+  `rOut_pct`. Значение события всегда конечно: NaN — 0.0 (F-33, тест `ControlValve_FbNaN_EventAndStsFinite`).
 
 ## Статус и готовность
 
@@ -163,7 +167,7 @@ Reset (`stCommon.xReset`, `Reset()`) — `Accepted`: снимает зафикс
 | 28 | 14–15 | `rPosSp_pct` | `REAL` | задание после пределов, до рампы (в принудительных и удерживающих ветвях — их цель) |
 | 32 | 16–17 | `rOut_pct` | `REAL` | выход, % |
 | 36 | 18–19 | `rOut_mA` | `REAL` | выход, мА |
-| 40 | 20–21 | `rPosFb_pct` | `REAL` | ОС положения (вход как есть) |
+| 40 | 20–21 | `rPosFb_pct` | `REAL` | ОС положения (вход как есть; неконечное — 0.0, F-33) |
 | 44 | 22–23 | `rDeviation_pct` | `REAL` | `rOut_pct − rPosFb_pct`; 0 без достоверной ОС |
 | 48 | 24 | `wInterlock` | `WORD` | действующие блокировки (после маски) |
 | 50 | 25 | `uiFirstOut` | `UINT` | первопричина блокировки; `NO_FIRST_OUT` (16#FFFF) — нет |
@@ -196,12 +200,12 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 `ProcessMode` → первопричина, ОС, позиционер, рассогласование → `SelectOutput` (защищённый метод:
 выбор выхода по таблице 16.3; значения `stCmd.rPosSpMan_pct` и `stCfg.rSafePos_pct` получает
 параметрами, к `VAR_IN_OUT` не обращается — R2) → плотное закрытие, мА, слежение → тревоги →
-состояние и `FinishCycle`. Задержка — `FB_Delay` (`fbDev`). Состояние рампы — `rRamp_pct` (до
-плотного закрытия). Имена методов и переменных секции `VAR` для наследника зарезервированы (L2).
+состояние и `FinishCycle`. Задержка — `FB_Delay` (`fbDev`). Состояние рампы — `lrRamp_pct` (LREAL, до
+плотного закрытия), признак плотного закрытия с гистерезисом — `xTightAct`. Имена методов и переменных секции `VAR` для наследника зарезервированы (L2).
 
 ## Допущения и отклонения
 
-Решения реализации CV-1…CV-12 и решение интеграции по открытому вопросу CV-12 — [ASSUMPTIONS.md, «FB_ControlValve»](../ASSUMPTIONS.md#fb_controlvalve)
+Решения реализации CV-1…CV-14 (CV-13 и CV-14 — по ревью перед выпуском) и решение интеграции по открытому вопросу CV-12 — [ASSUMPTIONS.md, «FB_ControlValve»](../ASSUMPTIONS.md#fb_controlvalve)
 и [«Открытые вопросы семейств»](../ASSUMPTIONS.md#открытые-вопросы-семейств-решения-интеграции). Изменения нормативного поведения
 контракта rc2 — CV-1 (положение безопасности из поданной Cfg), CV-11 (выход в Local в пределах хода) —
 [API.md, «Отклонения от rc2»](../API.md#отклонения-от-rc2). Общие решения: A-01 (LKG), A-09 (OOS — удержание).
@@ -212,14 +216,14 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
   0 ошибок.
 - iec_checker 0.4 (`run_iec_checker.py --tests`): ошибок разбора нет. Обоснования в
   `tools/check/iec_checker_allow.toml`, раздел «Семейство арматуры»: PLCOPEN-CP9 (классическая
-  сложность — тело 16, `SelectOutput` 12, `CheckConfig` 8) и UnusedVariable `rPosSpAuto_pct` —
+  сложность — тело 19, `SelectOutput` 12, `CheckConfig` 8) и UnusedVariable `rPosSpAuto_pct` —
   артефакт понижения (вход использует только `SelectOutput`).
 - RuSTy 1.0.6: проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Тесты (`FB_ControlValve_Test`)
 
-Прогон: CODESYS 3.5.17.30, Control Win V3, 16.10.2026, `cds.py test` — все тесты набора пройдены.
-Числа — из `tools/reference/valve_reference.py` (сценарии `cv_manual_ramp`, `cv_tight_ramp`,
+Прогон: CODESYS 3.5.17.30, Control Win V3, 19.10.2026, `cds.py test` — все тесты набора пройдены.
+Числа — из `tools/reference/valve_reference.py` (сценарии `cv_manual_ramp`, `cv_tight_ramp`, `cv_slow_ramp`,
 `cv_return_ramp`, `cv_bumpless`, `cv_positioner`, `cv_cycle_independence`, `cv_ma`, `cv_local_clamp`), их согласованность
 проверяет `tools/project_checks/test_valve_reference.py`.
 
@@ -231,12 +235,18 @@ GVL_Devices.fbFIC201.xTrack := NOT GVL_Devices.fbFV201.xAutoActive;
 `ControlValve_AutoToManual_Bumpless` · `ControlValve_FbInvalid_MaintenanceRequiredKeepsControl` ·
 `ControlValve_PositionerFault_SafePosAction` · ★ `ControlValve_InvalidCfg_StartupSafePosition`
 
-Сверх контракта (11): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
+Сверх контракта (15): `ControlValve_OutOfService_HoldsOutput` · `ControlValve_AutoSpNaN_HoldsWithWarning` ·
 `ControlValve_PositionerFault_HoldAction` · `ControlValve_OosEntry_ClearsLatchedDeviation` ·
 `ControlValve_DefaultCfg_PassesCheck` · `ControlValve_CfgChecks_SetBits` ·
 `ControlValve_InvalidCfgAtRuntime_KeepsLastValid` · `ControlValve_Ramp_IndependentOfCycleTime` ·
 `ControlValve_LocalFeedbackOutOfRange_OutputClamped` ·
-`ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev` · `ControlValve_InterlockInManual_StaysAtSafePosition`
+`ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev` · `ControlValve_InterlockInManual_StaysAtSafePosition` ·
+`ControlValve_TightShutHysteresis_NoChatter` · `ControlValve_SlowRamp1msCycle_NotStalled` ·
+`ControlValve_FbNaN_EventAndStsFinite` · `ControlValve_InterlockFirstOut_KeptUntilResetOrOos`
+
+Ревью перед выпуском (19.10.2026): плотное закрытие без гистерезиса (CV-13), рампа в REAL при цикле 1 мс (CV-14) и
+NaN в Sts и событии (F-33) — тесты падали до исправления; мутант «первопричина перезаписывается каждый цикл»
+(M7) выживал — его ловит `ControlValve_InterlockFirstOut_KeptUntilResetOrOos`.
 
 Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат).
 Второй круг (после исправлений проверки, в копии рабочего дерева), четыре мутации: сразу пойман отказ

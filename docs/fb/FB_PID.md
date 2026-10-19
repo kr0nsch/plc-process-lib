@@ -256,7 +256,7 @@ Failure — регулятор в этот момент не управляет 
 | 0…27 | 0…13 | `stCommon` | `ST_DeviceSts` | общий заголовок |
 | 28 | 14 | `rSpTarget_eu` | `REAL` | цель задания после пределов, до рампы |
 | 32 | 16 | `rSp_eu` | `REAL` | действующее задание (после рампы) |
-| 36 | 18 | `rPv_eu` | `REAL` | PV (вход как есть) |
+| 36 | 18 | `rPv_eu` | `REAL` | PV (вход как есть; неконечная — 0.0, F-33) |
 | 40 | 20 | `rErr_pct` | `REAL` | ошибка e' последнего расчёта, % диапазона PV, со знаком действия |
 | 44 | 22 | `rOut_pct` | `REAL` | выход |
 | 48 | 24 | `rP_pct` | `REAL` | P последнего расчёта |
@@ -355,7 +355,7 @@ P-16 (удерживаемая цель в пределах) — [API.md, «От
 ★ `Pid_Fopdt_ClosedLoop_MatchesPythonReference` · ★ `Pid_InvalidCfg_StartupManualOutput` ·
 `Pid_RetainAuto_RestoredOnRestart` · `Pid_OutOfService_HoldsOutput`
 
-Сверх контракта (17): `Pid_Fopdt_SaturatedStep_BackCalcLimitsOvershoot` (насыщение в замкнутом
+Сверх контракта (18): `Pid_Fopdt_SaturatedStep_BackCalcLimitsOvershoot` (насыщение в замкнутом
 контуре с обратным расчётом и без) · `FopdtModel_OpenLoopStep_MatchesPythonReference` (помощник) ·
 `Pid_TimeBackwards_InitStep_NoJump` · `Pid_PvFail_SafeOut_DrivesSafeOutput` ·
 `Pid_SpTrackPv_ManualSetpoint_FollowsPv` · `Pid_SetpointNaN_HoldsTarget_Warns` ·
@@ -366,7 +366,10 @@ P-16 (удерживаемая цель в пределах) — [API.md, «От
 `MIN(dt/Tt, 1)`) · `Pid_Startup_OutActInitialisesOutput` (старт в Auto от `rOutAct_pct`, а не от нуля
 `rManualOut_pct`; неконечный `rOutAct_pct` — следующий источник) · `Pid_DtGap_BoundaryAtTDtMax` (шаг
 ровно `tDtMax` — обычный, на 1 мс больше — разрыв) · `Pid_SetpointRamp_ResumesAfterPvFailure` (рампа
-задания стоит, пока PV негодна, и продолжается без скачка к цели)
+задания стоит, пока PV негодна, и продолжается без скачка к цели) · `Pid_PvNaN_EventAndStsFinite` (PV NaN:
+значение события PvInvalid и `stSts.rPv_eu` конечны, F-33; ревью перед выпуском). В
+`Pid_Track_PresetsIntegrator_BumplessRelease` добавлена проверка `Available = FALSE` при слежении с годной PV
+(мутант ревью M4 выживал)
 
 Добавлены при приёмочной проверке (12): `Pid_PvFail_ShedToManual_AlarmStaysActive` (P-15: тревога
 после сброса в Manual) · `Pid_SetpointNaN_HeldTargetWithinSpLimits` (P-16) ·

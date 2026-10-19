@@ -95,6 +95,7 @@
 | Local | нет | сняты (катушка обесточена) | только внешняя авария | состояние по концевикам (арматуру двигают руками); блокировка — только `VLV_WRN_INTERLOCK_IN_LOCAL` |
 | OutOfService | нет | сняты | нет | состояние по концевикам; вход снимает зафиксированные отказы и первопричину |
 | блокировка (Auto/Manual) | `eSafePos` (`Stay` — стоп) | по цели, без разрешений | да | команды — `RejectedInterlock`; после снятия Manual остаётся в положении безопасности, Auto ведёт к `xAutoOpen` |
+| блокировка при отказе контроля (`Motorized`) | `eSafePos` (Open, Closed) — аварийный ход | выход направления безопасности, состояние Fault | отказ держится | только BothLimits, PositionLost, FailToOpen, FailToClose; не при ExtFault, TorqueTrip, без напряжения (VLV-20) |
 
 `xLocalSupported = TRUE`, `xLocalSel = xLocal`, `xOosAllowed = eState ∉ {Opening, Closing, Reversing}`
 (тест `Valve_OosRequestWhileMoving_Rejected`). Безударность в `OnModeChanged`: при переходе в Manual
@@ -169,7 +170,7 @@ stateDiagram-v2
 | Ситуация | Выходы и значения |
 |---|---|
 | Корректной Cfg ещё не было | `xQOpen = xQClose = xQCoil = FALSE`: привод стоит, катушка обесточена; состояние — по концевикам; открыть/закрыть — `RejectedCfg` (тест `Valve_InvalidCfg_StartupOutputsOff`) |
-| Отказ | выходы сняты, катушка обесточена (клапан уходит в положение пружины независимо от `eSafePos`, A-10) |
+| Отказ | выходы сняты, катушка обесточена (клапан уходит в положение пружины независимо от `eSafePos`, A-10); у задвижки с приводом при блокировке и одних отказах контроля — аварийный ход в `eSafePos` (VLV-20) |
 | OutOfService | выходы сняты |
 | Local | выходы сняты, ПЛК следит за концевиками |
 | Нет напряжения | выходы сняты, без отказа |
@@ -182,12 +183,29 @@ stateDiagram-v2
 | 1 `FailToClose` | Closing дольше `tTravel`, подключён ZSC или закрытие по моменту (тогда и при сработавшем ZSC: муфта не сработала) | Auto, Manual | да | Medium | бит 1 |
 | 2 `BothLimits` | оба концевика дольше `tLimitFilter` (при старте ПЛК — сразу) | Auto, Manual при корректной Cfg | **нет**: снимается сам | Medium | бит 2 |
 | 3 `PositionLost` | в Open/Closed, подтверждённом концевиком, он пропал без команды дольше `tLimitFilter` | Auto, Manual, есть напряжение | да | Medium | бит 3 |
-| 4 `TorqueTrip` | муфта в направлении хода раньше концевика; при закрытии по моменту — муфта закрытия раньше подключённого ZSC (без ZSC муфта закрытия — штатное окончание) | Auto, Manual, в ходе | да | Medium | бит 4 |
+| 4 `TorqueTrip` | муфта в направлении хода раньше концевика; при закрытии по моменту — муфта закрытия раньше подключённого ZSC (без ZSC муфта закрытия — штатное окончание); муфта открытия при страгивании с седла — нет (VLV-21) | Auto, Manual, в ходе | да | Medium | бит 4 |
 | 5 `ExtFault` | `xExtFault` | все, кроме OutOfService | да | Medium | бит 5 |
 | 6 `InterlockAct` | действует блокировка (Auto/Manual) | Auto, Manual | нет | None (выключена) | — |
 
 - Любой отказ: выходы сняты, `eState = Fault`, NE 107 Failure, `Available = FALSE`; положение
-  по-прежнему видно в `xOpened`/`xClosed` и битах `VLV_STS_OPENED`/`CLOSED`.
+  по-прежнему видно в `xOpened`/`xClosed` и битах `VLV_STS_OPENED`/`CLOSED`. Исключение — блокировка при одних
+  отказах контроля (ниже, VLV-20).
+- **Аварийный ход в положение безопасности** (VLV-20, `Motorized`, `eSafePos` Open или Closed): действует
+  блокировка, а отказали только средства контроля — BothLimits, PositionLost, FailToOpen, FailToClose; привод
+  исправен (нет ExtFault и TorqueTrip, есть напряжение и корректная Cfg). Задвижка идёт к `eSafePos`: включён
+  выход этого направления, `eState` остаётся Fault, биты `VLV_STS_OPENING`/`CLOSING` показывают ход,
+  `uiTravelRemain_s` — остаток. Концевикам при таком отказе верить нельзя, поэтому ход заканчивается по
+  согласованному концевику положения безопасности (свой замкнут, встречный нет), по муфте в этом направлении или
+  через `tTravel`. Пока блокировка и отказ держатся, ход не повторяется; снялись и вернулись — новый ход. Начало —
+  после выбега встречного направления (VLV-05). Вывод из работы во время хода отклоняется (`RejectedState`).
+  Тесты `Valve_InterlockWithBothLimits_DrivesSafe`, `Valve_InterlockAfterPositionLost_DrivesSafe`,
+  `Valve_InterlockWithExtFault_OutputsStayOff`.
+- **Страгивание с седла** (VLV-21): усилие вырыва клина из седла больше усилия хода, и муфта открытия
+  срабатывает при ещё замкнутом ZSC. При открытии из Closed муфта открытия не контролируется, пока ZSC замкнут и
+  ещё `tLimitFilter` после его размыкания (без ZSC — всё окно), но не дольше `VLV_UNSEAT_BYPASS` (2 с) от
+  начала хода; держится дольше — TorqueTrip. Контроль заклинивания в ходе остаётся. Окно — константа (Cfg
+  заморожена), сверить с паспортом привода. Тесты `Valve_OpenTorqueWhileUnseating_Ignored`,
+  `Valve_OpenTorqueUnseatingNoZsc_TripsAfterBypass`.
 - **Reset** (`stCommon.xReset` или `Reset()`): результат `Accepted` сразу. Если есть зафиксированные
   отказы, открывается окно `tResetWindow`: FailToOpen, FailToClose и PositionLost снимаются сразу (привод
   стоит — причина в прошлом), TorqueTrip — когда муфта отпустила, ExtFault — когда `xExtFault = FALSE`.
@@ -236,8 +254,8 @@ stateDiagram-v2
 |---|---|---|---|---|
 | 0 | `VLV_STS_OPENED` — `xOpened` | `VLV_FLT_FAIL_TO_OPEN` | `VLV_WRN_MAINT_CYCLES` — интервал ТО по циклам | `VLV_CFG_TYPE` — `eType` вне перечисления |
 | 1 | `VLV_STS_CLOSED` — `xClosed` | `VLV_FLT_FAIL_TO_CLOSE` | `VLV_WRN_POWER_LOST` — `xPowerOk = FALSE` | `VLV_CFG_TRAVEL` — `tTravel = T#0S` |
-| 2 | `VLV_STS_OPENING` — `eState = Opening` | `VLV_FLT_BOTH_LIMITS` (нефикс.) | `VLV_WRN_INTERLOCK_IN_LOCAL` — Local и блокировка | `VLV_CFG_SAFE_POS` — `eSafePos` вне перечисления или `Stay` у соленоида |
-| 3 | `VLV_STS_CLOSING` — `eState = Closing` | `VLV_FLT_POSITION_LOST` | `VLV_WRN_POSITION_BY_TIME` — Open без ZSO или Closed без ZSC (не по моменту) | `VLV_CFG_TORQUE` — `xCloseOnTorque` без `xTorqueUsed` или `xTorqueUsed` у соленоида |
+| 2 | `VLV_STS_OPENING` — `eState = Opening` или аварийный ход на открытие (VLV-20) | `VLV_FLT_BOTH_LIMITS` (нефикс.) | `VLV_WRN_INTERLOCK_IN_LOCAL` — Local и блокировка | `VLV_CFG_SAFE_POS` — `eSafePos` вне перечисления или `Stay` у соленоида |
+| 3 | `VLV_STS_CLOSING` — `eState = Closing` или аварийный ход на закрытие (VLV-20) | `VLV_FLT_POSITION_LOST` | `VLV_WRN_POSITION_BY_TIME` — Open без ZSO или Closed без ZSC (не по моменту) | `VLV_CFG_TORQUE` — `xCloseOnTorque` без `xTorqueUsed` или `xTorqueUsed` у соленоида |
 | 4 | `VLV_STS_INTERLOCKED` — блокировка действует (Auto/Manual) | `VLV_FLT_TORQUE_TRIP` | `VLV_WRN_POSITION_UNKNOWN` — `eState = Unknown` | `VLV_CFG_REVERSE` — `Motorized` и `tReverse = T#0S` |
 | 5 | `VLV_STS_PERMIT_MISSING` — `wPermitMissing <> 0` | `VLV_FLT_EXT_FAULT` | — | `VLV_CFG_RESET` — `tResetWindow = T#0S` |
 | 6 | `VLV_STS_TORQUE` — муфта сработала (сигнал) | — | — | `VLV_CFG_ALARM` — приоритет тревоги вне перечисления |
@@ -286,19 +304,20 @@ GVL_IO.xXV101_QClose := GVL_Devices.fbXV101.xQClose;
 
 Тело — нормативный порядок цикла (раздел 9.4 контракта): первый вызов → `BeginCycle` → LKG →
 сигналы по LKG → `ResetFaults` → `ProcessMode` → условия вызова и `HandleCommands` → шаги логики
-`SelectTarget`, `SuperviseLimits`, `TrackPosition`, `DriveToTarget`, `RunTravelTimers`, `SetOutputs`,
-`CountOperations` → тревоги → состояние и `FinishCycle`. Шаги — защищённые методы (правило L5);
+`SelectTarget`, `SuperviseLimits`, `TrackPosition`, `DriveToTarget`, `RunTravelTimers`, `SafeMoveOnFault`
+(аварийный ход, VLV-20), `SetOutputs`, `CountOperations` → тревоги → состояние и `FinishCycle`. Шаги — защищённые методы (правило L5);
 структуры `VAR_IN_OUT` они получают параметрами (`HandleCommands`, `CountOperations`), к
 `VAR_IN_OUT` экземпляра не обращаются (R2, C0371 нет). Вспомогательные `LimitPosition` (положение по
 концевикам) и `CurrentTarget` (цель «не дёргаться»). Задержки — только `FB_Delay` (`fbTravel`,
-`fbReverse`, `fbRunOff`, `fbBoth`, `fbPosLost`, `fbResetWin`). `fbRunOff` (выбег) вызывается дважды за
+`fbReverse`, `fbRunOff`, `fbBoth`, `fbPosLost`, `fbResetWin`, `fbSafeMove` — время аварийного хода, `fbUnseat` и
+`fbZscOff` — окно страгивания). `fbRunOff` (выбег) вызывается дважды за
 цикл: в `DriveToTarget` — с выходами прошлого вызова (отсчёт к этому моменту), в `SetOutputs` — с
 выходами этого вызова (отметка снятия выхода ровно в нём). Имена методов и переменных секции `VAR` для
 наследника зарезервированы (L2).
 
 ## Допущения и отклонения
 
-Решения реализации VLV-01…VLV-19 (в документе семейства были V-1…V-19) — [ASSUMPTIONS.md, «FB_Valve»](../ASSUMPTIONS.md#fb_valve).
+Решения реализации VLV-01…VLV-21 (в документе семейства были V-1…V-19; VLV-20 и VLV-21 — по ревью перед выпуском) — [ASSUMPTIONS.md, «FB_Valve»](../ASSUMPTIONS.md#fb_valve).
 Изменения нормативного поведения контракта rc2 — VLV-05 (пауза реверса и после остановки), VLV-09 (граница таймаута
 хода), VLV-15 (положение «по времени» в Local и OutOfService), VLV-19 (закрытие по моменту) — [API.md, «Отклонения
 от rc2»](../API.md#отклонения-от-rc2). Общие решения: A-01 (LKG), A-04 (Local), A-10 (соленоид на пружине),
@@ -311,14 +330,15 @@ A-12 (блокировки не фиксируются), A-13 (Cfg заморо�
 - iec_checker 0.4 (`run_iec_checker.py --tests`): ошибок разбора нет — в коде нет конструкций, которые
   понижение шаблона ещё не обходит (`LTIME()`, константы в границах массивов, `a[i].x`, длительности с
   пропуском единиц, ключевые слова как имена). Обоснования в `tools/check/iec_checker_allow.toml`,
-  раздел «Семейство арматуры»: PLCOPEN-CP9 (классическая сложность — тело 10, `DriveToTarget` 20,
-  `HandleCommands` 15, `TrackPosition` 15, `RunTravelTimers` 12, `SelectTarget` 10, остальные ≤ 8) и
+  раздел «Семейство арматуры»: PLCOPEN-CP9 (классическая сложность — тело 11, `DriveToTarget` 22,
+  `HandleCommands` 15, `TrackPosition` 15, `RunTravelTimers` 12, `SelectTarget` 10, `SafeMoveOnFault` 10,
+  остальные ≤ 8) и
   UnusedVariable — артефакт понижения (переменные, которые используют только методы-шаги).
 - RuSTy 1.0.6: проверяются все файлы, ошибок нет: вариант сборки `rusty` понижает `VAR_IN_OUT CONSTANT` до `VAR_IN_OUT` (замена R13 шаблона), исключений нет.
 
 ## Тесты (`FB_Valve_Test`)
 
-Прогон: CODESYS 3.5.17.30, Control Win V3, 16.10.2026, `cds.py test` — все тесты набора пройдены.
+Прогон: CODESYS 3.5.17.30, Control Win V3, 19.10.2026, `cds.py test` — все тесты набора пройдены.
 Числа — из `tools/reference/valve_reference.py` (сценарии `valve_travel_remain`, `valve_act_time`),
 их согласованность проверяет `tools/project_checks/test_valve_reference.py`.
 
@@ -334,7 +354,7 @@ A-12 (блокировки не фиксируются), A-13 (Cfg заморо�
 `Valve_PowerLoss_StopsWithoutFault` · `Valve_Local_OutputsOffTracksLimits` · `Valve_Cycles_CountedOnOpen` ·
 ★ `Valve_InvalidCfg_StartupOutputsOff`
 
-Сверх контракта (20): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
+Сверх контракта (26): `Valve_ExtFault_TripsAndResetRejectedWhileActive` ·
 `Valve_Reset_CauseClearsWithinWindow_FaultCleared` · `Valve_OosRequestWhileMoving_Rejected` ·
 `Valve_OosEntry_ClearsLatchedFaults` · `Valve_AutoToManual_Bumpless` · `Valve_PlcRestart_StateFromLimits` ·
 `Valve_ActTime_AccumulatesInRetain` · `Valve_MaintCyclesReached_MaintenanceRequired` ·
@@ -343,7 +363,15 @@ A-12 (блокировки не фиксируются), A-13 (Cfg заморо�
 `Valve_CloseOnTorque_ZscAloneKeepsDrivingUntilTimeout` · `Valve_ReverseAfterEndStop_WaitsReversePause` ·
 `Valve_CloseOnTorque_TorqueBeforeZsc_LatchesTorqueTrip` · `Valve_PositionByTime_LostInLocal_AutoDrivesAgain` ·
 `Valve_SolenoidByTime_CoilOff_NotReportedOpen` · `Valve_CloseOnTorqueNoZsc_TorqueMissing_SetsFailToClose` ·
-`Valve_PermitCloseMissing_AutoWaitsReportsCloseBits`
+`Valve_PermitCloseMissing_AutoWaitsReportsCloseBits` · `Valve_InterlockWithBothLimits_DrivesSafe` ·
+`Valve_InterlockAfterPositionLost_DrivesSafe` · `Valve_InterlockWithExtFault_OutputsStayOff` ·
+`Valve_OpenTorqueWhileUnseating_Ignored` · `Valve_OpenTorqueUnseatingNoZsc_TripsAfterBypass` ·
+`Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault`
+
+Ревью перед выпуском (19.10.2026): блокировка при отказе контроля не двигала задвижку (VLV-20), муфта открытия
+при страгивании давала TorqueTrip (VLV-21) — тесты падали до исправления; мутант «контроль ухода с концевика без
+проверки напряжения» (M6) выживал — его ловит `Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault`.
+`Valve_OosEntry_ClearsLatchedFaults` заводит муфту после страгивания (3 с хода).
 
 Мутационная проверка (16.10.2026, по одной однострочной мутации на прогон `cds.py test`, затем откат).
 Первый круг: все пять мутаций `FB_Valve` поймал хотя бы один тест — реверс без паузы

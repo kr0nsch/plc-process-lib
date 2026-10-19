@@ -79,7 +79,7 @@ SCADA. Реализует `I_Device` (и через него `I_AlarmSource`): �
 | `uiAlarmCount` | `UINT` | наследник, первый вызов | используемых слотов |
 | `afbAlarm[0..7]` | `FB_Alarm` | `RunAlarms` | слоты тревог (индекс — `E_<Dev>Alarm`) |
 | `axAlmCond[0..7]`, `axAlmSuppress[0..7]`, `arAlmValue[0..7]` | `BOOL`, `BOOL`, `REAL` | наследник, шаг 7 | условие, подавление и значение слота |
-| `wAlmActive`, `wAlmUnack`, `wAlmShelved`, `ePrioUnack` | | `RunAlarms` | сводка тревог |
+| `wAlmActive`, `wAlmUnack`, `wAlmShelved`, `wAlmSuppressed`, `ePrioUnack` | | `RunAlarms` | сводка тревог: `wAlmShelved` — отложенные оператором, `wAlmSuppressed` — подавленные логикой (F-32) |
 
 Границы массивов — `0..GVL_Const.DEV_ALARMS_MAX - 1`; длину проверяет
 `Device_AlarmSlotArrays_MatchDevAlarmsMax` (до синхронизации с понижением шаблона граница была
@@ -207,7 +207,9 @@ OutOfService. Виртуальный вызов проверен во время
 
 `eNe107 := MAX(eDevStatus, eModeStatus, eCfgStatus)` (значения упорядочены по тяжести):
 - `eDevStatus` — от логики устройства (Failure, OutOfSpecification, MaintenanceRequired);
-- `eModeStatus` — CheckFunction в OutOfService, а при `xManualIsCheck` (AI/DI) ещё и в Manual;
+- `eModeStatus` — CheckFunction в OutOfService и Local (механизмом управляют с места, выход ПЛК не
+  действует — категория C NE 107, «function check / local override», F-30), а при `xManualIsCheck` (AI/DI) ещё и
+  в Manual;
 - `eCfgStatus` — CheckFunction, если `wCfgErr <> 0` или корректной Cfg ещё не было.
 
 `Fault = (eNe107 = Failure)`: устройство в OutOfService с отказом показывает Failure, режим виден
@@ -233,7 +235,9 @@ OutOfService. Виртуальный вызов проверен во время
 2. **Вызов слотов** `0..MIN(uiAlarmCount, 8) - 1`: условие, подавление, `xOutOfService := (eMode =
    OutOfService)`, `udiId := udiIdBase + слот`, значение, параметры слота, `itfTimeAct`. Цикл —
    `FOR ui := 1 TO MIN(...)`: при 0 слотов беззнаковое «0 - 1» не возникает.
-3. **Сводка** `wAlmActive`, `wAlmUnack`, `wAlmShelved`, `ePrioUnack` — через `I_Alarm` слота.
+3. **Сводка** `wAlmActive`, `wAlmUnack`, `wAlmShelved` (Shelved), `wAlmSuppressed` (SuppressedByDesign),
+   `ePrioUnack` — через `I_Alarm` слота. Слоты в OutOfService (это режим устройства) — ни в одном из двух слов
+   (F-32).
 
 ## Карта битов
 
@@ -253,7 +257,7 @@ OutOfService. Виртуальный вызов проверен во время
 
 Общий заголовок `ST_DeviceSts` (14 полей по 16 бит): `wStatus`, `wFault`, `wWarning`, `wCfgErr`,
 `eMode`, `eNe107`, `eCmdResult`, `uiCmdSeq`, `wAlmActive`, `wAlmUnack`, `wAlmShelved`, `ePrioUnack`,
-`eDevType`, `wReserve` (0) — все заполняет `FinishCycle`.
+`eDevType`, `wAlmSuppressed` (бывший резерв `wReserve`, раскладка та же) — все заполняет `FinishCycle`.
 
 ## Проверено во время выполнения (CODESYS Control Win V3, 32 бит)
 
@@ -299,7 +303,7 @@ END_FOR
 `FB_Integration_Test` на настоящих устройствах (F-26, I-04); на тестовом устройстве то же проверяют
 `Device_DevTypeSetByHeir_ReportedInStsCommon` и `Device_DefaultAlarmCfgOfAllTypes_PassesCheckAlarmCfg`.
 
-Сверх контракта (29): `Device_HookViaThis_DispatchesToMostDerivedOverride`,
+Сверх контракта (32): `Device_HookViaThis_DispatchesToMostDerivedOverride`,
 `Device_SuperBodyCall_RunsBaseBodyOnSameStructs`, `Device_DerivedBodyWithoutSuper_BaseBodyNotRun`,
 `Device_InvalidCfgAtStart_CheckFunctionSafeOutput`, `Device_InvalidCfgDuringOperation_KeepsLastValidCfg`,
 `Device_AlarmPriorityInvalid_CfgErrBit`, `Device_DefaultAlarmCfgOfAllTypes_PassesCheckAlarmCfg`,
@@ -313,6 +317,8 @@ END_FOR
 `Device_ResetCmd_AcksAlarmsAndClearsLatch`, `Device_DevTypeSetByHeir_ReportedInStsCommon`,
 `Device_InputLike_ModeMemStartsAutoManualIsCheck`, `Device_ImplementsIDevice_InterfaceAccess`,
 `Device_AlarmSlotArrays_MatchDevAlarmsMax`, `Device_ShelveMaskNotAccepted_RejectedState`,
-`Device_MethodRequests_ProcessedOnce`, `Device_ShelveMaskOnOosEntry_RejectedState`.
+`Device_MethodRequests_ProcessedOnce`, `Device_ShelveMaskOnOosEntry_RejectedState`; ревью перед выпуском:
+`Device_OosRepeatWhileMovingInOos_Accepted` (F-22 (в), мутант M5 выживал), `Device_LocalMode_Ne107CheckFunction`
+(F-30), `Device_ShelvedAndSuppressed_SeparateMasks` (F-32).
 
 Описания — в [TEST_REPORT.md](../TEST_REPORT.md).
