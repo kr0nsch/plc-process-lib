@@ -13,7 +13,7 @@
   <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
   <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
   <img alt="Язык: Structured Text" src="https://img.shields.io/badge/Structured%20Text-3A4B60?style=flat-square">
-  <a href="#тесты-и-качество"><img alt="Тесты: coUnit — 453 из 453 в CODESYS Control Win V3; pytest — 626 тестов, все проходят при установленных iec_checker и RuSTy" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20626-3A4B60?style=flat-square&labelColor=1B2736"></a>
+  <a href="#тесты-и-качество"><img alt="Тесты: coUnit — 453 из 453 в CODESYS Control Win V3; pytest — 628 тестов, все проходят при установленных iec_checker и RuSTy" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20628-3A4B60?style=flat-square&labelColor=1B2736"></a>
 </p>
 
 <p align="center">
@@ -183,8 +183,8 @@
    python -m pytest
    ```
 
-   Увидите: `616 passed, 10 skipped` (меньше минуты). Пропущены 10 интеграционных тестов с настоящими
-   iec_checker и RuSTy: они ждут бинарники из шагов 4–5. С обоими инструментами — `626 passed` (около минуты).
+   Увидите: `618 passed, 10 skipped` (меньше минуты). Пропущены 10 интеграционных тестов с настоящими
+   iec_checker и RuSTy: они ждут бинарники из шагов 4–5. С обоими инструментами — `628 passed` (около минуты).
 3. Линтер ST: раскладка файлов, заголовки POU, префиксы имён, «магические числа».
 
    ```bash
@@ -379,7 +379,7 @@ flowchart LR
 | `st_lint --strict` | CI | 1332 файла, 0 замечаний, подавлений нет |
 | iec_checker v0.4 (`--tests`) | CI | 0 ошибок разбора, 0 необоснованных находок; 5192 обоснованных — [разбор](docs/STATIC_ANALYSIS.md) |
 | RuSTy 1.0.6 | CI, необязательно | 0 ошибок, исключённых файлов нет; 399 предупреждений — [разбор](docs/STATIC_ANALYSIS.md#rusty-plc---check) |
-| ruff, mypy, pytest | CI | пройдено; pytest — 626 тестов: в CI 622 пройдено, 4 интеграционных теста RuSTy пропущены (RuSTy — отдельное задание); локально с iec_checker и RuSTy — 626 из 626 |
+| ruff, mypy, pytest | CI | пройдено; pytest — 628 тестов: в CI 624 пройдено, 4 интеграционных теста RuSTy пропущены (RuSTy — отдельное задание); локально с iec_checker и RuSTy — 628 из 628 |
 
 **Прогон в CODESYS.** Нужны Windows, CODESYS 3.5.17.30, Python 3.11+ и coUnit 1.2.0.0 (скачать с CODESYS Forge и
 установить или указать путь в `COUNIT_LIBRARY` — [MANUAL_STEPS.md, раздел 2](docs/MANUAL_STEPS.md#2-counit-cfunit-1200)).
