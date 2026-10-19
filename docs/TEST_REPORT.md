@@ -8,12 +8,12 @@
 <!-- cds:test-report:begin (раздел обновляет `python tools/codesys/cds.py report`) -->
 ## Последний прогон в CODESYS
 
-Проверено в CODESYS 3.5.17.30 / CODESYS Control Win V3 (пользовательский процесс) — 2026-10-19 09:39:08. Итог: **все тесты пройдены**.
+Проверено в CODESYS 3.5.17.30 / CODESYS Control Win V3 (пользовательский процесс) — 2026-10-19 11:42:52. Итог: **все тесты пройдены**.
 
 | Параметр | Значение |
 |---|---|
-| Дата прогона | 2026-10-19 09:39:08 |
-| Коммит | 44e8201 |
+| Дата прогона | 2026-10-19 11:42:52 |
+| Коммит | cf4400a-dirty |
 | CODESYS | 3.5.17.30 (профиль `CODESYS V3.5 SP17 Patch 3`) |
 | Устройство в проекте | CODESYS Control Win V3 (4096 / 0000 0001 / 3.5.17.30) |
 | Рантайм | CODESYS Control Win V3 (пользовательский процесс) |
@@ -23,21 +23,21 @@
 
 | Набор | Тестов | Пройдено | Упало | Пропущено | Итог |
 |---|---|---|---|---|---|
-| `GVL_TestsAiDi.fbAnalogInputTest` | 51 | 51 | 0 | 0 | пройдено |
-| `GVL_TestsAiDi.fbDigitalInputTest` | 18 | 18 | 0 | 0 | пройдено |
-| `GVL_TestsAlarm.fbAlarmTest` | 38 | 38 | 0 | 0 | пройдено |
-| `GVL_TestsAlarm.fbDeviceBaseTest` | 44 | 44 | 0 | 0 | пройдено |
+| `GVL_TestsAiDi.fbAnalogInputTest` | 54 | 54 | 0 | 0 | пройдено |
+| `GVL_TestsAiDi.fbDigitalInputTest` | 19 | 19 | 0 | 0 | пройдено |
+| `GVL_TestsAlarm.fbAlarmTest` | 40 | 40 | 0 | 0 | пройдено |
+| `GVL_TestsAlarm.fbDeviceBaseTest` | 47 | 47 | 0 | 0 | пройдено |
 | `GVL_TestsAlarm.fbRuntimeTest` | 8 | 8 | 0 | 0 | пройдено |
 | `GVL_TestsFoundation.fbTimeTest` | 24 | 24 | 0 | 0 | пройдено |
-| `GVL_TestsFoundation.fbUtilTest` | 26 | 26 | 0 | 0 | пройдено |
+| `GVL_TestsFoundation.fbUtilTest` | 28 | 28 | 0 | 0 | пройдено |
 | `GVL_TestsFoundation.fbCommonTest` | 11 | 11 | 0 | 0 | пройдено |
-| `GVL_TestsMotor.fbMotorTest` | 52 | 52 | 0 | 0 | пройдено |
-| `GVL_TestsMotor.fbMotorVfdTest` | 27 | 27 | 0 | 0 | пройдено |
-| `GVL_TestsPid.fbPidTest` | 53 | 53 | 0 | 0 | пройдено |
-| `GVL_TestsValve.fbValveTest` | 41 | 41 | 0 | 0 | пройдено |
-| `GVL_TestsValve.fbControlValveTest` | 24 | 24 | 0 | 0 | пройдено |
-| `GVL_TestsIntegration.fbIntegrationTest` | 3 | 3 | 0 | 0 | пройдено |
-| **Всего** | 420 | 420 | 0 | 0 | **пройдено** |
+| `GVL_TestsMotor.fbMotorTest` | 55 | 55 | 0 | 0 | пройдено |
+| `GVL_TestsMotor.fbMotorVfdTest` | 33 | 33 | 0 | 0 | пройдено |
+| `GVL_TestsPid.fbPidTest` | 54 | 54 | 0 | 0 | пройдено |
+| `GVL_TestsValve.fbValveTest` | 47 | 47 | 0 | 0 | пройдено |
+| `GVL_TestsValve.fbControlValveTest` | 28 | 28 | 0 | 0 | пройдено |
+| `GVL_TestsIntegration.fbIntegrationTest` | 5 | 5 | 0 | 0 | пройдено |
+| **Всего** | 453 | 453 | 0 | 0 | **пройдено** |
 
 ### Результаты тестов
 
@@ -94,6 +94,9 @@
 | `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
 | `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` | пройден |
 | `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandLow_InvalidAfterDelay` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandHigh_InvalidLimitsKept` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionUnlimited_NoTimeout` | пройден |
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OnDelay_FiltersBounce` | пройден |
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OffDelay_HoldsValue` | пройден |
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_Invert_InvertsBeforeDelay` | пройден |
@@ -112,6 +115,7 @@
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_AlarmEvents_ValueIsZeroOrOne` | пройден |
 | `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionUnlimited_NoTimeout` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_Activate_GoesActiveUnack` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_AckWhileActive_GoesActiveAck` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_ReturnWithoutAck_GoesRtnUnack` | пройден |
@@ -150,6 +154,8 @@
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_PriorityNone_CancelsShelve` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_PriorityReenabled_OnDelayCountsFromEnabling` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_AckWithoutEffect_NotKeptForLater` | пройден |
+| `GVL_TestsAlarm.fbAlarmTest` | `Alarm_PriorityNoneWhileActive_EmitsClosingEvent` | пройден |
+| `GVL_TestsAlarm.fbAlarmTest` | `Alarm_NonFiniteValue_EventValueFinite` | пройден |
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_RetainModeInvalid_SanitizedToManual` | пройден |
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_ConflictingModeRequests_OosWins` | пройден |
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_LocalOverridesRemote_ReturnsToRememberedMode` | пройден |
@@ -194,6 +200,9 @@
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_AlarmSlotArrays_MatchDevAlarmsMax` | пройден |
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_MethodRequests_ProcessedOnce` | пройден |
 | `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_ShelveMaskOnOosEntry_RejectedState` | пройден |
+| `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_OosRepeatWhileMovingInOos_Accepted` | пройден |
+| `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_LocalMode_Ne107CheckFunction` | пройден |
+| `GVL_TestsAlarm.fbDeviceBaseTest` | `Device_ShelvedAndSuppressed_SeparateMasks` | пройден |
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_LTime_MonotonicAcrossTaskCycles` | пройден |
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_LTime_ResolutionAtMost1us` | пройден |
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_MethodCallWithoutThis_DispatchesVirtually` | пройден |
@@ -252,6 +261,8 @@
 | `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_OffDelay_HoldsFlag` | пройден |
 | `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_NonFiniteValue_KeepsState` | пройден |
 | `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_Reenabled_RestartsOnDelay` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_SmallStep_NotLost` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_NonFiniteTargetOrZeroDt_HoldsCurrent` | пройден |
 | `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfSts_MatchesRegisterMap` | пройден |
 | `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfDeviceRetain_Is36` | пройден |
 | `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfAlarmCfg_Is16` | пройден |
@@ -315,6 +326,9 @@
 | `GVL_TestsMotor.fbMotorTest` | `Motor_ReadyToStart_FalseWhileStarting` | пройден |
 | `GVL_TestsMotor.fbMotorTest` | `Motor_OosRequestWhileRunningByFeedback_Rejected` | пройден |
 | `GVL_TestsMotor.fbMotorTest` | `Motor_ResetFailToStop_ClearedOnlyAfterMotorStops` | пройден |
+| `GVL_TestsMotor.fbMotorTest` | `Motor_TimeBackwardsDuringMinStop_PauseRestarts` | пройден |
+| `GVL_TestsMotor.fbMotorTest` | `Motor_TimeBackwardsDuringMinRun_KeepsRunning` | пройден |
+| `GVL_TestsMotor.fbMotorTest` | `Motor_TimeBackwardsDuringResetPulse_PulseRestarts` | пройден |
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_FirstCallFakeTime_CommLossDeterministic` | пройден |
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_ImplementsIMotorVfd_LeadPumpProperties` | пройден |
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_SpeedRamp_LimitsRate` | пройден |
@@ -342,6 +356,12 @@
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_CommLossInOos_NoFaultNoWarning` | пройден |
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_StartWithNaNTarget_RefStartsAtMin` | пройден |
 | `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_CommLossWhileStopping_HoldsStopping` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_PlcRestart_RefBumpless` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_StartInCommGap_RefPresetToMin` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_CommLoss_CountersFrozen` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_SlowRamp1msCycle_NotStalled` | пройден |
+| `GVL_TestsMotor.fbMotorVfdTest` | `MotorVfd_SpeedActNaN_StsFinite` | пройден |
 | `GVL_TestsPid.fbPidTest` | `Pid_POnly_ErrorStep_OutputEqualsKpTimesError` | пройден |
 | `GVL_TestsPid.fbPidTest` | `Pid_Integral_ConstantError_RampRateKpOverTi` | пройден |
 | `GVL_TestsPid.fbPidTest` | `Pid_DOnMeasurement_SetpointStep_NoDerivativeKick` | пройден |
@@ -395,6 +415,7 @@
 | `GVL_TestsPid.fbPidTest` | `Pid_SetAutoWithOosRequest_OneCommand` | пройден |
 | `GVL_TestsPid.fbPidTest` | `Pid_Manual_OutputClampedToLimits` | пройден |
 | `GVL_TestsPid.fbPidTest` | `Pid_SameTimestamp_NoCalc_HoldsOutput` | пройден |
+| `GVL_TestsPid.fbPidTest` | `Pid_PvNaN_EventAndStsFinite` | пройден |
 | `GVL_TestsValve.fbValveTest` | `Valve_Open_LimitReached_GoesOpen` | пройден |
 | `GVL_TestsValve.fbValveTest` | `Valve_Close_LimitReached_GoesClosed` | пройден |
 | `GVL_TestsValve.fbValveTest` | `Valve_Open_Timeout_SetsFailToOpen` | пройден |
@@ -436,6 +457,12 @@
 | `GVL_TestsValve.fbValveTest` | `Valve_SolenoidByTime_CoilOff_NotReportedOpen` | пройден |
 | `GVL_TestsValve.fbValveTest` | `Valve_CloseOnTorqueNoZsc_TorqueMissing_SetsFailToClose` | пройден |
 | `GVL_TestsValve.fbValveTest` | `Valve_PermitCloseMissing_AutoWaitsReportsCloseBits` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_InterlockWithBothLimits_DrivesSafe` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_InterlockAfterPositionLost_DrivesSafe` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_InterlockWithExtFault_OutputsStayOff` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_OpenTorqueWhileUnseating_Ignored` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_OpenTorqueUnseatingNoZsc_TripsAfterBypass` | пройден |
+| `GVL_TestsValve.fbValveTest` | `Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_ManualSetpoint_RateLimited` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_OutputLimits_Clamp` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_Invert_20mAAtZero` | пройден |
@@ -460,9 +487,15 @@
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_LocalFeedbackOutOfRange_OutputClamped` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_InterlockInManual_StaysAtSafePosition` | пройден |
+| `GVL_TestsValve.fbControlValveTest` | `ControlValve_TightShutHysteresis_NoChatter` | пройден |
+| `GVL_TestsValve.fbControlValveTest` | `ControlValve_SlowRamp1msCycle_NotStalled` | пройден |
+| `GVL_TestsValve.fbControlValveTest` | `ControlValve_FbNaN_EventAndStsFinite` | пройден |
+| `GVL_TestsValve.fbControlValveTest` | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` | пройден |
 | `GVL_TestsIntegration.fbIntegrationTest` | `Device_DefaultCfg_PassesCheck` | пройден |
 | `GVL_TestsIntegration.fbIntegrationTest` | `Device_DevType_ReportedInStsCommon` | пройден |
 | `GVL_TestsIntegration.fbIntegrationTest` | `Device_AllTypes_AlarmCountThroughIDevice` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_AiPidVfd_TracksBumplessNoWindup` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_GuardBandCurrent_PidHoldsOutput` | пройден |
 
 ### Упавшие тесты
 
@@ -479,7 +512,7 @@ _Нет._
 `GVL_TestsPid`, межсемейные тесты — `GVL_TestsIntegration`. Тесты из списка 23.2 контракта и тесты сверх
 него (граничные значения, отказы, найденные мутационной проверкой) — в одной таблице, порядок — как в
 теле набора. Описание строки — комментарий объявления метода-теста (таблица собрана из исходников при
-интеграции, 420 тестов).
+выпуске 1.0.0, 453 теста).
 
 | Набор | Тест | Что проверяет |
 |---|---|---|
@@ -533,6 +566,8 @@ _Нет._
 | `FB_Util_Test` | `Util_LimitMonitor_OffDelay_HoldsFlag` | Задержка снятия 2 с: сырой флаг снимается сразу, выходной держится до t0 + 1,9 с и снимается ровно в t0 + 2,0 с. |
 | `FB_Util_Test` | `Util_LimitMonitor_NonFiniteValue_KeepsState` | Неконечное значение (NaN, ±Inf, больше REAL_SANE_MAX) флаг не меняет: -Inf не снимает взведённый флаг верхней уставки, +Inf не взводит снятый. |
 | `FB_Util_Test` | `Util_LimitMonitor_Reenabled_RestartsOnDelay` | Выключение уставки во время задержки срабатывания (2 с) сбрасывает отсчёт: после повторного включения в t0 + 1,6 с флаг — ровно через 2 с от включения, а не в t0 + 2,0 с. |
+| `FB_Util_Test` | `Util_RateLimitLr_SmallStep_NotLost` | F_RateLimitLr: состояние в LREAL — 1000 шагов по 1 мс со скоростью 0,003 ед./с от 70,0 дают 70,003 (в REAL приращение 3·10⁻⁶ меньше половины шага REAL рядом с 70 и терялось бы); спад — так же; цель достигается точно. |
+| `FB_Util_Test` | `Util_RateLimitLr_NonFiniteTargetOrZeroDt_HoldsCurrent` | F_RateLimitLr: цель NaN (мусор Modbus) или шаг времени 0 — значение не меняется; скорость 0 — сразу к цели; текущее значение NaN — сразу к цели (как F_RateLimit, F-11). |
 | `FB_Common_Test` | `Common_SizeOfSts_MatchesRegisterMap` | SIZEOF семи структур состояния — таблица 4.6 контракта (карта регистров Modbus = порядок полей, скрытого выравнивания нет). Источник: таблица 4.6 и tools/reference/common.py, сценарий sts_sizes. |
 | `FB_Common_Test` | `Common_SizeOfDeviceRetain_Is36` | SIZEOF(ST_DeviceRetain) = 36 на Control Win V3 32 бит (зонд P17 контракта). |
 | `FB_Common_Test` | `Common_SizeOfAlarmCfg_Is16` | SIZEOF(ST_AlarmCfg) = 16 (зонд Q14 контракта) и SIZEOF(ST_AiLimitCfg) = 20: элементы массивов astAlarm и astLimit в persistent-данных. Источник: tools/reference/common.py, сценарий cfg_sizes. |
@@ -578,10 +613,12 @@ _Нет._
 | `FB_Alarm_Test` | `Alarm_InterfaceProperties_MatchOutputs` | Свойства I_Alarm совпадают с выходами ФБ: Id, State, AlarmPriority, Active, Unacked, Seq. |
 | `FB_Alarm_Test` | `Alarm_NoTimeSource_FallsBackToSystemTime` | Без источника (itfTime = 0) FB_Alarm берёт встроенный FB_SystemTime: тревога без задержки появляется сразу, отметка перехода больше 0; задержка 1 ч за время теста не истекает. |
 | `FB_Alarm_Test` | `Alarm_Unshelve_ReturnsTrueOnlyWhenShelved` | Unshelve возвращает TRUE, только пока shelve действует; без shelve запрос ни на что не влияет. |
-| `FB_Alarm_Test` | `Alarm_ShelveRequestThenOos_Rejected` | Запрос Shelve принят методом (тревога ещё не в OutOfService), но в ближайшем вызове тела поднялся xOutOfService: тело запрос отклоняет — shelve не начинается, после выхода из OutOfService тревога не Shelved, а базовое состояние (условие активно — ActiveUnack). F-21 (в), контракт 10.1. |
-| `FB_Alarm_Test` | `Alarm_PriorityNone_CancelsShelve` | Выключение тревоги (приоритет None) снимает действующий shelve: Normal без события, xShelved = FALSE, остаток 0. После включения при активном условии — Activated (ActiveUnack), а не Shelved: shelve выключенной тревоги не «доживает» до её включения. Контракт 10.2, F-21 (б) |
+| `FB_Alarm_Test` | `Alarm_ShelveRequestThenOos_Rejected` | Запрос Shelve принят методом (тревога ещё не в OutOfService), но в ближайшем вызове тела поднялся xOutOfService: тело запрос отклоняет — shelve не начинается, после выхода из OutOfService тревога не Shelved, а базовое состояние (условие активно — ActiveUnack). F-21 (в), контракт 10.1 |
+| `FB_Alarm_Test` | `Alarm_PriorityNone_CancelsShelve` | Выключение тревоги (приоритет None) снимает действующий shelve: Normal с событием Disabled (ALM-1), xShelved = FALSE, остаток 0. После включения при активном условии — Activated (ActiveUnack), а не Shelved: shelve выключенной тревоги не «доживает» до её включения. Контракт 10.2, F-21 (б) |
 | `FB_Alarm_Test` | `Alarm_PriorityReenabled_OnDelayCountsFromEnabling` | Задержка появления после выключения и включения тревоги отсчитывается заново, от включения: тревога с tOnDelay 2 с была активна и квитирована, на 5 с выключена (приоритет None) при активном условии; после включения — Normal 1,9 с и ActiveUnack ровно через 2 с, а не сразу по старому состоянию задержки. F-21 (б) |
 | `FB_Alarm_Test` | `Alarm_AckWithoutEffect_NotKeptForLater` | Квитирование без эффекта не запоминается: Ack в Normal и в Shelved выполняется ближайшим вызовом тела и снимается. Следующее появление тревоги (в том числе повторное оповещение после снятия shelve) остаётся ActiveUnack и в следующих вызовах — «заранее квитировать» тревогу нельзя (ISA-18.2: оператор должен увидеть каждое новое появление) |
+| `FB_Alarm_Test` | `Alarm_PriorityNoneWhileActive_EmitsClosingEvent` | Тревога ActiveUnack, приоритет переключили на None (ALM-1): переход в Normal с событием Disabled (старое состояние ActiveUnack, новое Normal, udiSeq + 1) — журнал и сводка по событиям закрывают тревогу. Дальше выключенная тревога событий не даёт. |
+| `FB_Alarm_Test` | `Alarm_NonFiniteValue_EventValueFinite` | Значение процесса NaN в момент перехода (PV из Modbus): rValue события конечно — 0.0 (R6: приёмник журнала и SQL не получают NaN); конечное значение передаётся как есть. |
 | `FB_DeviceBase_Test` | `Device_RetainModeInvalid_SanitizedToManual` | Значение вне {Auto, Manual} в stRetain.eRemoteMode (7 — мусор, 0 — очищенная память) заменяется на Manual и записывается обратно; устройство работает в Manual; это не команда (uiCmdSeq = 0). |
 | `FB_DeviceBase_Test` | `Device_ConflictingModeRequests_OosWins` | Одновременные запросы режима (xSetAuto, xSetManual, xSetOos и RequestMode(Auto)) — одна команда: побеждает OutOfService; затем xSetAuto вместе с RequestMode(Manual) — побеждает Manual и выводит из OutOfService. Импульсы сброшены. |
 | `FB_DeviceBase_Test` | `Device_LocalOverridesRemote_ReturnsToRememberedMode` | Local старше дистанционного режима: в Local выходы сняты, запомненный режим (Auto) сохранён; после возврата переключателя устройство продолжает в Auto. Хук — на каждой смене режима. |
@@ -616,16 +653,19 @@ _Нет._
 | `FB_DeviceBase_Test` | `Device_NoTimeSource_UsesSystemTime` | Без источника (itfTime = 0) база берёт встроенный FB_SystemTime: действующий источник задан, время вызова больше 0, шаг между двумя соседними вызовами меньше 1 с. |
 | `FB_DeviceBase_Test` | `Device_ResolveTimeBeforeBeginCycle_NestedDelayDeterministic` | ResolveTime до BeginCycle: вложенный FB_Delay, вызванный раньше BeginCycle, с первого вызова получает подменное время — задержка включения 2 с отрабатывает ровно (на 1,9 с выхода нет). |
 | `FB_DeviceBase_Test` | `Device_AlarmIds_BaseFromCfgPlusSlot` | Номер тревоги слота = stCfg.udiAlarmIdBase + слот: база 120, слот 5 — 125; номер и значение процесса приходят в событии. |
-| `FB_DeviceBase_Test` | `Device_AlarmsInOos_AllSlotsOutOfService` | OutOfService устройства — OutOfService у всех используемых слотов (3): wAlmShelved = 2#111, неквитированных нет; после выхода активная тревога снова ActiveUnack. |
-| `FB_DeviceBase_Test` | `Device_AlarmSummary_WordsAndPrioUnack` | Сводка тревог: слоты Low, High, Medium активны — ePrioUnack = High; квитирован High — Medium; слот Medium вернулся без квитирования — wAlmActive = 2#011, wAlmUnack = 2#101; подавление слота 0 — бит в wAlmShelved и снят из wAlmUnack. |
+| `FB_DeviceBase_Test` | `Device_AlarmsInOos_AllSlotsOutOfService` | OutOfService устройства — OutOfService у всех используемых слотов (3); в wAlmShelved и wAlmSuppressed их нет (ALM-2: вывод из работы виден по eMode), неквитированных нет; после выхода активная тревога снова ActiveUnack. |
+| `FB_DeviceBase_Test` | `Device_AlarmSummary_WordsAndPrioUnack` | Сводка тревог: слоты Low, High, Medium активны — ePrioUnack = High; квитирован High — Medium; слот Medium вернулся без квитирования — wAlmActive = 2#011, wAlmUnack = 2#101; подавление слота 0 — бит в wAlmSuppressed (не в wAlmShelved, ALM-2) и снят из wAlmUnack. |
 | `FB_DeviceBase_Test` | `Device_ZeroAlarmCount_NoSlotsRun` | Устройство без тревог (uiAlarmCount = 0): все условия и маски взведены — ни один слот не вызывается, сводка пустая, GetAlarm(0) = 0; маска квитирования — Accepted, маска shelve — RejectedState. Проверка цикла FOR 1 TO MIN(...) без беззнакового «0 - 1». |
 | `FB_DeviceBase_Test` | `Device_ResetCmd_AcksAlarmsAndClearsLatch` | stCmd.xReset: сброс зафиксированного отказа (причина ушла) и квитирование всех тревог — одна команда (результат Accepted, uiCmdSeq + 1), бит сброшен. Метод Reset() квитирует так же. |
 | `FB_DeviceBase_Test` | `Device_DevTypeSetByHeir_ReportedInStsCommon` | Тип устройства задаёт наследник в первом вызове, FinishCycle пишет его в stCommon.eDevType; до первого вызова — None. |
 | `FB_DeviceBase_Test` | `Device_InputLike_ModeMemStartsAutoManualIsCheck` | AI/DI-подобное устройство (без stRetain, режима Local нет): после старта Auto из stModeMem, переключатель «Местное» не действует, xSetManual — Manual (подмена) с CheckFunction; stRetain не трогается. |
 | `FB_DeviceBase_Test` | `Device_ImplementsIDevice_InterfaceAccess` | Устройства через I_Device (массив интерфейсов, как у станционной логики): RequestMode, Reset, Mode, Status, Fault, Available, AlarmCount, GetAlarm, AckAll работают одинаково для FB_TestDevice и его наследника. |
 | `FB_DeviceBase_Test` | `Device_AlarmSlotArrays_MatchDevAlarmsMax` | Длина массивов слотов базы (afbAlarm, axAlmCond, axAlmSuppress, arAlmValue) равна GVL_Const.DEV_ALARMS_MAX: циклы базы идут по константе, тест ловит расхождение, если границу запишут числом. Тест читает внутренние переменные базы намеренно — это проверка раскладки. |
-| `FB_DeviceBase_Test` | `Device_MethodRequests_ProcessedOnce` | Запросы методов Reset(), AckAll() и RequestMode() выполняет один ближайший вызов тела, затем они снимаются (FinishCycle): uiCmdSeq растёт на 1 за запрос, а не в каждом цикле; тревога, появившаяся после выполненного запроса, остаётся неквитированной; режим, сменённый командой после RequestMode(), повторный запрос не возвращает. Иначе Reset() станции квитировал бы все будущие тревоги и бесконечно повторял бы сброс. |
-| `FB_DeviceBase_Test` | `Device_ShelveMaskOnOosEntry_RejectedState` | Маска shelve в вызове, в котором устройство уходит в OutOfService (xSetOos и wShelveReq вместе), и в OutOfService: shelve не принимается (10.1) — результат маски RejectedState, а не ложный Accepted (слот в этот момент ещё не в OutOfService и на запрос ответил бы TRUE); после выхода из OutOfService тревога не Shelved. |
+| `FB_DeviceBase_Test` | `Device_MethodRequests_ProcessedOnce` | Запросы методов Reset(), AckAll() и RequestMode() выполняет один ближайший вызов тела, затем они снимаются (FinishCycle): uiCmdSeq растёт на 1 за запрос, а не в каждом цикле; тревога, появившаяся после выполненного запроса, остаётся неквитированной; режим, сменённый командой после RequestMode(), повторный запрос не возвращает. Иначе Reset() станции квитировал бы все будущие тревоги и бесконечно повторял бы сброс |
+| `FB_DeviceBase_Test` | `Device_ShelveMaskOnOosEntry_RejectedState` | Маска shelve в вызове, в котором устройство уходит в OutOfService (xSetOos и wShelveReq вместе), и в OutOfService: shelve не принимается (10.1) — результат маски RejectedState, а не ложный Accepted (слот в этот момент ещё не в OutOfService и на запрос ответил бы TRUE); после выхода из OutOfService тревога не Shelved |
+| `FB_DeviceBase_Test` | `Device_OosRepeatWhileMovingInOos_Accepted` | Повтор запроса OutOfService, когда устройство уже выведено из работы, а механизм движется (двигают по месту, xMoving): принимается (F-22 (в)) — битом команды и RequestMode: Accepted, uiCmdSeq + 1, режим OutOfService. |
+| `FB_DeviceBase_Test` | `Device_LocalMode_Ne107CheckFunction` | Local (переключатель на месте, тип с Local): ПЛК механизмом не управляет — сводный NE 107 CheckFunction («местное управление», категория C NE 107, статус PA 0x3C), Available = FALSE; отказ в Local старше — Failure. Возврат в дистанционный режим — Good. |
+| `FB_DeviceBase_Test` | `Device_ShelvedAndSuppressed_SeparateMasks` | Отложенная оператором тревога и подавленная логикой — разные биты (ISA-18.2, ALM-2): слот 0 отложен (wShelveReq) — бит только в wAlmShelved; слот 1 подавлен (axSuppressIn) — бит только в wAlmSuppressed. Вывод устройства из работы — ни shelve, ни подавление: оба слова 0 (OutOfService виден по eMode). |
 | `FB_Runtime_Test` | `Runtime_LTime_MonotonicAcrossTaskCycles` | R1 контракта по циклам задачи: LTIME() (FB_SystemTime) в 50 циклах TestTask (10 мс) строго растёт от цикла к циклу, а промежуток 49 циклов — от 49·5 мс до 49·50 мс (время идёт с реальной скоростью). Единственный тест библиотеки на несколько циклов: реального ожидания в нём нет, цикл задачи — данность. Смену системного времени ОС тест не делает (нужны права администратора). |
 | `FB_Runtime_Test` | `Runtime_LTime_ResolutionAtMost1us` | R1 контракта внутри цикла: 20 000 чтений LTIME() подряд — время не убывает, меняется хотя бы раз, наименьший ненулевой шаг (разрешение источника) не больше 1 мкс. |
 | `FB_Runtime_Test` | `Runtime_MethodCallWithoutThis_DispatchesVirtually` | Связывание вызовов (L6 контракта): метод базы вызывает переопределённый метод через THIS^ и без него; у экземпляра наследника оба вызова выполняют реализацию наследника, у экземпляра базы — базы. |
@@ -646,10 +686,10 @@ _Нет._
 | `FB_AnalogInput_Test` | `AnalogInput_WireBreak_HoldsLastGoodValue` | HoldLast (по умолчанию): при обрыве значение 3,75 (16 мА на шкале 0..5) держится и до подтверждения, и после него (xValid = FALSE); проценты и слежение в stCmd — то же значение. |
 | `FB_AnalogInput_Test` | `AnalogInput_WireBreakShorterThanDelay_NoFailure` | Обрыв на 1,5 с при tFailDelay = 2 с: отказа и тревоги нет ни в одном вызове, значение держится, после возврата сигнала — сразу новое измеренное значение; ещё 3 с — без отказа. |
 | `FB_AnalogInput_Test` | `AnalogInput_At3p6mA_IsFailure` | Граница NE 43 3,6 мА включена в отказ (A-02, сверить с NAMUR NE 43): FailLow, Failure (tFailDelay = 0), бит AI_FLT_FAIL_LOW; чуть выше, 3,61 мА — уже UnderRange. |
-| `FB_AnalogInput_Test` | `AnalogInput_At3p7mA_IsOutOfSpecification` | 3,7 мА (между 3,6 и 3,8): UnderRange, OutOfSpecification, значение считается (экстраполяция -1,875 %) и пригодно, бит AI_WRN_UNDER_RANGE, тревога OutOfRange. источник: tools/reference/ai_reference.py, сценарий scale «3,7 мА, шкала 0..100». |
+| `FB_AnalogInput_Test` | `AnalogInput_At3p7mA_IsOutOfSpecification` | 3,7 мА (между 3,6 и 3,8): UnderRange, OutOfSpecification, значение — насыщение NE 43 3,8 мА (-1,25 %), без экстраполяции; выход за диапазон подтверждён (tFailDelay = 0) — xValid = FALSE (AI-13), бит AI_WRN_UNDER_RANGE, тревога OutOfRange. источник: tools/reference/ai_reference.py, сценарий scale «3,7 мА, шкала 0..100 (насыщение NE 43)». |
 | `FB_AnalogInput_Test` | `AnalogInput_At3p8mA_IsGood` | Граница 3,8 мА — уже норма (NE43_MEAS_LOW_MA: «I < — вне диапазона»): Good, значение -1,25 %. |
 | `FB_AnalogInput_Test` | `AnalogInput_At20p5mA_IsGood` | Граница 20,5 мА — ещё норма (NE43_MEAS_HIGH_MA: «I > — вне диапазона»): Good, значение 103,125 %. |
-| `FB_AnalogInput_Test` | `AnalogInput_At20p7mA_IsOutOfSpecification` | 20,7 мА (между 20,5 и 21,0): OverRange, OutOfSpecification, значение 104,375 % пригодно, бит AI_WRN_OVER_RANGE. источник: tools/reference/ai_reference.py, сценарий scale «20,7 мА, шкала 0..100». |
+| `FB_AnalogInput_Test` | `AnalogInput_At20p7mA_IsOutOfSpecification` | 20,7 мА (между 20,5 и 21,0): OverRange, OutOfSpecification, значение — насыщение NE 43 20,5 мА (103,125 %), без экстраполяции; выход за диапазон подтверждён — xValid = FALSE (AI-13), бит AI_WRN_OVER_RANGE. источник: tools/reference/ai_reference.py, сценарий scale «20,7 мА, шкала 0..100 (насыщение NE 43)». |
 | `FB_AnalogInput_Test` | `AnalogInput_At21mA_IsFailure` | Граница NE 43 21,0 мА включена в отказ (A-02): FailHigh, Failure, бит AI_FLT_FAIL_HIGH; 20,99 мА — ещё OverRange. |
 | `FB_AnalogInput_Test` | `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter` | Фильтр 10 с, tFailDelay 2 с: отказ подтверждён; сигнал вернулся (75 %) — отказ держится 1,9 с (значение удерживается 50), снимается ровно через 2,0 с, и значение сразу 75: фильтр начался с текущего значения. Без сброса фильтра было бы 54,53 (источник: tools/reference/ai_reference.py, сценарий filter «возврат сигнала 50 -> 75 без сброса фильтра»). |
 | `FB_AnalogInput_Test` | `AnalogInput_NaNInput_TreatedAsFailure` | NaN на входе (например, ошибка обмена REAL): NotFinite, значение удерживается до подтверждения (tFailDelay 1 с), затем Failure и бит AI_FLT_NOT_FINITE; +Inf и 1E31 (больше REAL_SANE_MAX) — тоже NotFinite. После возврата значение конечно и равно новому: NaN не попал в фильтр. |
@@ -685,6 +725,9 @@ _Нет._
 | `FB_AnalogInput_Test` | `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | Подмена, снятая по tSubstMax, и новый запрос подмены в следующем же вызове: срок отсчитывается заново, подмена не снимается сразу же. Остаток uiSubstRemain_s — целые секунды с округлением вверх (59,4 с -> 60, 1,3 с -> 2, 0,1 с -> 1): пока подмена идёт, остаток не 0. |
 | `FB_AnalogInput_Test` | `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` | Короткий провал сигнала (один вызов с отказом канала, ошибка обмена Modbus): отказ не подтверждён, значение удерживается, фильтр заморожен и после провала продолжает с прежнего состояния (AI-12). Фильтр 10 с, ступень 50 -> 75, HH 70 без задержки: до провала (1 с) 52,379, через вызов после провала 52,604, HH нет. Сброс фильтра выдал бы мгновенное 75 и ложный HH. источник: tools/reference/ai_reference.py, сценарии filter «ступень 50 -> 75, T = 10 с, 1 с до провала» и «… провал 0,1 с, фильтр заморожен». |
 | `FB_AnalogInput_Test` | `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` | Подмена при подтверждённом отказе датчика (наладка блокировок при оборванной линии): в Manual уставки считаются по подменённому значению (11.3, п. 7: принудительный сброс — только в Auto), тревоги уставок подавлены отказом (xLimitsOnFail = FALSE), значение годно, NE 107 — Failure. Возврат в Auto при оборванной линии — уставки сняты сразу, значение — удерживаемое до отказа, xValid = FALSE. |
+| `FB_AnalogInput_Test` | `AnalogInput_GuardBandLow_InvalidAfterDelay` | 3,61 мА — защитная полоса NE 43 между отказом (<= 3,6) и измерением (>= 3,8 мА): исправный датчик NE 43 так не выдаёт, это ток отказа с погрешностью канала или насыщение (AI-13). Значение не экстраполируется ниже насыщения 3,8 мА: -0,125 м на шкале 0..10 м (-0,0125 · 10). Пока выход за диапазон не подтверждён (1,9 с) — xValid; через tFailDelay = 2 с — xValid = FALSE (ПИД и автоматика по неопределённому значению не управляют), NE 107 OutOfSpecification, wFault = 0, UNDER_RANGE; уставка LL остаётся (значение не выше насыщения). Норма 12 мА — xValid снова через tFailDelay. источник: tools/reference/ai_reference.py, сценарий scale «3,61 мА, шкала 0..10 (насыщение NE 43)». |
+| `FB_AnalogInput_Test` | `AnalogInput_GuardBandHigh_InvalidLimitsKept` | 20,9 мА — верхняя защитная полоса NE 43 (между 20,5 и 21 мА, AI-13): значение — насыщение 20,5 мА, 10,3125 м на шкале 0..10 м (1,03125 · 10), без экстраполяции; через tFailDelay — xValid = FALSE, OVER_RANGE, уставка HH (9,5 м) остаётся: процесс выше верхнего предела измерения. источник: tools/reference/ai_reference.py, сценарий scale «20,9 мА, шкала 0..10 (насыщение NE 43)». |
+| `FB_AnalogInput_Test` | `AnalogInput_SubstitutionUnlimited_NoTimeout` | tSubstMax = T#0S — подмена без ограничения срока (Cfg, контракт 11.1): 24 ч в Manual крупными шагами — режим остаётся Manual, результата SubstExpired нет, значение подмены, остаток uiSubstRemain_s = 0. |
 | `FB_DigitalInput_Test` | `DigitalInput_OnDelay_FiltersBounce` | Задержка включения 500 мс: дребезг (импульсы 200 и 300 мс) значение не включает, пока идёт отсчёт — бит DI_STS_TIMING_ON; устойчивый сигнал — TRUE ровно через 500 мс. |
 | `FB_DigitalInput_Test` | `DigitalInput_OffDelay_HoldsValue` | Задержка отключения 1 с: сигнал пропал — значение держится 0,9 с (бит DI_STS_TIMING_OFF), снимается ровно через 1,0 с. |
 | `FB_DigitalInput_Test` | `DigitalInput_Invert_InvertsBeforeDelay` | Инверсия (НЗ-контакт) до задержек: xIn TRUE — значение FALSE; пропадание xIn — фронт инвертированного сигнала, его и задерживает tOnDelay 300 мс (бит DI_STS_RAW = 1 сразу); возврат xIn — спад без задержки. |
@@ -692,7 +735,7 @@ _Нет._
 | `FB_DigitalInput_Test` | `DigitalInput_ChannelFault_ForceTrue` | ForceTrue (защитный сигнал: отказ канала = сработал): отказ — значение TRUE сразу, xValid = FALSE, Failure, биты DI_FLT_CHANNEL и DI_STS_CHANNEL_FAULT, тревога Failure ActiveUnack, тревога State подавлена (SuppressedByDesign, без дублирования). Отказ снят — снова измерение. |
 | `FB_DigitalInput_Test` | `DigitalInput_ChannelFault_HoldLast` | HoldLast: при отказе канала держится значение до отказа (TRUE), xValid = FALSE; после отказа задержка отключения 1 с отсчитывается от возврата канала. |
 | `FB_DigitalInput_Test` | `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` | xAlarmOnTrue = FALSE (тревога при пропадании сигнала, например «давление в норме»): TRUE — тревоги нет; FALSE — тревога State ActiveUnack, бит DI_STS_ALARM_COND, приоритет в ePrioUnack. |
-| `FB_DigitalInput_Test` | `DigitalInput_OutOfService_AlarmsOutOfService` | OutOfService: оба слота OutOfService (wAlmShelved = 2#11), значение удерживается (TRUE), xValid = FALSE, CheckFunction; отказ канала в OOS не даёт Failure; слежение xSubstValue действует и в OOS (2.1). После выхода активная тревога State снова ActiveUnack. |
+| `FB_DigitalInput_Test` | `DigitalInput_OutOfService_AlarmsOutOfService` | OutOfService: оба слота OutOfService (в wAlmShelved их нет — ALM-2), значение удерживается (TRUE), xValid = FALSE, CheckFunction; отказ канала в OOS не даёт Failure; слежение xSubstValue действует и в OOS (2.1). После выхода активная тревога State снова ActiveUnack. |
 | `FB_DigitalInput_Test` | `DigitalInput_SubstitutionTimeout_ReturnsToAuto` | tSubstMax 30 с: подмена TRUE; остаток 30 при входе, 1 в 29 с; ровно через 30 с — Auto, результат SubstExpired, значение измеренное (FALSE). |
 | `FB_DigitalInput_Test` | `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` | Cfg по умолчанию проходит CheckConfig; после первого вызова — Auto, тип DigitalInput, 2 слота, Good. Значение в первом вызове — без задержки включения (2 с): после старта ПЛК вход сразу равен сигналу. Тревога State по умолчанию выключена (None) и не формируется. |
 | `FB_DigitalInput_Test` | `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` | Без корректной Cfg с первого вызова (eFailValue и приоритет тревоги вне перечисления): биты DI_CFG_FAIL_VALUE и DI_CFG_ALARM, значение FALSE при xIn = TRUE, xValid = FALSE, Available = FALSE, CheckFunction. Исправленная Cfg — измерение. |
@@ -703,6 +746,7 @@ _Нет._
 | `FB_DigitalInput_Test` | `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | Подмена, снятая по tSubstMax, и новый запрос подмены в следующем же вызове: срок отсчитывается заново, подмена не снимается сразу же. Остаток uiSubstRemain_s — целые секунды с округлением вверх (29,4 с -> 30, 0,3 с -> 1). |
 | `FB_DigitalInput_Test` | `DigitalInput_AlarmEvents_ValueIsZeroOrOne` | Значение события тревог дискретного входа — xValue как 1.0 / 0.0 (DI-7): State при xValue = TRUE — Activated со значением 1.0, снятие — Cleared со значением 0.0; номер тревоги State = udiAlarmIdBase + 0. |
 | `FB_DigitalInput_Test` | `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` | Защитный сигнал (ForceTrue, «сухой ход»): после возврата канала задержки отсчитываются от значения отказа, а не от значения до отказа (DI-2). tOnDelay 2 с, tOffDelay 3 с. 1) До отказа FALSE, после возврата датчик сработал (TRUE) — значение остаётся TRUE без провала (иначе 2 с FALSE при xValid = TRUE: насос пустили бы на сухую). 2) До отказа FALSE, после возврата датчик в норме — TRUE снимается только через tOffDelay, ровно в tr + 3,0 с. |
+| `FB_DigitalInput_Test` | `DigitalInput_SubstitutionUnlimited_NoTimeout` | tSubstMax = T#0S — подмена без ограничения срока: 24 ч в Manual — режим Manual, SubstExpired нет, значение подмены TRUE, остаток 0. |
 | `FB_Motor_Test` | `Motor_FirstCall_SetsTypeSlotsAndPassesDefaultCfg` | Чек-лист устройства, пункты 1 и 4: первый вызов — тип Motor, 8 слотов тревог, умолчания Cfg проходят CheckConfig; двигатель стоит, первопричины нет, NE 107 — Good (Manual у двигателя — не CheckFunction). |
 | `FB_Motor_Test` | `Motor_AutoRun_StartsAndConfirms` | Auto: запрос xAutoRun запускает двигатель (Starting, xQRun), ОС через 1 с подтверждает пуск (Running); пуск считается по фронту ОС, отметка в окне пусков — при входе в Starting; двигатель доступен автоматике. |
 | `FB_Motor_Test` | `Motor_ManualStart_FeedbackOk_GoesRunning` | Manual: xStart принимается (Accepted, импульс сброшен), двигатель в Starting ждёт ОС; ОС через 2 с (меньше tFbStart = 5 с) — Running без отказа. |
@@ -755,8 +799,11 @@ _Нет._
 | `FB_Motor_Test` | `Motor_ReadyToStart_FalseWhileStarting` | ReadyToStart — «стоит и готов к пуску» (I_Motor): в Auto до пуска TRUE; в Starting (команда подана, ОС ещё нет, tMinStop = 0) — FALSE: станция не должна считать запускаемый насос резервом; в Running — FALSE. |
 | `FB_Motor_Test` | `Motor_OosRequestWhileRunningByFeedback_Rejected` | Вывод из работы — только когда механизм стоит (2.2): после внешней аварии команда снята (Fault), но ОС «в работе» держится (сварился контактор) — xSetOos отклоняется (RejectedState), зафиксированные отказы не снимаются; ОС пропала — вывод из работы принят. |
 | `FB_Motor_Test` | `Motor_ResetFailToStop_ClearedOnlyAfterMotorStops` | FailToStop снимается Reset только когда двигатель не работает по ОС (M-02): Reset при ещё работающем двигателе — импульс xQReset, отказ остаётся, к концу окна tResetWindow = 3 с второй результат RejectedFault; ОС пропала — следующий Reset снимает отказ, двигатель в Stopped. |
+| `FB_Motor_Test` | `Motor_TimeBackwardsDuringMinStop_PauseRestarts` | Пауза tMinStop = 10 с (защита погружного насоса от обратного вращения): двигатель остановлен, прошло 2 с, время назад на 30 с (SetNow — смена источника времени). Пауза отсчитывается заново (M-03, M-17), а не снимается переполнением LTIME без знака: пуск — RejectedInhibit, остаток 10 с; 1 с в 9,9 с; через 10 с пуск принят. |
+| `FB_Motor_Test` | `Motor_TimeBackwardsDuringMinRun_KeepsRunning` | Auto, tMinRun = 10 с: через 2 с работы запрос снят — двигатель работает до tMinRun. Время назад на 30 с: отсчёт tMinRun начинается заново (M-17), двигатель не останавливается раньше срока; останов ровно через 10 с после скачка. |
+| `FB_Motor_Test` | `Motor_TimeBackwardsDuringResetPulse_PulseRestarts` | Внешняя авария зафиксирована, Reset с tResetPulse = 1 с (сброс УПП): через 0,5 с время назад на 30 с. Импульс xQReset и окно tResetWindow отсчитываются заново (M-17), а не обрываются переполнением: импульс держится ещё 1 с после скачка; авария, снятая в окне, сброшена без RejectedFault. |
 | `FB_MotorVfd_Test` | `MotorVfd_FirstCallFakeTime_CommLossDeterministic` | Связи с ПЧ нет с первого вызова: ResolveTime() до вложенного фильтра даёт подменное время и в первом вызове, отказ связи — ровно через tCommLoss = 2 с (на 1,9 с ещё нет). |
-| `FB_MotorVfd_Test` | `MotorVfd_ImplementsIMotorVfd_LeadPumpProperties` | I_MotorVfd для ведущего насоса: SpeedRef, SpeedAct, SpeedAutoActive (Auto, Running, без отказа), Running и Mode через интерфейс; в Manual SpeedAutoActive = FALSE. |
+| `FB_MotorVfd_Test` | `MotorVfd_ImplementsIMotorVfd_LeadPumpProperties` | I_MotorVfd для ведущего насоса: SpeedRef, SpeedAct, SpeedAutoActive, Running и Mode через интерфейс. SpeedAutoActive (VFD-06) — только Auto, Running и без отказа: FALSE у стоящего в Auto насоса, в Starting (ОС ещё нет), в Stopping (ОС ещё есть), при отказе связи и в Manual; TRUE — Auto и Running. |
 | `FB_MotorVfd_Test` | `MotorVfd_SpeedRamp_LimitsRate` | Рампа задания: min 20 %, рост 10 %/с, спад 5 %/с, шаг 100 мс; пуск — с 20 %, через 1,5 с — 35 %, через 3 с — цель 50 %; цель 30 %: через 2 с — 40 %, через 4 с — 30 %. Источник: tools/reference/motor.py, сценарии ramp_*. |
 | `FB_MotorVfd_Test` | `MotorVfd_SpeedClampedToMinMax` | Пределы задания 20…90 %: цель Auto 95 % → 90 % (слежение stCmd.rSpeedSp_pct тоже 90), 5 % → 20 %; в Manual 150 % → 90 % и записывается обратно в stCmd. |
 | `FB_MotorVfd_Test` | `MotorVfd_StartPresetsRampToMin` | Вход в Starting начинает рампу с rSpeedMin_pct = 30 % (а не с 0): в вызове пуска 30 %, через шаг 100 мс — 31 %, через 1 с — 40 % (рост 10 %/с, цель 80 %). Источник: tools/reference/motor.py, сценарии start_preset_*. |
@@ -782,6 +829,12 @@ _Нет._
 | `FB_MotorVfd_Test` | `MotorVfd_CommLossInOos_NoFaultNoWarning` | Отказ связи с ПЧ действует во всех режимах, кроме OutOfService (13.6, 14.4): в OOS связи нет 4 с — ни MOT_FLT_COMM_LOSS (xCommLossIsFault = TRUE), ни MOT_WRN_COMM_LOSS (FALSE), тревога слота 6 — в OutOfService. Выход в Manual при той же потере связи — предупреждение появляется. |
 | `FB_MotorVfd_Test` | `MotorVfd_StartWithNaNTarget_RefStartsAtMin` | Пуск при не конечной цели (ПИД выдал NaN, пока насос стоял), без ограничения роста (rRampUp_pctps = 0): задание начинается с rSpeedMin_pct = 25 %, а не с последней конечной цели 60 %; предупреждение SPEED_SP_INVALID. Конечная цель — задание сразу к ней (VFD-03). |
 | `FB_MotorVfd_Test` | `MotorVfd_CommLossWhileStopping_HoldsStopping` | Связь с ПЧ пропала во время торможения (Stopping, ОС из слова состояния): ОС недостоверна — состояние удерживается в Stopping (не «остановлен»), контроль приостановлен; связь вернулась через 1 с (меньше tCommLoss), ПЧ ещё тормозит — Stopping под контролем tFbStop; ПЧ остановился — Stopped без отказа. |
+| `FB_MotorVfd_Test` | `MotorVfd_PlcRestart_RefBumpless` | Перезапуск ПЛК при работающем ПЧ: подхват (VFD-09). Auto, запрос есть, ПЧ на 70 %: задание на ПЧ сразу 70 % — фактическая скорость в пределах rSpeedMin…rSpeedMax, — без провала к 0 и рампы с нуля (rRampUp 10 %/с). Manual, ПЧ на 55 %: подхват пишет фактическую скорость и в задание оператора stCmd.rSpeedSp_pct (оно не энергонезависимо и после старта 0) — двигатель не тормозится до rSpeedMin. |
+| `FB_MotorVfd_Test` | `MotorVfd_StartInCommGap_RefPresetToMin` | Пуск в Manual во время короткого пропуска связи (короче tCommLoss): пуск не блокируется, а задание передать нельзя — предустановка rSpeedMin ждёт связи (VFD-10). Связь вернулась — задание 30 % (rSpeedMin), а не рампа от 0; дальше рампа 1 %/с: 30,1 % через 0,1 с. |
+| `FB_MotorVfd_Test` | `MotorVfd_CommLoss_CountersFrozen` | ПЧ с ОС из слова состояния работает в Auto 10 с; связь пропала на 1 ч (кабель), питание есть. Через tCommLoss — отказ CommLoss, и двигатель больше не считается работающим по устаревшей ОС (VFD-11): xRunning, Running и бит RUNNING сняты, наработка выросла только на время до отказа, CurrentRunSeconds = 0. Связь вернулась, ПЧ работает, запрос есть — Running без нового пуска. |
+| `FB_MotorVfd_Test` | `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` | Пропало питание станции: xPowerOk = FALSE, ПЧ обесточен, связи нет (VFD-11, VFD-12). Отказа CommLoss и тревоги слота 6 нет — пропадание питания — останов без отказа (13.7); двигатель не работает: xRunning снят сразу, Stopped, наработка за час не растёт. Питание вернулось — ПЧ загружается VFD_POWER_UP_DELAY = 10 с, затем фильтр tCommLoss = 3 с: отказ связи — только через 13 с, если связь так и не появилась; связь есть — отказ снят. |
+| `FB_MotorVfd_Test` | `MotorVfd_SlowRamp1msCycle_NotStalled` | Рампа задания 0,003 %/с при цикле 1 мс (VFD-13): состояние рампы в LREAL — за 1 с задание растёт на 0,003 % (в REAL приращение 3·10⁻⁶ % рядом с 70 % терялось бы и рампа стояла). Ожидаемое: 70 + 0,003 · 1 с. |
+| `FB_MotorVfd_Test` | `MotorVfd_SpeedActNaN_StsFinite` | Фактическая скорость NaN при xCommOk (мусор Modbus): связь недостоверна, задание удерживается; в Sts и свойстве SpeedAct — конечное 0.0 (R6: карта регистров NaN не получает). |
 | `FB_Valve_Test` | `Valve_Open_LimitReached_GoesOpen` | Manual, задвижка закрыта (ZSC). xOpen: Opening, включён только xQOpen, остаток хода 10 с; через 2 с остаток 8 с; ZSO на t0 + 5,0 с — Open, выход снят, xOpened, один цикл в stRetain. |
 | `FB_Valve_Test` | `Valve_Close_LimitReached_GoesClosed` | Manual, задвижка открыта (ZSO). xClose: Closing, включён только xQClose; ZSC на t0 + 3,0 с — Closed, выход снят, xClosed. Закрытие циклом «открыто» не считается. |
 | `FB_Valve_Test` | `Valve_Open_Timeout_SetsFailToOpen` | tTravel = 10 с, ZSO не приходит: на t0 + 9,9 с ещё Opening без отказа, ровно на t0 + 10,0 с — FailToOpen (wFault бит 0, Failure, тревога слота 0), выход снят. Отказ фиксируется: пришедший позже ZSO его не снимает (положение видно в xOpened), снимает Reset — далее состояние по концевикам. |
@@ -806,7 +859,7 @@ _Нет._
 | `FB_Valve_Test` | `Valve_ExtFault_TripsAndResetRejectedWhileActive` | Внешняя авария в ходе: Fault, выход снят, тревога слота 5 с номером udiAlarmIdBase + 5. Reset при действующей причине: Accepted сразу, окно tResetWindow = 3 с; до конца окна второго результата нет, ровно на 3 с — RejectedFault, отказ остаётся. Причина ушла — отказ держится до Reset; Reset снимает. |
 | `FB_Valve_Test` | `Valve_Reset_CauseClearsWithinWindow_FaultCleared` | TorqueTrip, Reset при сработавшей муфте: отказ держится; муфта отпустила через 1 с — отказ снят в окне tResetWindow без второго результата (и после конца окна RejectedFault нет). |
 | `FB_Valve_Test` | `Valve_OosRequestWhileMoving_Rejected` | Вывод из работы в ходе — RejectedState, ход продолжается. Остановленную арматуру вывести можно: OutOfService, выходы сняты, CheckFunction, команды — RejectedMode. |
-| `FB_Valve_Test` | `Valve_OosEntry_ClearsLatchedFaults` | Зафиксированные TorqueTrip (муфта в ходе, отпустила) и внешняя авария (причина ушла) снимаются входом в OutOfService; в OOS внешняя авария не контролируется, тревоги — OutOfService; после выхода в Manual отказа нет. |
+| `FB_Valve_Test` | `Valve_OosEntry_ClearsLatchedFaults` | Зафиксированные TorqueTrip (муфта в ходе после страгивания, отпустила) и внешняя авария (причина ушла) снимаются входом в OutOfService; в OOS внешняя авария не контролируется, тревоги — OutOfService; после выхода в Manual отказа нет. |
 | `FB_Valve_Test` | `Valve_AutoToManual_Bumpless` | Auto открывает; переход в Manual: цель := текущее направление — ход продолжается до ZSO (арматура не дёргается). |
 | `FB_Valve_Test` | `Valve_PlcRestart_StateFromLimits` | Старт ПЛК (первый вызов, Manual): ZSO — Open, оба концевика — сразу Fault (BothLimits), ни одного — Intermediate, без концевиков — Unknown; выходы сняты. |
 | `FB_Valve_Test` | `Valve_ActTime_AccumulatesInRetain` | Время работы привода: 12,5 с с включённым выходом — 12 с в stRetain (доля 0,5 с в накопителе), часы в Sts; пока стоит — не копится; шаг времени 60 с идёт в счёт не больше DT_ACCUM_MAX = 10 с. xResetMaint обнуляет время «с ТО», полное время не трогает. |
@@ -823,10 +876,16 @@ _Нет._
 | `FB_Valve_Test` | `Valve_SolenoidByTime_CoilOff_NotReportedOpen` | Соленоид НЗ (SolenoidEto, без тока закрыт) без концевиков, Manual: открыт по времени хода (tTravel = 2 с, катушка под током). Пропало напряжение: катушка без тока, клапан уходит на пружину — «открыто» снято (Unknown). Напряжение вернулось: Manual стоит (цель снята), катушка без тока, «открыто» не показывается. Снова открыт по времени; Local и возврат в Manual: клапан, закрывшийся на пружине в Local, сам не открывается — катушка без команды не включается. |
 | `FB_Valve_Test` | `Valve_CloseOnTorqueNoZsc_TorqueMissing_SetsFailToClose` | Клиновая задвижка без ZSC (xZscUsed = FALSE), закрытие «по моменту», tTravel = 10 с. Муфта закрытия так и не сработала: на t0 + 9,9 с ещё Closing и выход «закрывать» держится, ровно на t0 + 10,0 с — FailToClose, выход снят, xClosed нет. Положения «закрыто по времени» у закрытия по моменту нет: его подтверждает только муфта. |
 | `FB_Valve_Test` | `Valve_PermitCloseMissing_AutoWaitsReportsCloseBits` | Auto, задвижка открыта. Нет разрешения на закрытие (бит 1), а на открытие не хватает другого бита (бит 0). Автоматика просит «закрыть»: выход «закрывать» не включается, бит PERMIT_MISSING, в wPermitMissing — недостающие биты направления к цели (16#0002), а не открытия. Разрешение появилось — задвижка закрывается, wPermitMissing = 0. |
+| `FB_Valve_Test` | `Valve_InterlockWithBothLimits_DrivesSafe` | Задвижка в Auto открыта по ZSO; замыкание в цепи ZSC — оба концевика дольше tLimitFilter, отказ BothLimits. Блокировка (положение безопасности Closed): привод исправен, отказал только контроль концевиков — задвижка закрывается (VLV-20), состояние Fault, биты INTERLOCKED и CLOSING. Концевикам верить нельзя, поэтому ход заканчивается по tTravel (60 с), а не по ZSC; дальше, пока блокировка держится, ход не повторяется; оба выхода никогда. |
+| `FB_Valve_Test` | `Valve_InterlockAfterPositionLost_DrivesSafe` | Задвижка в Auto открыта по ZSO; ZSO пропал (обрыв) — через tLimitFilter зафиксирован PositionLost, выходов нет. Блокировка (Closed): задвижка закрывается (VLV-20); ход заканчивается по ZSC — он согласован (ZSO нет). Отказ держится до Reset; после Reset — Closed по концевикам, движения нет (уже в положении безопасности). |
+| `FB_Valve_Test` | `Valve_InterlockWithExtFault_OutputsStayOff` | Авария привода (ExtFault: тепловое реле, обрыв фазы) — привод неисправен: блокировка выходы не включает (VLV-20), состояние Fault, бит INTERLOCKED показывает только действующую блокировку. |
+| `FB_Valve_Test` | `Valve_OpenTorqueWhileUnseating_Ignored` | Клиновая задвижка, закрытие по моменту (xTorqueUsed, xCloseOnTorque), закрыта при ZSC. «Открыть»: при страгивании клина муфта открытия срабатывает, пока ZSC ещё замкнут, — это не заклинивание (VLV-21): ход продолжается, отказа нет. ZSC разомкнулся; ещё tLimitFilter (0,5 с) муфта не контролируется, затем муфта в ходе — TorqueTrip. |
+| `FB_Valve_Test` | `Valve_OpenTorqueUnseatingNoZsc_TripsAfterBypass` | Закрытие по моменту без ZSC (xZscUsed = FALSE): задвижка закрыта по муфте. «Открыть»: муфта открытия держится — при страгивании с закрытого положения она не контролируется VLV_UNSEAT_BYPASS = 2 с от начала хода (VLV-21); держится дольше — клин не вышел из седла: TorqueTrip ровно через 2 с, выход снят. |
+| `FB_Valve_Test` | `Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault` | Соленоидный клапан НЗ (SolenoidEto) с ZSO и ZSC, открыт командой до ZSO. Пропало питание привода: катушка обесточена, клапан уходит на пружину — ZSO пропал, через 1 с ZSC. Отказа PositionLost нет: без напряжения уход с концевика не контролируется (VLV-08), состояние Closed. Питание вернулось — отказа нет, в Manual катушка не включается. |
 | `FB_ControlValve_Test` | `ControlValve_ManualSetpoint_RateLimited` | Manual, рост 10 %/с, спад 20 %/с, шаг 0,1 с. Задание 0 -> 50 %: 10 % через 1 с, 49 % на 4,9 с, 50 % на 5,0 с (бит RAMPING снят); задание 50 -> 10 %: 30 % через 1 с, 10 % через 2 с. Задание оператора в Manual ФБ не переписывает. |
 | `FB_ControlValve_Test` | `ControlValve_OutputLimits_Clamp` | Пределы 10…90 %: задание Manual 95 % — выход 90 % (бит LIMITED_MAX), 5 % — 10 % (LIMITED_MIN); в Auto 120 % — 90 %, 55 % — без ограничения. rPosSp_pct — задание после пределов. |
 | `FB_ControlValve_Test` | `ControlValve_Invert_20mAAtZero` | Инверсия выхода: 0 % — 20 мА, 25 % — 16 мА, 100 % — 4 мА; без инверсии 25 % — 8 мА. Ток — и в выходе, и в Sts. |
-| `FB_ControlValve_Test` | `ControlValve_TightShut_BelowThresholdGivesZero` | Плотное закрытие 5 %: задание 4 % — выход 0 % (бит TIGHT_SHUT, 4 мА), 6 % — 6 %. Рампа не залипает под порогом: рост 1 %/с, задание 20 %: на 4,5 с выход 0 % (рампа 4,5 %), на 5,0 с — 5 %, на 10 с — 10 %. |
+| `FB_ControlValve_Test` | `ControlValve_TightShut_BelowThresholdGivesZero` | Плотное закрытие 5 %: задание 4 % — выход 0 % (бит TIGHT_SHUT, 4 мА), 6 % — 6 %. Рампа не залипает под порогом: рост 1 %/с, задание 20 %: на 4,5 с выход 0 % (рампа 4,5 %), на 5,0 с ещё 0 % (гистерезис 1 %, CV-13), на 6,0 с — 6 %, на 10 с — 10 %. |
 | `FB_ControlValve_Test` | `ControlValve_Deviation_WarningAfterDelay` | ОС подключена, допуск 5 %, tDev = 30 с. Выход 50 %, ОС 40 %: до 29 с предупреждения нет, ровно на 30 с — CV_WRN_DEVIATION, NE 107 OutOfSpecification, тревога слота Deviation; отказа нет, выход не меняется, rDeviation_pct = 10 %. ОС 48 % — предупреждение снято, бит AT_SETPOINT. |
 | `FB_ControlValve_Test` | `ControlValve_DeviationDuringRamp_Ignored` | Клапан не двигается (ОС 0 %), задание 0 -> 50 % с рампой 1 %/с (50 с): во время рампы рассогласование не контролируется. После конца рампы предупреждение — ровно через tDev = 10 с (на 9 с ещё нет). |
 | `FB_ControlValve_Test` | `ControlValve_DeviationAsFault_GoesSafePosition` | Рассогласование — отказ (xDevIsFault), реакция SafePos (20 %), рампа 10 %/с, tDev = 5 с. Auto, выход 50 %, ОС 30 %: на 4 с отказа нет, на 5 с — CV_FLT_DEVIATION, Failure и сразу 20 % без рампы (бит SAFE_POS), xAutoActive = FALSE. Отказ фиксирован; Reset снимает, рампа к 50 % — от текущих 20 %. |
@@ -847,6 +906,10 @@ _Нет._
 | `FB_ControlValve_Test` | `ControlValve_LocalFeedbackOutOfRange_OutputClamped` | Local: выход следует ОС, но только в пределах хода 0…100 %. Датчик положения на закрытом клапане показывает чуть ниже нуля (-1,5 %, сигнал ещё достоверен): выход 0 % и 4,0 мА, а не 3,76 мА — ток ниже 4 мА позиционер с питанием от токовой петли может не держать (минимальный ток — по паспорту позиционера). ОС 102,5 % — выход 100 % и 20,0 мА, а не 20,4 мА. С инверсией: 100 % — 4,0 мА, -1,5 % — 20,0 мА. Возврат в Manual — без рывка от ограниченного выхода. |
 | `FB_ControlValve_Test` | `ControlValve_DeviationFaultReset_StuckValveRetripsAfterTDev` | Рассогласование — отказ (xDevIsFault), реакция Hold, tDev = 5 с. Manual, задание 50 %, клапан заклинило на 30 %: на t0 + 5 с — CV_FLT_DEVIATION, выход удерживается (50 %), предупреждения рассогласования нет — это отказ. Reset при неснятой причине снимает отказ и начинает отсчёт tDev заново: на t1 + 4 с отказа нет, ровно на t1 + 5 с он возвращается. |
 | `FB_ControlValve_Test` | `ControlValve_InterlockInManual_StaysAtSafePosition` | Manual, задание оператора 70 %. Блокировка: выход сразу в положение безопасности 15 %, задание Manual следит за ним (оператор не управляет выходом). Блокировка снята: Manual остаётся в 15 % — клапан сам к прежнему заданию оператора не уходит (CV-6, как у FB_Valve и двигателя). |
+| `FB_ControlValve_Test` | `ControlValve_TightShutHysteresis_NoChatter` | Плотное закрытие 2 % с гистерезисом CV_TIGHT_HYST_PCT = 1 % (CV-13): задание 2,02 %, затем по кругу 1,98 / 2,02 % десять вызовов — выход один раз уходит в 0 % и дальше не дёргается; 2,99 % — ещё 0 %; 3,0 % — выход 3,0 %, бит TIGHT_SHUT снят. |
+| `FB_ControlValve_Test` | `ControlValve_SlowRamp1msCycle_NotStalled` | Рампа 0,003 %/с при цикле 1 мс (CV-14): приращение за шаг 3·10⁻⁶ % меньше половины шага REAL рядом с 70 % (7,6·10⁻⁶ %) — в REAL рампа стояла бы на месте. Состояние рампы в LREAL: за 1 с (1000 шагов по 1 мс) выход 70,003 % — столько же, сколько при цикле 100 мс (10 шагов). источник: tools/reference/valve_reference.py, сценарий cv_slow_ramp. |
+| `FB_ControlValve_Test` | `ControlValve_FbNaN_EventAndStsFinite` | ОС положения NaN при xPosFbValid = TRUE (мусор Modbus): тревога FbFailure; значение её события и stSts.rPosFb_pct конечны — 0.0 (R6: журнал и карта регистров NaN не получают), рассогласование 0, выход удерживается. |
+| `FB_ControlValve_Test` | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` | Первопричина держится (CV-9): блокировка бит 2, затем добавился бит 0 (16#0005) — uiFirstOut = 2 не меняется. Reset снимает её; пока слово блокировок не 0, новой первопричины нет. Слово вернулось в 0, затем бит 1 — первопричина 1; вход в OutOfService её снимает. |
 | `FB_Pid_Test` | `Pid_POnly_ErrorStep_OutputEqualsKpTimesError` | П-регулятор (Kp = 2, без I и D): после безударного перехода в Auto со смещением 40 % выход отличается от смещения ровно на Kp·e при ошибке +5 % и -3 %. |
 | `FB_Pid_Test` | `Pid_Integral_ConstantError_RampRateKpOverTi` | ПИ-регулятор (Kp = 2, Ti = 10 с) при постоянной ошибке 4 %: выход растёт со скоростью Kp·e/Ti = 0,8 %/с, интегратор — на Kp·dt/Ti·e за шаг. |
 | `FB_Pid_Test` | `Pid_DOnMeasurement_SetpointStep_NoDerivativeKick` | D по измерению (Kp = 1, Td = 5 с, N = 10, без I): ступень задания меняет выход только на P (D = 0, «удара» нет), ступень PV на 2 % даёт D = -Kp·Td/(Tf + dt)·2 %. |
@@ -857,7 +920,7 @@ _Нет._
 | `FB_Pid_Test` | `Pid_AntiWindup_OutActFeedback_TracksExternalLimit` | Обратный расчёт по фактическому выходу (xUseOutAct): механизм не опускается ниже 30 % (минимум частоты ПЧ), rOutAct_pct = MAX(30, выход прошлого вызова). При ошибке -10 % 60 с выход ПИД держится у внешнего предела (около 30 - Tt·Kp·\|e\|/Ti = 20 %), а не уходит в 0; после смены знака ошибки механизм отвечает сразу. Без xUseOutAct ПИД уходит в 0 и после смены знака остаётся ниже 30 %. |
 | `FB_Pid_Test` | `Pid_OutputRateLimit_IntegratorBacksOff` | Ограничение скорости выхода 5 %/с (Kp = 2, Ti = 10 с): после ступени задания на 10 % выход растёт ровно на 0,5 % за шаг 100 мс (бит OUT_RATE_LIMITED), а обратный расчёт по разности u - v сдерживает интегратор (без него было бы 40 + 2·10·2/10 = 44 % за 2 с). |
 | `FB_Pid_Test` | `Pid_ManualToAuto_Bumpless` | Безударный переход Manual -> Auto (Kp = 2, Ti = 10 с, Td = 1 с): ошибка 3 % есть уже в Manual, интегратор предустановлен I = u - P - D = 35 - 6 - 0; в момент перехода выход равен ручному 35 %, дальше меняется только интегратором; Cmd следит за выходом в Auto. |
-| `FB_Pid_Test` | `Pid_Track_PresetsIntegrator_BumplessRelease` | Слежение в Auto (Kp = 2, Ti = 10 с, нижний предел 10 %): выход = rTrack_pct без пределов (0 %), интегратор I = u - P - D, бит TRACKING, Cmd следит за выходом; после снятия xTrack выход продолжается с 25 % без рывка. |
+| `FB_Pid_Test` | `Pid_Track_PresetsIntegrator_BumplessRelease` | Слежение в Auto (Kp = 2, Ti = 10 с, нижний предел 10 %): выход = rTrack_pct без пределов (0 %), интегратор I = u - P - D, бит TRACKING, Cmd следит за выходом; после снятия xTrack выход продолжается с 25 % без рывка. Available = FALSE при слежении (PV годна, Auto), TRUE после снятия. |
 | `FB_Pid_Test` | `Pid_SpExternal_TracksIntoCmd` | Внешнее задание: цель — rSpExt_eu (в пределах rSpMin_eu…rSpMax_eu), ФБ пишет её в stCmd.rSp_eu; после снятия xSpExt операторское задание продолжается с того же значения. |
 | `FB_Pid_Test` | `Pid_SetpointRamp_RateLimited` | Рампа задания 2 инж. ед./с: ступень операторского задания 40 -> 60 проходится за 10 с; через 5 с действующее задание 50 и бит SP_RAMPING, через 10 с — 60 и бит снят; цель — сразу 60. |
 | `FB_Pid_Test` | `Pid_RealDt_SameResultFor10msAnd100msSteps` | Расчёт по реальному dt (Kp = 2, Ti = 10 с, e = 4 %): за 5 с при вызовах раз в 10 мс и раз в 100 мс интегратор одинаков (30 + 2·4·5/10 = 34 %). Выход берёт интегратор прошлого шага, поэтому выходы различаются ровно на приращение одного шага: 0,008 и 0,08 %. |
@@ -900,9 +963,12 @@ _Нет._
 | `FB_Pid_Test` | `Pid_SetAutoWithOosRequest_OneCommand` | Запрос Auto при негодной PV вместе со старшим запросом OutOfService в одном вызове (P-13): одна команда — результат старшего (Accepted), uiCmdSeq + 1, оба бита сброшены. |
 | `FB_Pid_Test` | `Pid_Manual_OutputClampedToLimits` | Manual: выход оператора ограничивается rOutMin_pct…rOutMax_pct (таблица 17.5), флаги насыщения выставляются и на самих пределах; значение оператора в Cmd ФБ не переписывает. |
 | `FB_Pid_Test` | `Pid_SameTimestamp_NoCalc_HoldsOutput` | Второй вызов в тот же момент (dt = 0; P-02): расчёта нет — выход и D прежние, хотя PV изменилась; следующий шаг учитывает изменение PV один раз. Расчёт с нулевым шагом дал бы всплеск D = Kp·Td/Tf·ΔPV = 10 %. |
+| `FB_Pid_Test` | `Pid_PvNaN_EventAndStsFinite` | Auto, PV = NaN при xPvValid = TRUE (мусор Modbus): тревога PvInvalid; значение её события и stSts.rPv_eu конечны — 0.0 (R6), выход удерживается (Hold) и конечен. |
 | `FB_Integration_Test` | `Device_DefaultCfg_PassesCheck` | Инвариант генератора (контракт 2.3, раздел 20): умолчания Cfg всех семи типов устройств проходят CheckConfig — после первого вызова wCfgErr = 0 и нет бита DEV_STS_CFG_ERROR (корректная Cfg принята как LKG). Каждый тип — настоящий ФБ, а не тестовое устройство (F-26). |
 | `FB_Integration_Test` | `Device_DevType_ReportedInStsCommon` | Каждый тип пишет свой E_DeviceType в stSts.stCommon.eDevType с первого вызова (SCADA выбирает фейсплейт, генератор карты Modbus сверяет тип блока); до первого вызова — None. FB_MotorVfd сообщает MotorVfd, а не Motor: FB_Motor тип наследника не затирает и во втором вызове. |
 | `FB_Integration_Test` | `Device_AllTypes_AlarmCountThroughIDevice` | Все семь типов доступны через I_Device (интерфейс станции и SCADA-адаптера): число слотов тревог AlarmCount (I_AlarmSource) после первого вызова равно <DEV>_ALARM_COUNT из GVL_Const, слот 0 доступен через GetAlarm, режим — из перечисления. У FB_Motor и FB_MotorVfd слотов одинаково (8). |
+| `FB_Integration_Test` | `LevelLoop_AiPidVfd_TracksBumplessNoWindup` | Контур уровня КНС по примеру 17.3 контракта: LT (AI 4–20 мА, 0..10 м) -> LIC (ПИД Direct, Kp 2, Ti 20 с, xUseOutAct) -> ведущий насос (ПЧ, rSpeedMin 30 %); xTrack := NOT SpeedAutoActive, rTrack = rOutAct = SpeedRef с прошлого цикла. (1) Насос стоит в Auto — ПИД следит, выход = заданию ПЧ (0 %), Available = FALSE. (2) Пуск: Starting — ПИД ещё следит (30 % — предустановка ПЧ); Running — слежение снято, выход ПИД без рывка (30 %). (3) Уровень 4,8 м ниже задания 5 м 10 мин: ПИД просит меньше минимума, задание ПЧ держится на 30 %, выход ПИД по обратному расчёту от rOutAct не уходит в 0: 30 + P = 30 - 2·2 = 26 %. (4) Уровень 5,2 м — задание ПЧ сразу 34 % (30 + P), без задержки на «раскрутку» интегратора. |
+| `FB_Integration_Test` | `LevelLoop_GuardBandCurrent_PidHoldsOutput` | Датчик уровня выдаёт ток отказа NAMUR, а канал AI читает 3,61 мА (защитная полоса NE 43, AI-13). ПИД (Reverse, Auto, задание 5 м, выход 40 %) работает tFailDelay = 2 с по значению насыщения, затем AI снимает xValid — ПИД фиксирует отказ PV и удерживает выход (Hold), а не уводит его к 100 % за минуту. |
 
 ## Вопросы раздела 24.2 контракта: ответы прогона
 
@@ -951,7 +1017,7 @@ CODESYS Control Win V3 3.5.17.30, 32 бит, пользовательский п
 | M7 | `FinishCycle` не снимает запрос `Reset()` | **не поймана** | `Device_MethodRequests_ProcessedOnce` |
 | M8 | `CheckAlarmCfg` не проверяет последний слот | 1 тест | 1 тест |
 | M9 | бит `DEV_STS_WARNING` без учёта NE 107 S/M | 1 тест | 1 тест |
-| M10 | `wAlmShelved` без слотов в OutOfService | 2 теста | 2 теста |
+| M10 | `wAlmShelved` без слотов в OutOfService | 2 теста | 2 теста (с 1.0.0 это нормативное поведение — F-32: OutOfService виден по `eMode`) |
 | M11 | Local без учёта `xLocalSupported` | 1 тест | 1 тест |
 | M12 | `stCmd.xReset` не квитирует тревоги | 1 тест | 1 тест |
 | M13 | `SwitchRemoteMode` без вызова хука | не проверялась | 2 теста |
@@ -980,15 +1046,81 @@ CHANGELOG, «Fixed»): новый тест на нём падает.
 | `FB_MotorVfd`: `eDevType := E_DeviceType.Motor` вместо `MotorVfd` (19.10.2026) | поймана, 417 из 420 | `Device_DevType_ReportedInStsCommon` («MotorVfd, not Motor»), `MotorVfd_FirstCall_SetsTypeMotorVfdAndPassesDefaultCfg`, `MotorVfd_ImplementsIMotor_PolymorphicArray` |
 | `F_RateLimit`: неконечная цель без проверки — результат NaN (16.10.2026) | поймана после правила NaN | `Util_RateLimit_NonFiniteTarget_HoldsCurrent` («NaN target: result finite»); прежний `AssertEquals_REAL` её пропускал ([TESTING.md](TESTING.md#ожидаемые-значения-и-эталоны)) |
 
+## Ревью перед выпуском: находки и мутации
+
+19.10.2026, три независимых ревью интегрированной библиотеки: стандарты (NAMUR NE 43, NE 107, ISA-18.2,
+практика арматуры и ПИД), ПО (мутации и пробелы тестов), потребители (проекты 02 и 07). 25 находок. Каждая
+проверена в этой рабочей копии: настоящая ошибка — тест, который падал до исправления, затем исправление;
+пробел тестов — тест, который падает на мутанте ревью и зелёный на исправном коде. Решения —
+[ASSUMPTIONS.md](ASSUMPTIONS.md) (I-10 и номера в таблице), изменения контракта —
+[API.md, «Изменения по ревью перед выпуском»](API.md#изменения-по-ревью-перед-выпуском).
+
+**Красный прогон** (CODESYS 3.5.17.30, Control Win V3, `cds.py test`): исходный код, все новые и расширенные
+тесты и одновременно мутанты пробелов M1, M1b, M1c, M2, M2b, M3, M4, M5, M6, M7 (таблица ниже). 14 наборов,
+451 тест: 419 пройдено, **32 упало** — ровно новые и расширенные тесты, каждый на исправляемом месте (тест
+`Valve_InterlockWithExtFault_OutputsStayOff` — граничный, зелёный и до, и после). Существующие 419 тестов с
+мутантами прошли — это и есть пробелы, найденные ревью. **Зелёный прогон** после исправлений, отката мутантов и
+двух тестов `F_RateLimitLr`: 14 наборов, 453 теста, 453 пройдено.
+
+| Находка | Важность | Итог | Изменение | Тесты (падали до исправления или на мутанте) |
+|---|---|---|---|---|
+| VLV-1 | major | исправлено | VLV-20: блокировка при одних отказах контроля ведёт задвижку в положение безопасности | `Valve_InterlockWithBothLimits_DrivesSafe`, `Valve_InterlockAfterPositionLost_DrivesSafe`; граничный `Valve_InterlockWithExtFault_OutputsStayOff` |
+| VLV-2 | major | исправлено | VLV-21: муфта открытия при страгивании с седла не контролируется (ZSC + `tLimitFilter`, не дольше `VLV_UNSEAT_BYPASS`) | `Valve_OpenTorqueWhileUnseating_Ignored`, `Valve_OpenTorqueUnseatingNoZsc_TripsAfterBypass` |
+| NE43-1 | major | исправлено | AI-13: значение в защитной полосе — насыщение NE 43, подтверждённый выход за диапазон — `xValid = FALSE` | `AnalogInput_GuardBandLow_InvalidAfterDelay`, `AnalogInput_GuardBandHigh_InvalidLimitsKept`, `LevelLoop_GuardBandCurrent_PidHoldsOutput` |
+| NE107-1 | minor | исправлено | F-30: Local — NE 107 CheckFunction | `Device_LocalMode_Ne107CheckFunction` |
+| CV-1 | minor | исправлено | CV-13: гистерезис плотного закрытия `CV_TIGHT_HYST_PCT` | `ControlValve_TightShutHysteresis_NoChatter` |
+| ALM-1 | minor | исправлено | F-31: приоритет None у активной тревоги — событие `Disabled` | `Alarm_PriorityNoneWhileActive_EmitsClosingEvent` |
+| ALM-2 | minor | исправлено | F-32: `wAlmShelved` — только Shelved, `wAlmSuppressed` (бывший `wReserve`) — SuppressedByDesign | `Device_ShelvedAndSuppressed_SeparateMasks` |
+| R1 | major | исправлено | VFD-09: подхват — задание от фактической скорости, в Manual — и задание оператора | `MotorVfd_PlcRestart_RefBumpless` |
+| R2 | major | пробел закрыт | — (код верен) | `Motor_TimeBackwardsDuringMinStop_PauseRestarts` (M1), `Motor_TimeBackwardsDuringMinRun_KeepsRunning` (M1b), `Motor_TimeBackwardsDuringResetPulse_PulseRestarts` (M1c) |
+| R3 | major | пробел закрыт | — (код верен) | `MotorVfd_ImplementsIMotorVfd_LeadPumpProperties` расширен (M3), `LevelLoop_AiPidVfd_TracksBumplessNoWindup` (контур AI → ПИД → ПЧ по 17.3) |
+| R4 | minor | исправлено | VFD-10: предустановка пуска ждёт связи | `MotorVfd_StartInCommGap_RefPresetToMin` |
+| R5 | minor | исправлено | CV-14, VFD-13: состояние рамп в LREAL, функция `F_RateLimitLr` | `ControlValve_SlowRamp1msCycle_NotStalled`, `MotorVfd_SlowRamp1msCycle_NotStalled`; функция — `Util_RateLimitLr_*` |
+| R6 | minor | исправлено | F-33: значения событий и Sts конечны | `Alarm_NonFiniteValue_EventValueFinite`, `Pid_PvNaN_EventAndStsFinite`, `ControlValve_FbNaN_EventAndStsFinite`, `MotorVfd_SpeedActNaN_StsFinite` |
+| R7 | minor | пробел закрыт | — (код верен) | `Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault` (M6) |
+| R8 | minor | пробел закрыт | — (код верен) | `AnalogInput_SubstitutionUnlimited_NoTimeout` (M2), `DigitalInput_SubstitutionUnlimited_NoTimeout` (M2b) |
+| R9 | minor | пробел закрыт | — (код верен) | `Pid_Track_PresetsIntegrator_BumplessRelease` расширен (M4) |
+| R10 | minor | пробел закрыт | — (код верен) | `Device_OosRepeatWhileMovingInOos_Accepted` (M5) |
+| R11 | minor | пробел закрыт | — (код верен) | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` (M7) |
+| F1 | major | исправлено | VFD-11: устаревшая ОС (нет питания или отказ связи) — не работа: счётчики, `Running` стоят | `MotorVfd_CommLoss_CountersFrozen`, `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` |
+| F2 | major | исправлено | VFD-12: без питания и `VFD_POWER_UP_DELAY` после его возврата связь не контролируется | `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` |
+| F3 | major | исправлено в контракте | I-13: Pid — тип устройства iolistgen, данные приложения — `persist_extra`; изменения генератора — [CONSUMERS.md](CONSUMERS.md#iolistgen) | — (проект 07) |
+| F4 | minor | исправлено | I-11: `docs/alarm_templates.csv` | `tools/project_checks/test_alarm_templates.py` |
+| F5 | minor | исправлено | I-12: сверка объявлений ФБ, таблиц `docs/fb` и констант 5.1 с исходниками | `test_fb_declarations_match_api_doc`, `test_fb_io_tables_match_sources`, `test_non_mask_constants_in_api_doc_table` (`tools/project_checks/test_contract_doc.py`); эксперимент ревью (`xCommOk := FALSE`, `xPvValid` → `xPvGood`) теперь падает |
+
+Мутанты пробелов (однострочные, применены вместе в красном прогоне, затем откатаны):
+
+| № | Мутация | До (420 тестов) | После |
+|---|---|---|---|
+| M1 | `FB_Motor`: убрана проверка «время назад» отметки останова `ltStopMark` | выжила | `Motor_TimeBackwardsDuringMinStop_PauseRestarts` |
+| M1b | `FB_Motor`: то же для `ltRunEntry` (`tMinRun` в Auto) | выжила | `Motor_TimeBackwardsDuringMinRun_KeepsRunning` |
+| M1c | `FB_Motor`: то же для `ltResetMark` (импульс и окно Reset) | выжила | `Motor_TimeBackwardsDuringResetPulse_PulseRestarts` |
+| M2 | `FB_AnalogInput`: подмена ограничена и при `tSubstMax = T#0S` | выжила | `AnalogInput_SubstitutionUnlimited_NoTimeout` |
+| M2b | `FB_DigitalInput`: то же | выжила | `DigitalInput_SubstitutionUnlimited_NoTimeout` |
+| M3 | `FB_MotorVfd`: `xSpeedAutoActive` без `eState = Running` | выжила | `MotorVfd_ImplementsIMotorVfd_LeadPumpProperties`, `LevelLoop_AiPidVfd_TracksBumplessNoWindup` |
+| M4 | `FB_PID`: `xAvailableDev` без `NOT xTrack` | выжила | `Pid_Track_PresetsIntegrator_BumplessRelease` |
+| M5 | `ProcessMode`: повтор OutOfService в OutOfService только при `xOosAllowed` | выжила | `Device_OosRepeatWhileMovingInOos_Accepted` |
+| M6 | `FB_Valve`: контроль ухода с концевика без проверки напряжения | выжила | `Valve_SolenoidWithZso_PowerLoss_NoPositionLostFault` |
+| M7 | `FB_ControlValve`: первопричина перезаписывается каждый цикл | выжила | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` |
+
+Существующие тесты, поведение которых изменилось осознанно (новые ожидания вместо прежних):
+`AnalogInput_At3p7mA_IsOutOfSpecification`, `AnalogInput_At20p7mA_IsOutOfSpecification` (AI-13),
+`Alarm_PriorityNone_CancelsShelve` (F-31), `Device_AlarmSummary_WordsAndPrioUnack`,
+`Device_AlarmsInOos_AllSlotsOutOfService`, `Device_OutOfServiceRetained_StartsInOos`,
+`Device_StsHeader_AllFieldsFilled`, `DigitalInput_OutOfService_AlarmsOutOfService`,
+`MotorVfd_CommLossInOos_NoFaultNoWarning` (F-32), `ControlValve_TightShut_BelowThresholdGivesZero` (CV-13),
+`ControlValve_PositionerFault_SafePosAction` (эталон рампы в LREAL, CV-14), `Valve_OosEntry_ClearsLatchedFaults`
+(муфта заводится после страгивания, VLV-21).
+
 ## Проверки без CODESYS
 
 Итоги последнего локального прогона (Windows, 19.10.2026); в CI — те же команды.
 
 | Проверка | Итог | Примечание |
 |---|---|---|
-| `ruff check`, `ruff format --check`, `mypy` | пройдено | ruff — 59 файлов; mypy strict — 29 модулей |
-| `pytest` | пройдено: 612 тестов | инструменты шаблона (в том числе интеграционные с настоящими `plc` и iec_checker) и `tools/project_checks/` (соглашения тестов, константы, маски, перечисления, DUT, интерфейсы и константы `docs/API.md` против исходников) |
-| `tools/check/st_lint.py --strict` | пройдено | 1260 файлов, 0 замечаний; подавлений `lint:allow` нет |
-| iec_checker 0.4 (`run_iec_checker.py`, `--tests`) | пройдено | `src/`: 79 объектов, ошибок разбора нет, необоснованных 0; с `tests/`: 115 объектов, необоснованных 0 — разбор в [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md) |
-| RuSTy 1.0.6 (`run_rusty.py`, необязательно) | пройдено: 0 ошибок | 116 файлов, исключённых нет; предупреждения E049, E067, E091, E040, E127 — [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md#rusty-plc---check) |
+| `ruff check`, `ruff format --check`, `mypy` | пройдено | ruff — 61 файл; mypy strict — 30 модулей |
+| `pytest` | пройдено: 620 тестов | инструменты шаблона (в том числе интеграционные с настоящими `plc` и iec_checker) и `tools/project_checks/` (соглашения тестов, константы, маски, перечисления, DUT, интерфейсы, объявления ФБ, таблицы «Входы и выходы» `docs/fb` и константы `docs/API.md` против исходников, шаблоны текстов тревог) |
+| `tools/check/st_lint.py --strict` | пройдено | 1332 файла, 0 замечаний; подавлений `lint:allow` нет |
+| iec_checker 0.4 (`run_iec_checker.py`, `--tests`) | пройдено | `src/`: 80 объектов, ошибок разбора нет, необоснованных 0; с `tests/`: 116 объектов, необоснованных 0 — разбор в [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md) |
+| RuSTy 1.0.6 (`run_rusty.py`, необязательно) | пройдено: 0 ошибок | 117 файлов, исключённых нет; предупреждения E049, E067, E091, E040, E127 — [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md#rusty-plc---check) |
 | `tools/reference/*.py` (`common`, `ai_reference`, `motor`, `valve_reference`, `pid`) | пройдено | эталоны тестов; размеры Sts совпадают с таблицей 4.6 контракта |
