@@ -12,7 +12,7 @@
   <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
   <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
   <img alt="Язык: Structured Text" src="https://img.shields.io/badge/Structured%20Text-3A4B60?style=flat-square">
-  <a href="#тесты-и-проверки"><img alt="Тесты: coUnit 453 из 453 в CODESYS Control Win, pytest 620" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20620-3A4B60?style=flat-square&labelColor=1B2736"></a>
+  <a href="#тесты-и-проверки"><img alt="Тесты: coUnit 453 из 453 в CODESYS Control Win, pytest 626" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20626-3A4B60?style=flat-square&labelColor=1B2736"></a>
 </p>
 
 <p align="center">
