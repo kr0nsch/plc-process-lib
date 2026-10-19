@@ -12,7 +12,7 @@
   <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
   <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
   <img alt="Язык: Structured Text" src="https://img.shields.io/badge/Structured%20Text-3A4B60?style=flat-square">
-  <a href="docs/TEST_REPORT.md"><img alt="coUnit: 453 теста в CODESYS Control Win V3" src="https://img.shields.io/badge/coUnit-453%20%D1%82%D0%B5%D1%81%D1%82%D0%B0-3A4B60?style=flat-square&labelColor=1B2736"></a>
+  <a href="#тесты-и-проверки"><img alt="Тесты: coUnit 453 из 453 в CODESYS Control Win, pytest 620" src="https://img.shields.io/badge/tests-coUnit%20453%2F453%20%C2%B7%20pytest%20620-3A4B60?style=flat-square&labelColor=1B2736"></a>
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@ NE 43), квитирование и обмен с HMI/SCADA через стру�
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/media/chart-level-loop-dark.png">
     <source media="(prefers-color-scheme: light)" srcset="docs/media/chart-level-loop-light.png">
-    <img alt="Контур уровня AI → ПИД → ПЧ в Control Win: пуск насоса без рывка, ступень задания 2,5 → 1,5 м с выходом ПИД в 100 % около 26 с и недорегулированием 0,06 м, затем ступень притока 120 → 210 м³/ч" src="docs/media/chart-level-loop-light.png" width="900">
+    <img alt="Контур уровня AI → ПИД → ПЧ в Control Win: пуск насоса без рывка, ступень задания 2,5 → 1,5 м с выходом ПИД в 100 % около 26 с и перерегулированием 0,06 м, затем ступень притока 120 → 210 м³/ч" src="docs/media/chart-level-loop-light.png" width="900">
   </picture>
 </p>
 <p align="center"><sub><code>FB_AnalogInput</code> → <code>FB_PID</code> → <code>FB_MotorVfd</code>: слежение ПИД до пуска насоса, насыщение выхода с обратным расчётом по фактическому заданию ПЧ, отработка притока · <a href="docs/media/data/demo-level-loop.csv">CSV</a></sub></p>
@@ -243,7 +243,7 @@ coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.202
 
 | Набор | Тестов | | Набор | Тестов |
 |---|---|---|---|---|
-| `FB_Time_Test` | 24 | | `FB_AnalogInput_Test` | 51 |
+| `FB_Time_Test` | 24 | | `FB_AnalogInput_Test` | 54 |
 | `FB_Util_Test` | 28 | | `FB_DigitalInput_Test` | 19 |
 | `FB_Common_Test` | 11 | | `FB_Motor_Test` | 55 |
 | `FB_Alarm_Test` | 40 | | `FB_MotorVfd_Test` | 33 |

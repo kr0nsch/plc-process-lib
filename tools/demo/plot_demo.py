@@ -275,7 +275,7 @@ def chart_ne43(ch: ModuleType, theme: str, info: dict[str, Any]) -> list[Path]:
         ax.axhspan(21.0, 26, color=c["alarm"], alpha=soft, lw=0)
         for y in (3.6, 3.8, 20.5, 21.0):
             ax.axhline(y, color=c["warn"], lw=0.9, alpha=0.9)
-        for y, txt in ((3.7, "3,6 | 3,8"), (20.75, "20,5 | 21,0")):
+        for y, txt in ((3.7, "3.6 | 3.8"), (20.75, "20.5 | 21.0")):  # метки поля с точкой, как H 4.0
             ax.annotate(
                 txt,
                 xy=(1.0, y),
