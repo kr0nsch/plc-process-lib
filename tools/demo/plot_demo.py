@@ -1,4 +1,4 @@
-"""Графики раздела «Демонстрация» README из CSV демонстрационного прогона (docs/media/data/).
+"""Графики раздела «Как это выглядит» README из CSV демонстрационного прогона (docs/media/data/).
 
     python tools/demo/plot_demo.py [--kit ПУТЬ_К_МЕДИАКИТУ]
 

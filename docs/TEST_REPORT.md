@@ -1049,7 +1049,7 @@ CHANGELOG, «Fixed»): новый тест на нём падает.
 ## Ревью перед выпуском: находки и мутации
 
 19.10.2026, три независимых ревью интегрированной библиотеки: стандарты (NAMUR NE 43, NE 107, ISA-18.2,
-практика арматуры и ПИД), ПО (мутации и пробелы тестов), потребители (проекты 02 и 07). 25 находок. Каждая
+практика арматуры и ПИД), ПО (мутации и пробелы тестов), потребители (проекты `kns-pump-station` и `iolistgen`). 25 находок. Каждая
 проверена в этой рабочей копии: настоящая ошибка — тест, который падал до исправления, затем исправление;
 пробел тестов — тест, который падает на мутанте ревью и зелёный на исправном коде. Решения —
 [ASSUMPTIONS.md](ASSUMPTIONS.md) (I-10 и номера в таблице), изменения контракта —
@@ -1084,7 +1084,7 @@ CHANGELOG, «Fixed»): новый тест на нём падает.
 | R11 | minor | пробел закрыт | — (код верен) | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` (M7) |
 | F1 | major | исправлено | VFD-11: устаревшая ОС (нет питания или отказ связи) — не работа: счётчики, `Running` стоят | `MotorVfd_CommLoss_CountersFrozen`, `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` |
 | F2 | major | исправлено | VFD-12: без питания и `VFD_POWER_UP_DELAY` после его возврата связь не контролируется | `MotorVfd_PowerLossCommLoss_NoFaultNotRunning` |
-| F3 | major | исправлено в контракте | I-13: Pid — тип устройства iolistgen, данные приложения — `persist_extra`; изменения генератора — [CONSUMERS.md](CONSUMERS.md#iolistgen) | — (проект 07) |
+| F3 | major | исправлено в контракте | I-13: Pid — тип устройства iolistgen, данные приложения — `persist_extra`; изменения генератора — [CONSUMERS.md](CONSUMERS.md#iolistgen) | — (`iolistgen`) |
 | F4 | minor | исправлено | I-11: `docs/alarm_templates.csv` | `tools/project_checks/test_alarm_templates.py` |
 | F5 | minor | исправлено | I-12: сверка объявлений ФБ, таблиц `docs/fb` и констант 5.1 с исходниками | `test_fb_declarations_match_api_doc`, `test_fb_io_tables_match_sources`, `test_non_mask_constants_in_api_doc_table` (`tools/project_checks/test_contract_doc.py`); эксперимент ревью (`xCommOk := FALSE`, `xPvValid` → `xPvGood`) теперь падает |
 
@@ -1119,7 +1119,7 @@ CHANGELOG, «Fixed»): новый тест на нём падает.
 | Проверка | Итог | Примечание |
 |---|---|---|
 | `ruff check`, `ruff format --check`, `mypy` | пройдено | ruff — 61 файл; mypy strict — 30 модулей |
-| `pytest` | пройдено: 620 тестов | инструменты шаблона (в том числе интеграционные с настоящими `plc` и iec_checker) и `tools/project_checks/` (соглашения тестов, константы, маски, перечисления, DUT, интерфейсы, объявления ФБ, таблицы «Входы и выходы» `docs/fb` и константы `docs/API.md` против исходников, шаблоны текстов тревог) |
+| `pytest` | пройдено: 626 тестов | инструменты шаблона (в том числе интеграционные с настоящими `plc` и iec_checker) и `tools/project_checks/` (соглашения тестов, константы, маски, перечисления, DUT, интерфейсы, объявления ФБ, таблицы «Входы и выходы» `docs/fb` и константы `docs/API.md` против исходников, шаблоны текстов тревог) |
 | `tools/check/st_lint.py --strict` | пройдено | 1332 файла, 0 замечаний; подавлений `lint:allow` нет |
 | iec_checker 0.4 (`run_iec_checker.py`, `--tests`) | пройдено | `src/`: 80 объектов, ошибок разбора нет, необоснованных 0; с `tests/`: 116 объектов, необоснованных 0 — разбор в [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md) |
 | RuSTy 1.0.6 (`run_rusty.py`, необязательно) | пройдено: 0 ошибок | 117 файлов, исключённых нет; предупреждения E049, E067, E091, E040, E127 — [STATIC_ANALYSIS.md](STATIC_ANALYSIS.md#rusty-plc---check) |

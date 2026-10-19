@@ -274,7 +274,7 @@ OutOfService. Виртуальный вызов проверен во время
 ## Пример: станция через интерфейс
 
 ```st
-// общий сброс и счёт отказов насосов КНС без знания типов (проект 02)
+// общий сброс и счёт отказов насосов КНС без знания типов (`kns-pump-station`)
 aitfPumps[1] := GVL_Devices.fbP101;      // PL.FB_MotorVfd
 aitfPumps[2] := GVL_Devices.fbP102;
 FOR uiPump := 1 TO 2 DO

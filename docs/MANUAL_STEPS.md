@@ -1,8 +1,8 @@
 # Ручные шаги
 
 Шаги, которые выполняет человек в консоли Windows и в IDE CODESYS. Всё, что можно выполнить без
-CODESYS (сборка текстов, линтер, статанализ), описано в [README](../README.md#быстрый-старт)
-и выполняется в CI.
+CODESYS (тесты Python, линтер, статанализ), описано в [README](../README.md#проверки-без-codesys)
+и выполняется в CI. Как подключить библиотеку к своему проекту — [USAGE.md](USAGE.md).
 
 Команды разделов 3–7 проверены прогоном на CODESYS V3.5 SP17 Patch 3 (3.5.17.30, 32-битная сборка
 ОВЕН) и CODESYS Control Win V3 в пользовательском процессе (16.10.2026). Что не проверено — отмечено
@@ -226,7 +226,7 @@ setx CODESYS_PROFILE "CODESYS V3.5 SP17 Patch 3"
 
 Потребитель (репозиторий на шаблоне) подключает библиотеку описанием в `libraries` своего
 `config.json` с `build_from_repo` — тогда недостающую версию `cds.py` соберёт и поставит сам
-([README](../README.md#как-подключить-библиотеку)).
+([USAGE.md, раздел 10](USAGE.md#10-проект-на-шаблоне-plc-repo-template)).
 
 ## 8. Зеркало на GitVerse или GitFlic
 
@@ -270,7 +270,7 @@ persistent-данных на Control Win V3 и ПЛК210 тестами не п�
 
 1. В проекте приложения: «Application → Добавить объект → Persistent Variables», имя `GVL_Persist`
    (скриптом в SP17 не создаётся, D9 в [ASSUMPTIONS.md](ASSUMPTIONS.md)). Текст — из `src/GVLs/GVL_Persist.pvl.st`
-   приложения (его генерирует iolistgen, проект 07):
+   приложения (его генерирует `iolistgen`):
 
    ```st
    VAR_GLOBAL PERSISTENT RETAIN

@@ -7,20 +7,22 @@
 Источник истины — текстовые файлы ST в `src/` и `tests/` (раскладка — [LAYOUT.md](LAYOUT.md)).
 Проект CODESYS (`.project`) собирается из них скриптом и после правок в IDE экспортируется обратно.
 
-## Состав и состояние
+## Состав
 
-| Часть | Объекты | Состояние |
-|---|---|---|
-| Общие типы | 50 DUT (`src/DUTs/<Семейство>/`): перечисления, Cmd/Sts/Cfg/Retain всех устройств | этап 1, готово |
-| Константы | `GVL_Const`: числа, пределы, все маски битов слов состояния; `GVL_Lib`: приёмник тревог | этап 1, готово |
-| Интерфейсы | `I_TimeSource`, `I_Alarm`, `I_AlarmSource`, `I_AlarmSink`, `I_Device`, `I_Motor`, `I_MotorVfd` | этап 1, готово |
-| Время | `FB_SystemTime`, `FB_FakeTime`, `FB_Delay` (`src/POUs/Time/`) | этап 1, готово |
-| Утилиты | `F_LTimeToSec`, `F_TimeToSec`, `F_IsFinite`, `F_Ne107Worst`, `F_RateLimit`, `FB_StartsWindow`, `FB_LimitMonitor` (`src/POUs/Util/`) | этап 1, готово |
-| Тревоги и база | `FB_Alarm` (`src/POUs/Alarm/`), `FB_DeviceBase` (`src/POUs/Base/`) — [fb/FB_Alarm.md](fb/FB_Alarm.md), [fb/FB_DeviceBase.md](fb/FB_DeviceBase.md) | этап 2, готово |
-| Устройства | [`FB_AnalogInput`](fb/FB_AnalogInput.md), [`FB_DigitalInput`](fb/FB_DigitalInput.md), [`FB_Motor`](fb/FB_Motor.md), [`FB_MotorVfd`](fb/FB_MotorVfd.md), [`FB_Valve`](fb/FB_Valve.md), [`FB_ControlValve`](fb/FB_ControlValve.md) (`src/POUs/Devices/`), [`FB_PID`](fb/FB_PID.md) (`src/POUs/Control/`) | этап 3, готово; интеграция и межсемейные тесты — этап 4 |
+| Часть | Объекты |
+|---|---|
+| Общие типы | 50 DUT (`src/DUTs/<Семейство>/`): перечисления, Cmd/Sts/Cfg/Retain всех устройств |
+| Константы | `GVL_Const`: числа, пределы, все маски битов слов состояния; `GVL_Lib`: приёмник тревог |
+| Интерфейсы | `I_TimeSource`, `I_Alarm`, `I_AlarmSource`, `I_AlarmSink`, `I_Device`, `I_Motor`, `I_MotorVfd` |
+| Время | `FB_SystemTime`, `FB_FakeTime`, `FB_Delay` (`src/POUs/Time/`) |
+| Утилиты | `F_LTimeToSec`, `F_TimeToSec`, `F_IsFinite`, `F_Ne107Worst`, `F_RateLimit`, `F_RateLimitLr`, `FB_StartsWindow`, `FB_LimitMonitor` (`src/POUs/Util/`) |
+| Тревоги и база | `FB_Alarm` (`src/POUs/Alarm/`), `FB_DeviceBase` (`src/POUs/Base/`) — [fb/FB_Alarm.md](fb/FB_Alarm.md), [fb/FB_DeviceBase.md](fb/FB_DeviceBase.md) |
+| Устройства | [`FB_AnalogInput`](fb/FB_AnalogInput.md), [`FB_DigitalInput`](fb/FB_DigitalInput.md), [`FB_Motor`](fb/FB_Motor.md), [`FB_MotorVfd`](fb/FB_MotorVfd.md), [`FB_Valve`](fb/FB_Valve.md), [`FB_ControlValve`](fb/FB_ControlValve.md) (`src/POUs/Devices/`), [`FB_PID`](fb/FB_PID.md) (`src/POUs/Control/`) |
 
 `src/POUs/PRG_Main` — служебная программа рабочей сборки, не часть API (F-02 в
 [ASSUMPTIONS.md](ASSUMPTIONS.md)).
+
+### Основа: интерфейсы, время, тревоги
 
 ```mermaid
 classDiagram
@@ -105,6 +107,70 @@ classDiagram
     FB_DeviceBase *-- FB_Alarm : 8 слотов
     FB_DeviceBase *-- FB_SystemTime : запасной источник
 ```
+
+### Иерархия устройств
+
+```mermaid
+classDiagram
+    direction LR
+    class I_TimeSource {
+        <<interface>>
+        +Now() LTIME
+    }
+    class I_Alarm {
+        <<interface>>
+        +Ack() Shelve() Unshelve()
+        +State, AlarmPriority, Active, Unacked
+    }
+    class I_AlarmSource {
+        <<interface>>
+        +AlarmCount
+        +GetAlarm(uiIndex) I_Alarm
+        +AckAll()
+    }
+    class I_Device {
+        <<interface>>
+        +Reset() RequestMode(eNewMode)
+        +Mode, Status, Fault, Available
+    }
+    class I_Motor {
+        <<interface>>
+        +Running, ReadyToStart, RunSeconds, Starts
+    }
+    class I_MotorVfd {
+        <<interface>>
+        +SpeedRef, SpeedAct, SpeedAutoActive
+    }
+    class FB_DeviceBase {
+        <<abstract>>
+        #BeginCycle() AcceptCfg() ProcessMode()
+        #RunAlarms() FinishCycle()
+        #OnModeChanged(eOld, eNew)
+    }
+    I_AlarmSource <|-- I_Device
+    I_Device <|-- I_Motor
+    I_Motor <|-- I_MotorVfd
+    I_Device <|.. FB_DeviceBase : IMPLEMENTS
+    I_Alarm <|.. FB_Alarm : IMPLEMENTS
+    I_TimeSource <|.. FB_SystemTime : IMPLEMENTS
+    I_TimeSource <|.. FB_FakeTime : IMPLEMENTS
+    FB_DeviceBase <|-- FB_AnalogInput : EXTENDS
+    FB_DeviceBase <|-- FB_DigitalInput : EXTENDS
+    FB_DeviceBase <|-- FB_Motor : EXTENDS
+    FB_Motor <|-- FB_MotorVfd : EXTENDS
+    FB_DeviceBase <|-- FB_Valve : EXTENDS
+    FB_DeviceBase <|-- FB_ControlValve : EXTENDS
+    FB_DeviceBase <|-- FB_PID : EXTENDS
+    I_Motor <|.. FB_Motor : IMPLEMENTS
+    I_MotorVfd <|.. FB_MotorVfd : IMPLEMENTS
+    FB_DeviceBase *-- FB_Alarm : 8 слотов
+    FB_AnalogInput *-- FB_LimitMonitor : HH, H, L, LL
+    FB_Motor *-- FB_StartsWindow : пуски в час
+    FB_Alarm *-- FB_Delay
+    FB_Delay ..> I_TimeSource : itfTime
+```
+
+Порядок тела устройства и сводка решений — [API.md](API.md), разделы 0 и 9.4.
 
 ## Общие типы
 
@@ -251,7 +317,7 @@ flowchart LR
 
 | Каталог | Содержимое |
 |---|---|
-| `src/` | библиотека: `DUTs/<Семейство>/`, `GVLs/`, `Interfaces/`, `POUs/Time/`, `POUs/Util/`, `POUs/Alarm/`, `POUs/Base/`; дальше — `POUs/Devices/`, `POUs/Control/` |
+| `src/` | библиотека: `DUTs/<Семейство>/`, `GVLs/`, `Interfaces/`, `POUs/Time/`, `POUs/Util/`, `POUs/Alarm/`, `POUs/Base/`, `POUs/Devices/`, `POUs/Control/` |
 | `tests/` | наборы coUnit (`POUs/Suites/`), их регистрация (`GVLs/GVL_Tests<Семейство>`), `PRG_Tests`, помощники (`POUs/Helpers/`); при импорте — папка проекта `Tests` ([TESTING.md](TESTING.md)) |
 | `tools/` | инструменты шаблона ([tools/README.md](../tools/README.md)), эталоны `reference/`, проверки соглашений `project_checks/` |
 | `docs/` | документация, `fb/` — по ФБ, отчёты проверок |

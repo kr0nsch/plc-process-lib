@@ -222,7 +222,7 @@ def source_fbs() -> dict[str, L.StObject]:
 def test_fb_declarations_match_api_doc() -> None:
     """Блоки FUNCTION_BLOCK контракта: заголовок (ABSTRACT, EXTENDS, IMPLEMENTS) и публичные секции — имя,
     тип и начальное значение — совпадают с исходниками. Их копируют потребители (iolistgen, заглушки тестов
-    проектов 02 и 07): правка только в коде или только в документе ловится здесь (F5)."""
+    проектов `kns-pump-station` и `iolistgen`): правка только в коде или только в документе ловится здесь (F5)."""
     contract = contract_fbs()
     sources = source_fbs()
     assert len(contract) == 14, sorted(contract)
