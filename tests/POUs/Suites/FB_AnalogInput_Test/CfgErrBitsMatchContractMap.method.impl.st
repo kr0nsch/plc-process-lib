@@ -61,6 +61,8 @@ stBad.rFailValue_eu := uBits.rValue;
 fbAi(itfTime := fbTime, rIn := 50.0, stCmd := stCmd, stCfg := stBad);
 AssertEquals_WORD(Expected := GVL_Const.AI_CFG_FAIL_VALUE, Actual := fbAi.stSts.stCommon.wCfgErr,
                   Message := 'fail value NaN');
+AssertTrue(Condition := F_IsFinite(rIn := fbAi.rValue_eu) AND F_IsFinite(rIn := fbAi.stSts.rValue_eu),
+           Message := 'NaN fail value: value finite');
 stBad := stCfg;
 uPrio.iValue := 9;
 SetAlarmPriority(stCfgAi := stBad, uiSlot := E_AiAlarm.L, ePriority := uPrio.ePriority);

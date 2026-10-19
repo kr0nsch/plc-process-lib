@@ -9,6 +9,7 @@ stCfg := stCfgDef;
 stCfg.rKp := uBits.rValue;
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 AssertEquals_WORD(Expected := GVL_Const.PID_CFG_KP, Actual := fbPid.stSts.stCommon.wCfgErr, Message := 'bit 1: NaN');
+AssertTrue(Condition := F_IsFinite(rIn := fbPid.rOut_pct), Message := 'NaN Kp: output finite');
 stCfg := stCfgDef;
 stCfg.rTd_s := -1.0;
 fbPid(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);

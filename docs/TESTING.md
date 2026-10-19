@@ -197,8 +197,10 @@ coUnit.TEST_FINISHED();
 
   Так же для `AssertEquals_LREAL`. Проверено по всем наборам: тесты с неконечными входами
   `FB_Util_Test` (`F_RateLimit`), `FB_AnalogInput_Test`, `FB_MotorVfd_Test`, `FB_ControlValve_Test`,
-  `FB_Pid_Test` проверяют конечность; тесты, где NaN подаётся только в Cfg (`*_CfgErrBits*`,
-  `*_CfgChecks*`), сравнивают только биты `wCfgErr`, а `FB_LimitMonitor` — только `BOOL`.
+  `FB_Pid_Test` проверяют конечность. Тесты, где NaN подаётся в Cfg (`AnalogInput_CfgErrBits_MatchContractMap`,
+  `ControlValve_CfgChecks_SetBits`, `Pid_CfgChecks_SetDocumentedBits`), кроме битов `wCfgErr` проверяют,
+  что NaN из отвергнутой Cfg не попал в выход (работа идёт по LKG или в безопасном положении);
+  `FB_LimitMonitor` выдаёт только `BOOL`.
   Мутационная проверка правила (Control Win V3, 16.10.2026): `F_RateLimit` без проверки конечности
   цели возвращает NaN — прежний `AssertEquals_REAL(Expected := 42.0, …)` проходил, проверка
   `F_IsFinite` роняет `Util_RateLimit_NonFiniteTarget_HoldsCurrent` («NaN target: result finite»).

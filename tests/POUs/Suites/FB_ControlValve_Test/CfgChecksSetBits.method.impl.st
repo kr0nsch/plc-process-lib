@@ -22,6 +22,8 @@ stCfg.rRateDown_pctps := 0.0;
 stCfg.rRateUp_pctps := uBits.rValue;
 fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
 AssertEquals_WORD(Expected := GVL_Const.CV_CFG_RATE, Actual := fbCv.stSts.stCommon.wCfgErr, Message := 'rate NaN');
+AssertTrue(Condition := F_IsFinite(rIn := fbCv.rOut_pct) AND F_IsFinite(rIn := fbCv.rOut_mA),
+           Message := 'NaN rate: output finite');
 stCfg.rRateUp_pctps := 0.0;
 stCfg.rSafePos_pct := 100.5;
 fbCv(itfTime := fbTime, stCmd := stCmd, stRetain := stRetain, stCfg := stCfg);
