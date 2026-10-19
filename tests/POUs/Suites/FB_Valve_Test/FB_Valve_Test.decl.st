@@ -5,7 +5,7 @@
 //             Local, OutOfService), питание, Reset с окном, счётчики циклов и времени работы,
 //             проверка конфигурации и LKG. Время — FB_FakeTime; ожидаемые числа — из
 //             tools/reference/valve_reference.py.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Valve.md
 FUNCTION_BLOCK FB_Valve_Test EXTENDS coUnit.FB_TestSuite

@@ -1,7 +1,7 @@
 // Назначение: параметры дискретного входа (Persistent Variables приложения,
 //             VAR_IN_OUT CONSTANT stCfg). Значения по умолчанию проходят CheckConfig.
 //             Тип лежит в Persistent Variables приложения и заморожен в пределах 1.x (A-13).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_DigitalInput.md
 {attribute 'qualified_only'}

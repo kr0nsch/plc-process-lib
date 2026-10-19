@@ -218,7 +218,7 @@
     },
     "default_namespace": "PL",
     "placeholder": null,
-    "author": "<ИМЯ ФАМИЛИЯ>",
+    "author": "kr0nsch",
     "description": "Библиотека технологических ФБ: аналоговые и дискретные входы, двигатели и ПЧ, задвижки и регулирующие клапаны, ПИД, тревоги ISA-18.2",
     "released": true,
     "exclude": [

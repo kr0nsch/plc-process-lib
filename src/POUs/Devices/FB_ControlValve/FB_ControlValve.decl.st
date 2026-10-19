@@ -5,7 +5,7 @@
 //             блокировке и отказу мимо рампы; выход xAutoActive для слежения ПИД. Режимы Auto,
 //             Manual, Local (позиционер на месте — выход следит за ОС), OutOfService (удержание).
 //             Наследует FB_DeviceBase: тело — нормативный порядок цикла (раздел 9.4 контракта).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_ControlValve.md
 FUNCTION_BLOCK FB_ControlValve EXTENDS FB_DeviceBase

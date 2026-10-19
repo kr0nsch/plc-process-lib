@@ -194,7 +194,7 @@
     "version": "1.0.0.0",
     "default_namespace": "PL",
     "placeholder": null,
-    "author": "<ИМЯ ФАМИЛИЯ>",
+    "author": "kr0nsch",
     "description": "Демонстрационный прогон ФБ plc-process-lib в CODESYS Control Win V3",
     "released": false,
     "exclude": [],

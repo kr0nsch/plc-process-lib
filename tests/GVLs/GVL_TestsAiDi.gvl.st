@@ -2,7 +2,7 @@
 //             Объявление экземпляра регистрирует набор в coUnit; PRG_Tests их не перечисляет.
 //             {attribute 'linkalways'} обязателен: без него CODESYS 3.5.17 не включает GVL в
 //             приложение, и наборы молча не выполняются (docs/TESTING.md).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/TESTING.md
 {attribute 'qualified_only'}

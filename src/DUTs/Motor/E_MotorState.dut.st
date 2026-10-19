@@ -1,5 +1,5 @@
 // Назначение: состояние двигателя (FB_Motor, FB_MotorVfd).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Motor.md
 {attribute 'qualified_only'}

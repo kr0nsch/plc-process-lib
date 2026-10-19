@@ -6,7 +6,7 @@
 //             реальному dt источника времени и период расчёта tSample, реакция на недостоверную PV.
 //             Внутреннее состояние (I, D, PV прошлого шага, задание после рампы, выход) — LREAL.
 //             Режимы Auto, Manual, OutOfService (Local нет); одна тревога PvInvalid.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_PID.md
 FUNCTION_BLOCK FB_PID EXTENDS FB_DeviceBase

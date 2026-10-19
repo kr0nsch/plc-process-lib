@@ -5,7 +5,7 @@
 //             реальному dt и tSample, разрывы времени, зона нечувствительности, отказ PV, режимы,
 //             конфигурация, тревога PvInvalid; замкнутый контур с моделью FOPDT (FB_FopdtModel).
 //             Время — FB_FakeTime. Эталоны — tools/reference/pid.py (строки «// ref: ...»).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_PID.md
 FUNCTION_BLOCK FB_Pid_Test EXTENDS coUnit.FB_TestSuite

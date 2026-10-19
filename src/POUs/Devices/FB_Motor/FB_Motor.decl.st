@@ -7,7 +7,7 @@
 //             напряжения; подхват работающего двигателя при старте ПЛК. Команда xQRun удерживаемая.
 //             Наследник FB_MotorVfd пишет точки расширения до вызова тела через SUPER^(...) и
 //             читает результаты (eState, xRunCmd, xEnteredStarting) после него.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Motor.md
 FUNCTION_BLOCK FB_Motor EXTENDS FB_DeviceBase IMPLEMENTS I_Motor

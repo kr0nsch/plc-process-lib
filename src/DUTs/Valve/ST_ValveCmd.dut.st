@@ -1,5 +1,5 @@
 // Назначение: команды HMI/SCADA запорной арматуры (GVL_Hmi приложения, VAR_IN_OUT stCmd).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Valve.md
 {attribute 'qualified_only'}

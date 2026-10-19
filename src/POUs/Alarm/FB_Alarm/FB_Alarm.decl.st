@@ -5,7 +5,7 @@
 //             увеличивает udiSeq и отправляет событие в GVL_Lib.itfAlarmSink (если приёмник задан).
 //             Методы Ack, Shelve, Unshelve только ставят запрос: его выполняет ближайший вызов тела.
 //             Модель состояний и повторное оповещение после shelve — сверить с ANSI/ISA-18.2-2016.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Alarm.md
 FUNCTION_BLOCK FB_Alarm IMPLEMENTS I_Alarm

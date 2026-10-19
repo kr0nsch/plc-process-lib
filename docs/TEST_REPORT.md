@@ -8,12 +8,12 @@
 <!-- cds:test-report:begin (раздел обновляет `python tools/codesys/cds.py report`) -->
 ## Последний прогон в CODESYS
 
-Проверено в CODESYS 3.5.17.30 / CODESYS Control Win V3 (пользовательский процесс) — 2026-10-19 11:42:52. Итог: **все тесты пройдены**.
+Проверено в CODESYS 3.5.17.30 / CODESYS Control Win V3 (пользовательский процесс) — 2026-10-19 14:40:47. Итог: **все тесты пройдены**.
 
 | Параметр | Значение |
 |---|---|
-| Дата прогона | 2026-10-19 11:42:52 |
-| Коммит | cf4400a-dirty |
+| Дата прогона | 2026-10-19 14:40:47 |
+| Коммит | cbf1d89-dirty |
 | CODESYS | 3.5.17.30 (профиль `CODESYS V3.5 SP17 Patch 3`) |
 | Устройство в проекте | CODESYS Control Win V3 (4096 / 0000 0001 / 3.5.17.30) |
 | Рантайм | CODESYS Control Win V3 (пользовательский процесс) |
@@ -23,99 +23,89 @@
 
 | Набор | Тестов | Пройдено | Упало | Пропущено | Итог |
 |---|---|---|---|---|---|
-| `GVL_TestsAiDi.fbAnalogInputTest` | 54 | 54 | 0 | 0 | пройдено |
-| `GVL_TestsAiDi.fbDigitalInputTest` | 19 | 19 | 0 | 0 | пройдено |
-| `GVL_TestsAlarm.fbAlarmTest` | 40 | 40 | 0 | 0 | пройдено |
-| `GVL_TestsAlarm.fbDeviceBaseTest` | 47 | 47 | 0 | 0 | пройдено |
-| `GVL_TestsAlarm.fbRuntimeTest` | 8 | 8 | 0 | 0 | пройдено |
 | `GVL_TestsFoundation.fbTimeTest` | 24 | 24 | 0 | 0 | пройдено |
 | `GVL_TestsFoundation.fbUtilTest` | 28 | 28 | 0 | 0 | пройдено |
 | `GVL_TestsFoundation.fbCommonTest` | 11 | 11 | 0 | 0 | пройдено |
+| `GVL_TestsAlarm.fbAlarmTest` | 40 | 40 | 0 | 0 | пройдено |
+| `GVL_TestsAlarm.fbDeviceBaseTest` | 47 | 47 | 0 | 0 | пройдено |
+| `GVL_TestsAlarm.fbRuntimeTest` | 8 | 8 | 0 | 0 | пройдено |
+| `GVL_TestsAiDi.fbAnalogInputTest` | 54 | 54 | 0 | 0 | пройдено |
+| `GVL_TestsAiDi.fbDigitalInputTest` | 19 | 19 | 0 | 0 | пройдено |
+| `GVL_TestsIntegration.fbIntegrationTest` | 5 | 5 | 0 | 0 | пройдено |
 | `GVL_TestsMotor.fbMotorTest` | 55 | 55 | 0 | 0 | пройдено |
 | `GVL_TestsMotor.fbMotorVfdTest` | 33 | 33 | 0 | 0 | пройдено |
 | `GVL_TestsPid.fbPidTest` | 54 | 54 | 0 | 0 | пройдено |
 | `GVL_TestsValve.fbValveTest` | 47 | 47 | 0 | 0 | пройдено |
 | `GVL_TestsValve.fbControlValveTest` | 28 | 28 | 0 | 0 | пройдено |
-| `GVL_TestsIntegration.fbIntegrationTest` | 5 | 5 | 0 | 0 | пройдено |
 | **Всего** | 453 | 453 | 0 | 0 | **пройдено** |
 
 ### Результаты тестов
 
 | Набор | Тест | Итог |
 |---|---|---|
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_4mA_ReturnsRangeLo` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_20mA_ReturnsRangeHi` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_12mA_ReturnsMidRange` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Norm420_ScalesLikeMilliamps` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Norm01_NoNe43Check` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_EngInput_PassesThrough` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_RawInput_ScalesCounts` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_RawRangeUnset_CfgErrBit8` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreak_SetsFailureAfterDelay` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreak_HoldsLastGoodValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreakShorterThanDelay_NoFailure` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p6mA_IsFailure` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p7mA_IsOutOfSpecification` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p8mA_IsGood` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At20p5mA_IsGood` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At20p7mA_IsOutOfSpecification` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At21mA_IsFailure` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_NaNInput_TreatedAsFailure` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ChannelFault_SetsFailure` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_FailValueSubstitute_UsesCfgValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitsOnFail_EvaluatesFailValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Sqrt_25PctDp_Returns50PctFlow` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LowCut_BelowCut_ReturnsZero` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Clamp_LimitsToRange` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Filter_OneTimeConstant_Reaches63Pct` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Filter_IndependentOfCycleTime` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitH_Hysteresis_ClearsBelowSpMinusHyst` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitL_Hysteresis_ClearsAboveSpPlusHyst` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitHH_OnDelay_ShortExcursionIgnored` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitOffDelay_HoldsFlag` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitDisabled_NeverSets` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Failure_ForcesLimitsFalseAndSuppressesLimitAlarms` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SuppressLimitAlarmsInput_FlagsStillSet` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Substitution_ValueAndCheckFunction` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Substitution_StartsFromCurrentValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionTimeout_ReturnsToAuto` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_OutOfService_HoldsValueInvalid` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_InvalidRangeAtStartup_CheckFunctionSafeValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitOrderInvalidAtRuntime_KeepsLastValidCfg` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ResetCmd_AcceptedAndAcksAlarms` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_AlarmEvents_FailureValueIsRawInput` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_CfgErrBits_MatchContractMap` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_TimeBackwards_FilterHoldsWithoutJump` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionNonFinite_ValueHeld` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandLow_InvalidAfterDelay` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandHigh_InvalidLimitsKept` | пройден |
-| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionUnlimited_NoTimeout` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OnDelay_FiltersBounce` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OffDelay_HoldsValue` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_Invert_InvertsBeforeDelay` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_Substitution_OverridesValueBypassesDelay` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_ForceTrue` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_HoldLast` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OutOfService_AlarmsOutOfService` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionTimeout_ReturnsToAuto` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ResetCmd_AcceptedAndAcksAlarms` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_ForceFalse` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_AlarmEvents_ValueIsZeroOrOne` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` | пройден |
-| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionUnlimited_NoTimeout` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_LTimeToSec_OneSecond_ReturnsOne` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_LTimeToSec_NanosecondAndDays_Exact` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_TimeToSec_1500ms_Returns1p5` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_TimeToSec_MaxTime_NoOverflow` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_StartsAtOneHour` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_Advance_AddsStep` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_SetNow_SetsValue` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_AdvanceL_SubMsAndLongSteps` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_ViaInterface_ReturnsSameTime` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Time_SystemTime_IsMonotonic` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_ZeroDelays_PassThroughSameCall` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_OnDelay_OutputExactlyAtDelay` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_OnDelay_ShortPulse_Ignored` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_OffDelay_HoldsOutputForDelay` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_DelayChangedWhileTiming_UsesNewValue` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_Preset_ForcesOutputWithoutDelay` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_Preset_RestartsTimingOnNextCall` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_TimeGoesBackwards_RestartsTiming` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_NoTimeSource_FallsBackToSystemTime` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_Remaining_ReportsTimeLeft` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_BothDelays_OnThenOffTimed` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_OffDelay_ShortGap_Ignored` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_TimingFlags_ReflectCountdown` | пройден |
+| `GVL_TestsFoundation.fbTimeTest` | `Delay_FirstCallWithInputTrue_StartsOnDelay` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_NaN_ReturnsFalse` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_Inf_ReturnsFalse` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_Normal_ReturnsTrue` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_AboveSaneMax_ReturnsFalse` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_Ne107Worst_ReturnsMostSevere` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_UpAndDownRatesSeparate` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_ZeroRate_Jumps` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_ZeroDt_NoChange` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_NonFiniteTarget_HoldsCurrent` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_NonFiniteCurrent_JumpsToTarget` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_SmallStep_ReachesTargetExactly` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_CountsOnlyLastHour` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_TimeToFree_ReportsRemaining` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_ExactlyOneHourOld_NotCounted` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_RingFull_OverwritesOldest` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_RingCapacity_MatchesConst` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_TimeBackwards_DropsFutureStamps` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_Clear_Empties` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_HighHysteresis_ClearsBelowSpMinusHyst` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_LowHysteresis_ClearsAboveSpPlusHyst` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_ForceOff_ClearsImmediately` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_Disabled_NeverSets` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_OnDelay_ShortExcursionIgnored` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_OffDelay_HoldsFlag` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_NonFiniteValue_KeepsState` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_Reenabled_RestartsOnDelay` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_SmallStep_NotLost` | пройден |
+| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_NonFiniteTargetOrZeroDt_HoldsCurrent` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfSts_MatchesRegisterMap` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfDeviceRetain_Is36` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfAlarmCfg_Is16` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfCfg_MatchesReference` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfCmd_MatchesReference` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_CfgDefaults_MatchContract` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_StsRetainDefaults_MatchContract` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_EnumValues_MatchRegisterCodes` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_AlarmSlots_FitDeviceCounts` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_TestSink_RecordsEventsInOrder` | пройден |
+| `GVL_TestsFoundation.fbCommonTest` | `Common_InterfaceRefs_DefaultToNull` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_Activate_GoesActiveUnack` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_AckWhileActive_GoesActiveAck` | пройден |
 | `GVL_TestsAlarm.fbAlarmTest` | `Alarm_ReturnWithoutAck_GoesRtnUnack` | пройден |
@@ -211,69 +201,84 @@
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_UnsignedCounters_WrapToZero` | пройден |
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_LocalDeviceInstances_RunInTestMethod` | пройден |
 | `GVL_TestsAlarm.fbRuntimeTest` | `Runtime_LkgCopy300MotorCfg_Below1ms` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_LTimeToSec_OneSecond_ReturnsOne` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_LTimeToSec_NanosecondAndDays_Exact` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_TimeToSec_1500ms_Returns1p5` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_TimeToSec_MaxTime_NoOverflow` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_StartsAtOneHour` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_Advance_AddsStep` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_SetNow_SetsValue` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_AdvanceL_SubMsAndLongSteps` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_FakeTime_ViaInterface_ReturnsSameTime` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Time_SystemTime_IsMonotonic` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_ZeroDelays_PassThroughSameCall` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_OnDelay_OutputExactlyAtDelay` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_OnDelay_ShortPulse_Ignored` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_OffDelay_HoldsOutputForDelay` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_DelayChangedWhileTiming_UsesNewValue` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_Preset_ForcesOutputWithoutDelay` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_Preset_RestartsTimingOnNextCall` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_TimeGoesBackwards_RestartsTiming` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_NoTimeSource_FallsBackToSystemTime` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_Remaining_ReportsTimeLeft` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_BothDelays_OnThenOffTimed` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_OffDelay_ShortGap_Ignored` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_TimingFlags_ReflectCountdown` | пройден |
-| `GVL_TestsFoundation.fbTimeTest` | `Delay_FirstCallWithInputTrue_StartsOnDelay` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_NaN_ReturnsFalse` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_Inf_ReturnsFalse` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_Normal_ReturnsTrue` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_IsFinite_AboveSaneMax_ReturnsFalse` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_Ne107Worst_ReturnsMostSevere` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_UpAndDownRatesSeparate` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_ZeroRate_Jumps` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_ZeroDt_NoChange` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_NonFiniteTarget_HoldsCurrent` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_NonFiniteCurrent_JumpsToTarget` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimit_SmallStep_ReachesTargetExactly` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_CountsOnlyLastHour` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_TimeToFree_ReportsRemaining` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_ExactlyOneHourOld_NotCounted` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_RingFull_OverwritesOldest` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_RingCapacity_MatchesConst` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_TimeBackwards_DropsFutureStamps` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_StartsWindow_Clear_Empties` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_HighHysteresis_ClearsBelowSpMinusHyst` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_LowHysteresis_ClearsAboveSpPlusHyst` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_ForceOff_ClearsImmediately` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_Disabled_NeverSets` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_OnDelay_ShortExcursionIgnored` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_OffDelay_HoldsFlag` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_NonFiniteValue_KeepsState` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_LimitMonitor_Reenabled_RestartsOnDelay` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_SmallStep_NotLost` | пройден |
-| `GVL_TestsFoundation.fbUtilTest` | `Util_RateLimitLr_NonFiniteTargetOrZeroDt_HoldsCurrent` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfSts_MatchesRegisterMap` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfDeviceRetain_Is36` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfAlarmCfg_Is16` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfCfg_MatchesReference` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_SizeOfCmd_MatchesReference` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_CfgDefaults_MatchContract` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_StsRetainDefaults_MatchContract` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_EnumValues_MatchRegisterCodes` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_AlarmSlots_FitDeviceCounts` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_TestSink_RecordsEventsInOrder` | пройден |
-| `GVL_TestsFoundation.fbCommonTest` | `Common_InterfaceRefs_DefaultToNull` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_4mA_ReturnsRangeLo` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_20mA_ReturnsRangeHi` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Scale_12mA_ReturnsMidRange` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Norm420_ScalesLikeMilliamps` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Norm01_NoNe43Check` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_EngInput_PassesThrough` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_RawInput_ScalesCounts` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_RawRangeUnset_CfgErrBit8` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreak_SetsFailureAfterDelay` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreak_HoldsLastGoodValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_WireBreakShorterThanDelay_NoFailure` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p6mA_IsFailure` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p7mA_IsOutOfSpecification` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At3p8mA_IsGood` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At20p5mA_IsGood` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At20p7mA_IsOutOfSpecification` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_At21mA_IsFailure` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SignalRecovered_ClearsFailureAfterDelayAndResetsFilter` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_NaNInput_TreatedAsFailure` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ChannelFault_SetsFailure` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_FailValueSubstitute_UsesCfgValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitsOnFail_EvaluatesFailValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Sqrt_25PctDp_Returns50PctFlow` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LowCut_BelowCut_ReturnsZero` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Clamp_LimitsToRange` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Filter_OneTimeConstant_Reaches63Pct` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Filter_IndependentOfCycleTime` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitH_Hysteresis_ClearsBelowSpMinusHyst` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitL_Hysteresis_ClearsAboveSpPlusHyst` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitHH_OnDelay_ShortExcursionIgnored` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitOffDelay_HoldsFlag` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitDisabled_NeverSets` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Failure_ForcesLimitsFalseAndSuppressesLimitAlarms` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SuppressLimitAlarmsInput_FlagsStillSet` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Substitution_ValueAndCheckFunction` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_Substitution_StartsFromCurrentValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionTimeout_ReturnsToAuto` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_OutOfService_HoldsValueInvalid` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_InvalidRangeAtStartup_CheckFunctionSafeValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_LimitOrderInvalidAtRuntime_KeepsLastValidCfg` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_DefaultCfg_FirstCallAutoTypeAndSlots` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ResetCmd_AcceptedAndAcksAlarms` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_StartupWireBreak_InvalidUntilFirstGoodValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_AlarmEvents_FailureValueIsRawInput` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_CfgErrBits_MatchContractMap` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_TimeBackwards_FilterHoldsWithoutJump` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionNonFinite_ValueHeld` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_OosExitWithBrokenSignal_InvalidAtOnce` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_ShortGlitch_FilterKeptNoFalseLimit` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionDuringFailure_LimitsOnSubstValue` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandLow_InvalidAfterDelay` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_GuardBandHigh_InvalidLimitsKept` | пройден |
+| `GVL_TestsAiDi.fbAnalogInputTest` | `AnalogInput_SubstitutionUnlimited_NoTimeout` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OnDelay_FiltersBounce` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OffDelay_HoldsValue` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_Invert_InvertsBeforeDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_Substitution_OverridesValueBypassesDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_ForceTrue` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_HoldLast` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_AlarmOnFalse_ActivatesWhenValueFalse` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_OutOfService_AlarmsOutOfService` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionTimeout_ReturnsToAuto` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_DefaultCfg_FirstCallValueWithoutDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_InvalidCfgAtStartup_ValueFalseCheckFunction` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ResetCmd_AcceptedAndAcksAlarms` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFault_ForceFalse` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_InvertFromFirstValidCfg_NoFalseValue` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFaultDuringOnDelay_RestartsDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionRenewedAfterTimeout_CountsFullPeriod` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_AlarmEvents_ValueIsZeroOrOne` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_ChannelFaultRecovered_ForcedValueReleasedThroughDelay` | пройден |
+| `GVL_TestsAiDi.fbDigitalInputTest` | `DigitalInput_SubstitutionUnlimited_NoTimeout` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `Device_DefaultCfg_PassesCheck` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `Device_DevType_ReportedInStsCommon` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `Device_AllTypes_AlarmCountThroughIDevice` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_AiPidVfd_TracksBumplessNoWindup` | пройден |
+| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_GuardBandCurrent_PidHoldsOutput` | пройден |
 | `GVL_TestsMotor.fbMotorTest` | `Motor_FirstCall_SetsTypeSlotsAndPassesDefaultCfg` | пройден |
 | `GVL_TestsMotor.fbMotorTest` | `Motor_AutoRun_StartsAndConfirms` | пройден |
 | `GVL_TestsMotor.fbMotorTest` | `Motor_ManualStart_FeedbackOk_GoesRunning` | пройден |
@@ -491,11 +496,6 @@
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_SlowRamp1msCycle_NotStalled` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_FbNaN_EventAndStsFinite` | пройден |
 | `GVL_TestsValve.fbControlValveTest` | `ControlValve_InterlockFirstOut_KeptUntilResetOrOos` | пройден |
-| `GVL_TestsIntegration.fbIntegrationTest` | `Device_DefaultCfg_PassesCheck` | пройден |
-| `GVL_TestsIntegration.fbIntegrationTest` | `Device_DevType_ReportedInStsCommon` | пройден |
-| `GVL_TestsIntegration.fbIntegrationTest` | `Device_AllTypes_AlarmCountThroughIDevice` | пройден |
-| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_AiPidVfd_TracksBumplessNoWindup` | пройден |
-| `GVL_TestsIntegration.fbIntegrationTest` | `LevelLoop_GuardBandCurrent_PidHoldsOutput` | пройден |
 
 ### Упавшие тесты
 

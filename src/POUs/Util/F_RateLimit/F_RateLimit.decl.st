@@ -2,7 +2,7 @@
 //             не быстрее rRateUp_ups (рост) и rRateDown_ups (спад) инж. ед. в секунду за шаг
 //             lrDt_s. Скорость 0 (или меньше) — без ограничения. lrDt_s <= 0 или rTarget не
 //             конечно (NaN из Modbus/ПИД) — значение не меняется. Расчёт шага — в LREAL.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/Functions.md
 FUNCTION F_RateLimit : REAL

@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/<GITHUB_USER>/plc-process-lib/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/<GITHUB_USER>/plc-process-lib/ci.yml?branch=main&style=flat-square&label=CI&labelColor=1B2736"></a>
+  <a href="https://github.com/kr0nsch/plc-process-lib/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kr0nsch/plc-process-lib/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="LICENSE"><img alt="Лицензия MIT" src="https://img.shields.io/badge/license-MIT-56677D?style=flat-square&labelColor=1B2736"></a>
   <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
   <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
@@ -303,8 +303,9 @@ coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.202
   [tools/README.md](tools/README.md), что осталось в коде — [STATIC_ANALYSIS.md](docs/STATIC_ANALYSIS.md).
 - Графики раздела «Демонстрация» — прогон на модели объекта в Control Win, а не на реальной ёмкости и не на
   ПЛК210: они показывают поведение ФБ, а не настройку контура для конкретного объекта.
-- Дальше: релиз v1.0.0 с `.library` и `.compiled-library` ([MANUAL_STEPS.md](docs/MANUAL_STEPS.md),
-  раздел 12), КНС на этой библиотеке ([kns-pump-station](https://github.com/<GITHUB_USER>/kns-pump-station)).
+- Готовые `.library` и `.compiled-library` версии 1.0.0 — в [релизах](https://github.com/kr0nsch/plc-process-lib/releases)
+  репозитория (собрать самому — [MANUAL_STEPS.md](docs/MANUAL_STEPS.md), раздел 12). Дальше — КНС на этой
+  библиотеке (`kns-pump-station`, готовится).
 
 ## Summary (EN)
 
@@ -321,13 +322,13 @@ hardware.
 
 ## Лицензия
 
-[MIT](LICENSE) © 2026 <ИМЯ ФАМИЛИЯ>
+[MIT](LICENSE) © 2026 kr0nsch
 
 ---
 
 <p align="center"><b>Портфолио АСУ ТП</b></p>
 <table>
-<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-repo-template">01 · plc-repo-template</a><br><sub>ST в git, сборка проекта скриптом, CI</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-process-lib"><b>02 · plc-process-lib</b></a><br><sub>ФБ: AI, двигатель, ПЧ, задвижка, ПИД, тревоги</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/kns-pump-station">03 · kns-pump-station</a><br><sub>флагман: КНС, три насоса с ПЧ, модель, HMI</sub></td></tr>
-<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/kns-port-domestic">04 · kns-port-domestic</a><br><sub>перенос на Astra.IDE / MasterSCADA 4D</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-iiot-stack">05 · plc-iiot-stack</a><br><sub>OPC UA / MQTT → InfluxDB → Grafana</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/iolistgen">06 · iolistgen</a><br><sub>перечень сигналов → ST, карты Modbus, SCADA</sub></td></tr>
-<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-ci-toolkit">07 · plc-ci-toolkit</a><br><sub>линтеры, сборка CODESYS, тесты, JUnit</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/s7-to-codesys">08 · s7-to-codesys</a><br><sub>конвертер SCL → ST с отчётом о переносе</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/sis-interlock-demo">09 · sis-interlock-demo</a><br><sub>ПАЗ: MooN, матрица причин и следствий</sub></td></tr>
+<tr><td width="33%"><a href="https://github.com/kr0nsch/plc-repo-template">01 · plc-repo-template</a><br><sub>ST в git, сборка проекта скриптом, CI</sub></td><td width="33%"><a href="https://github.com/kr0nsch/plc-process-lib"><b>02 · plc-process-lib</b></a><br><sub>ФБ: AI, двигатель, ПЧ, задвижка, ПИД, тревоги</sub></td><td width="33%"><span data-repo="kns-pump-station">03 · kns-pump-station</span> <sub>(готовится)</sub><br><sub>флагман: КНС, три насоса с ПЧ, модель, HMI</sub></td></tr>
+<tr><td width="33%"><span data-repo="kns-port-domestic">04 · kns-port-domestic</span> <sub>(готовится)</sub><br><sub>перенос на Astra.IDE / MasterSCADA 4D</sub></td><td width="33%"><span data-repo="plc-iiot-stack">05 · plc-iiot-stack</span> <sub>(готовится)</sub><br><sub>OPC UA / MQTT → InfluxDB → Grafana</sub></td><td width="33%"><span data-repo="iolistgen">06 · iolistgen</span> <sub>(готовится)</sub><br><sub>перечень сигналов → ST, карты Modbus, SCADA</sub></td></tr>
+<tr><td width="33%"><a href="https://github.com/kr0nsch/plc-ci-toolkit">07 · plc-ci-toolkit</a><br><sub>линтеры, сборка CODESYS, тесты, JUnit</sub></td><td width="33%"><a href="https://github.com/kr0nsch/s7-to-codesys">08 · s7-to-codesys</a><br><sub>конвертер SCL → ST с отчётом о переносе</sub></td><td width="33%"><a href="https://github.com/kr0nsch/sis-interlock-demo">09 · sis-interlock-demo</a><br><sub>ПАЗ: MooN, матрица причин и следствий</sub></td></tr>
 </table>

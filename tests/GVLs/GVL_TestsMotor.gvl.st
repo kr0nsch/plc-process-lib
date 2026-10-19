@@ -1,7 +1,7 @@
 // Назначение: экземпляры наборов тестов семейства двигателей (FB_Motor, FB_MotorVfd). Объявление
 //             экземпляра регистрирует набор в coUnit; PRG_Tests их не перечисляет.
 //             {attribute 'linkalways'} обязателен (docs/TESTING.md).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/TESTING.md
 {attribute 'qualified_only'}

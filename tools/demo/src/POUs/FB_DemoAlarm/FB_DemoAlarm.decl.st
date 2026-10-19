@@ -5,7 +5,7 @@
 //             ActiveUnack -> ActiveAck -> Normal; возврат без квитирования (RtnUnack) и
 //             квитирование; shelve и повторное оповещение по истечении срока.
 //             Коды событий: 1 — квитирование (xAck), 2 — shelve (wShelveReq).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Alarm.md, «Состояния»; tools/demo/README.md
 FUNCTION_BLOCK FB_DemoAlarm

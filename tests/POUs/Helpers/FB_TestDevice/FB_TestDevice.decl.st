@@ -6,7 +6,7 @@
 //             (безударность, снятие отказа при входе в OutOfService) и записывает его вызовы.
 //             xInputLike = TRUE ведёт себя как AI/DI: режим в stModeMem, Manual = CheckFunction.
 //             Только для тестов.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/TESTING.md, раздел «Тестовое устройство»
 FUNCTION_BLOCK FB_TestDevice EXTENDS FB_DeviceBase

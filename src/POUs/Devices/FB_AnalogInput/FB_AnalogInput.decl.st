@@ -6,7 +6,7 @@
 //             времени, шесть слотов тревог. Режимы: Auto — измерение, Manual — подмена,
 //             OutOfService; Local нет. Наследует FB_DeviceBase: тело — нормативный порядок цикла,
 //             шаги обработки сигнала — защищённые методы.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_AnalogInput.md
 FUNCTION_BLOCK FB_AnalogInput EXTENDS FB_DeviceBase

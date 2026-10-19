@@ -3,7 +3,7 @@
 //             тревога по состоянию и тревога отказа канала. Режимы: Auto — измерение, Manual —
 //             подмена, OutOfService; Local нет. Наследует FB_DeviceBase: тело — нормативный порядок
 //             цикла.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_DigitalInput.md
 FUNCTION_BLOCK FB_DigitalInput EXTENDS FB_DeviceBase

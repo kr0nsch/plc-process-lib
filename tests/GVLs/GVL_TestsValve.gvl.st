@@ -3,7 +3,7 @@
 //             {attribute 'linkalways'} обязателен: на GVL никто не ссылается, и без атрибута
 //             CODESYS 3.5.17 не включает её в приложение — наборы молча не выполняются
 //             (docs/TESTING.md).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/TESTING.md
 {attribute 'qualified_only'}

@@ -3,7 +3,7 @@
 // разрешения, минимальные времена, лимит пусков в час, Local и OutOfService, пропадание напряжения, подхват при
 // старте ПЛК, наработка и пуски в retain, ТО, конфигурация (LKG). Время — FB_FakeTime; эталоны чисел —
 // tools/reference/motor.py.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_Motor.md
 FUNCTION_BLOCK FB_Motor_Test EXTENDS coUnit.FB_TestSuite

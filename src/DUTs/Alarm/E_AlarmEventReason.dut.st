@@ -1,5 +1,5 @@
 // Назначение: причина перехода тревоги в событии ST_AlarmEvent (приёмник I_AlarmSink).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/ARCHITECTURE.md, раздел «Тревоги»
 {attribute 'qualified_only'}

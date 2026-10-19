@@ -4,7 +4,7 @@
 //             <ПРЕФИКС>_<СЛОВО>_<ИМЯ>: префиксы DEV (общие), AI, DI, MOT, VLV, CV, PID; слова
 //             STS (wStatus), FLT (wFault), WRN (wWarning), CFG (wCfgErr).
 //             Новые константы устройства добавляются в конец блока этого устройства.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/ARCHITECTURE.md, раздел «Константы и карты битов»
 {attribute 'qualified_only'}

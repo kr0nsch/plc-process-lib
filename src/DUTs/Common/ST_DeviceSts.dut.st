@@ -1,7 +1,7 @@
 // Назначение: общий заголовок состояния — первое поле stCommon каждой ST_<Dev>Sts.
 //             Все 14 полей 16-битные: 28 байт, 14 регистров Modbus подряд. Раскладка
 //             нормативна (тест Common_SizeOfSts_MatchesRegisterMap).
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/ARCHITECTURE.md, раздел «Общие типы»
 {attribute 'qualified_only'}

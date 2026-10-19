@@ -4,7 +4,7 @@
 //             время рампы), блокировка и отказ позиционера мимо рампы, Local со слежением за ОС,
 //             безударные переходы, отказ ОС, OutOfService, проверка конфигурации и LKG. Время —
 //             FB_FakeTime; ожидаемые числа — из tools/reference/valve_reference.py.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/fb/FB_ControlValve.md
 FUNCTION_BLOCK FB_ControlValve_Test EXTENDS coUnit.FB_TestSuite

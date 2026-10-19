@@ -3,7 +3,7 @@
 //             объявляет свои наборы в tests/GVLs/GVL_Tests<Семейство>.gvl.st с атрибутом
 //             'linkalways', объявление регистрирует набор в coUnit. Поэтому PRG_Tests не правит
 //             ни одна команда.
-// Автор:      <ИМЯ ФАМИЛИЯ>
+// Автор:      kr0nsch
 // Версия:     0.1.0
 // Документ:   docs/TESTING.md
 PROGRAM PRG_Tests
