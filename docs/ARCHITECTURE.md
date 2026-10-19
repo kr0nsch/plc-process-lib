@@ -1,8 +1,8 @@
 # Архитектура библиотеки
 
 `plc-process-lib` — библиотека технологических ФБ для CODESYS V3.5 SP17 Patch 3, пространство имён
-`PL`. Нормативное описание API — контракт [API.md](API.md) (версия 1.0.0-rc2; рассмотренные варианты — [DECISIONS.md](DECISIONS.md)): имена, типы, значения, карты
-битов, порядок тела устройств, список тестов. Этот документ — обзор того, что уже лежит в `src/`.
+`PL`. Нормативное описание API — контракт [API.md](API.md) (версия 1.0.0; рассмотренные варианты — [DECISIONS.md](DECISIONS.md)): имена, типы, значения, карты
+битов, порядок тела устройств, список тестов. Этот документ — обзор того, что лежит в `src/`.
 
 Источник истины — текстовые файлы ST в `src/` и `tests/` (раскладка — [LAYOUT.md](LAYOUT.md)).
 Проект CODESYS (`.project`) собирается из них скриптом и после правок в IDE экспортируется обратно.
@@ -17,7 +17,7 @@
 | Время | `FB_SystemTime`, `FB_FakeTime`, `FB_Delay` (`src/POUs/Time/`) | этап 1, готово |
 | Утилиты | `F_LTimeToSec`, `F_TimeToSec`, `F_IsFinite`, `F_Ne107Worst`, `F_RateLimit`, `FB_StartsWindow`, `FB_LimitMonitor` (`src/POUs/Util/`) | этап 1, готово |
 | Тревоги и база | `FB_Alarm` (`src/POUs/Alarm/`), `FB_DeviceBase` (`src/POUs/Base/`) — [fb/FB_Alarm.md](fb/FB_Alarm.md), [fb/FB_DeviceBase.md](fb/FB_DeviceBase.md) | этап 2, готово |
-| Устройства | `FB_AnalogInput`, `FB_DigitalInput`, `FB_Motor`, `FB_MotorVfd`, `FB_Valve`, `FB_ControlValve`, `FB_PID` | следующий этап, типы уже есть; шаблон документа — [fb/_TEMPLATE.md](fb/_TEMPLATE.md) |
+| Устройства | [`FB_AnalogInput`](fb/FB_AnalogInput.md), [`FB_DigitalInput`](fb/FB_DigitalInput.md), [`FB_Motor`](fb/FB_Motor.md), [`FB_MotorVfd`](fb/FB_MotorVfd.md), [`FB_Valve`](fb/FB_Valve.md), [`FB_ControlValve`](fb/FB_ControlValve.md) (`src/POUs/Devices/`), [`FB_PID`](fb/FB_PID.md) (`src/POUs/Control/`) | этап 3, готово; интеграция и межсемейные тесты — этап 4 |
 
 `src/POUs/PRG_Main` — служебная программа рабочей сборки, не часть API (F-02 в
 [ASSUMPTIONS.md](ASSUMPTIONS.md)).

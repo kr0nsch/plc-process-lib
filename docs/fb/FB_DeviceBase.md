@@ -295,9 +295,9 @@ END_FOR
 `Device_CmdBits_ClearedAfterProcessing`, `Device_OosEntry_ClearsLatchedFaults`,
 `Device_OnModeChangedHook_CalledInDerived`, `Device_OutOfServiceRetained_StartsInOos`;
 `Common_SizeOfSts_MatchesRegisterMap` и `Common_SizeOfDeviceRetain_Is36` — в `FB_Common_Test` (F-04).
-`Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов) появятся с
-устройствами; сейчас их часть проверяют `Device_DevTypeSetByHeir_ReportedInStsCommon` и
-`Device_DefaultAlarmCfgOfAllTypes_PassesCheckAlarmCfg` (F-26).
+`Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов) — в наборе
+`FB_Integration_Test` на настоящих устройствах (F-26, I-04); на тестовом устройстве то же проверяют
+`Device_DevTypeSetByHeir_ReportedInStsCommon` и `Device_DefaultAlarmCfgOfAllTypes_PassesCheckAlarmCfg`.
 
 Сверх контракта (29): `Device_HookViaThis_DispatchesToMostDerivedOverride`,
 `Device_SuperBodyCall_RunsBaseBodyOnSameStructs`, `Device_DerivedBodyWithoutSuper_BaseBodyNotRun`,

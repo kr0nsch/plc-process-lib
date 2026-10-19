@@ -3,7 +3,7 @@
 test_conventions.py сверяет src/ с таблицами, перенесёнными в код теста. Здесь источник — сам
 документ docs/API.md: тексты DUT (без комментариев, токен в токен), таблица констант 5.1, карты
 битов и сигнатуры интерфейсов раздела 6. Тест падает, если правка попала только в документ или
-только в исходники. Известные отступления реализации — в KNOWN_RENAMES (F-17, docs/ASSUMPTIONS.md).
+только в исходники. Известные отступления имён — в KNOWN_RENAMES (с 1.0.0 их нет: F-17 закреплено в контракте).
 
 Запуск: python -m pytest (каталог входит в testpaths, pyproject.toml).
 """
@@ -19,8 +19,9 @@ import stlayout as L
 REPO_ROOT = common.REPO_ROOT
 API_MD = os.path.join(REPO_ROOT, "docs", "API.md")
 
-# (интерфейс, имя по контракту) -> имя в исходниках: отступления, записанные в ASSUMPTIONS.md
-KNOWN_RENAMES: dict[tuple[str, str], str] = {("I_Alarm", "Priority"): "AlarmPriority"}
+# (интерфейс, имя по контракту) -> имя в исходниках: отступления, записанные в ASSUMPTIONS.md.
+# Пусто с контракта 1.0.0: AlarmPriority (F-17) — имя самого контракта.
+KNOWN_RENAMES: dict[tuple[str, str], str] = {}
 
 _TYPE_RE = re.compile(r"((?:\{attribute '[^']+'\}\s*)*)TYPE\s+(\w+)\s*:(.*?)END_TYPE", re.S)
 _ATTR_RE = re.compile(r"\{attribute '([^']+)'\}")

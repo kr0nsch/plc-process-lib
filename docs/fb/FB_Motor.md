@@ -355,36 +355,10 @@ GVL_IO.xM201_QReset := GVL_Devices.fbM201.xQReset;
 
 ## Допущения и отклонения
 
-Решения, которые контракт не задаёт или задаёт неоднозначно; интегратор переносит их в
-[ASSUMPTIONS.md](../ASSUMPTIONS.md).
-
-| № | Суть | Обоснование / чем проверено |
-|---|---|---|
-| M-01 | `xRunCmd` — команда работы **ПЛК**: TRUE только в Auto/Manual при `eState` Starting или Running. В Local и OOS `eState` может быть Running (следует ОС), но `xRunCmd = FALSE` | Контракт определяет `xRunCmd` как «`eState` = Starting или Running», не оговаривая Local; иначе в Local был бы бит `RUN_CMD` и `FB_MotorVfd` считал бы задание. `Motor_LocalMode_OutputsOffTracksFeedback` |
-| M-02 | Причина для Reset: FailToStart и FeedbackLost снимаются в момент Reset (длящейся причины нет); FailToStop и UncommandedRun — когда двигатель не работает по ОС (`xRunning`); ExtFault — когда снят вход аварии (`xExtFault OR xExtFaultAdd`, до фильтра) | `Motor_Reset_CauseClearsWithinWindow_FaultCleared`, `Motor_ExtFault_TripsAndResetRejectedWhileActive`, `MotorVfd_VfdFault_TripsAndResetPulses` |
-| M-03 | Пауза `tMinStop` — от фактического останова (первый вызов без команды и без работы по ОС), от старта ПЛК и от спада `xPowerOk`; «время назад» отсчитывает её заново | Контракт: «с последнего останова», «момент пропадания считается остановом». `Motor_MinStopTime_InhibitsRestart_ReportsRemaining`, `Motor_PowerLoss_StopsWithoutFault_StartsMinStop`, `Motor_PowerDipWhileStopped_PauseFromPowerLoss` (провал питания у стоящего двигателя) |
-| M-04 | `tMinRun` держит запрос только в Running: снятие `xAutoRun` во время Starting — останов сразу | Буква 13.3 («от входа в Running»). `Motor_MinRunTime_DelaysAutoStop` |
-| M-05 | Наработка: шаг `ltDt` засчитывается, если двигатель работал в прошлом вызове; фронт `xRunning` в первом вызове — пуск, только если первый вызов сам запустил двигатель (без ОС), подхват — не пуск | Погрешность — один цикл на пуск в любую сторону; так подхват не даёт ложный пуск. `Motor_RunHours_*`, `Motor_PlcRestart_RunningFeedback_Adopted` |
-| M-06 | Бит `MOT_STS_START_INHIBIT` и `uiInhibitRemain_s` показываются, пока двигатель стоит (нет команды и работы по ОС); `MOT_WRN_STARTS_LIMIT` — всегда, когда пусков за час не меньше лимита | Во время работы отсчёт паузы не идёт, и «остаток» вводил бы оператора в заблуждение |
-| M-07 | Первопричина записывается во всех режимах, кроме OutOfService; слот 5 `InterlockTrip` активен от останова блокировкой до возврата маскированного слова в 0 | В OOS блокировки не действуют (13.3). `Motor_InterlockTrip_SlotAlarmWhileInterlockActive` |
-| M-08 | Принудительный останов в Manual (блокировка **и** отсутствие корректной Cfg) снимает ручную защёлку | Контракт оговаривает блокировку; без корректной Cfg подхваченный двигатель иначе запустился бы сам, когда Cfg исправят. `Motor_InterlockCleared_AutoRestarts_ManualDoesNot` |
-| M-09 | `xStart` при уже поданной команде (Starting, Running) — `Accepted` без проверок; во время Stopping — обычные проверки (пауза отсчитывается от останова), пуск — после останова. Если к останову условие пуска уже не выполнено, отложенный пуск отменяется вторым результатом `RejectedPermit`/`RejectedInhibit` | Повторное нажатие «Пуск» на работающем двигателе не должно давать «отклонено: пауза». Без отмены защёлка ждала бы и двигатель в Manual запустился бы сам, когда разрешение вернётся (хоть через час): 13.5 — «защёлка не ставится». `Motor_StartWhileStopping_PermitLostCancelsLatch` |
-| M-10 | Пропадание напряжения: Starting, Running, Stopping → Stopped, если ОС = 0; пока ОС ещё есть (выбег; ПЧ пережил провал) — Stopping (контракт: Running/Starting → Stopped). В Local и OOS состояние следует ОС и от напряжения не зависит | Без напряжения контроль ОС приостановлен. Но после короткого провала, который пережил ПЧ, ОС остаётся, а Stopped с ОС через `tFbStart` давал ложный UncommandedRun (High), фиксируемый до Reset; Stopping контролирует торможение по `tFbStop`. Пуск после провала — только после останова (и `tMinStop`). `Motor_PowerDipFeedbackStays_StoppingWithoutUncommandedRun` |
-| M-11 | Выход из Fault, когда отказ снят: ОС = 0 → Stopped; ОС = 1 и есть запрос (и нет блокировки, есть Cfg и напряжение) → Running; иначе → Stopping (в том числе при недостоверной ОС) | Обобщение трёх переходов диаграммы 13.7. `MotorVfd_CommLoss_FaultAfterDelayNotLatched`, `MotorVfd_CommRestored_RunningWithoutDemand_Stops` |
-| M-12 | `xFbUsed = FALSE` отключает и ОС наследника (`xFbOverride`): ОС моделируется командой | «Без ОС … ОС моделируется командой» (13.6) — без исключений |
-| M-13 | Внешняя авария в OutOfService не фиксируется (вход фильтра в OOS снят); вход в OOS закрывает и окно Reset | «все, кроме OOS» (13.6) |
-| M-14 | `stSts.wPermitMissing` — только биты маски разрешений; доп. запрет наследника (ПЧ не готов) виден в бите `MOT_STS_PERMIT_MISSING`, но не в слове | Слово — номера причин для `TL_Reason`; у «ПЧ не готов» номера в маске нет |
-| M-15 | `MOT_STS_INTERLOCKED` — в Auto, Manual и Local (в Local — вместе с предупреждением), не в OOS; `MOT_WRN_FB_SUSPENDED` — только в Auto/Manual при `xFbUsed` | В Local и OOS контроля ОС нет — приостанавливать нечего |
-| M-16 | Значение процесса в событиях тревог двигателя — 0 (слоты 0–5) | У двигателя нет аналоговой величины; номер причины блокировки — в `uiFirstOut` |
-| M-17 | `LTIME` без знака: разности (`tMinRun`, `tMinStop`, окно Reset) считаются только после проверки «время назад», при «времени назад» отметка переносится на текущий момент | L7 контракта. `Motor_TimeBackwards_NoFaultNoCountJump` |
-| M-18 | Подхват при старте ПЛК решается по **первой достоверной ОС**, а не только в первом вызове: у ПЧ с ОС по связи (`xFbInvalid`, пока Modbus не опросил слейв) подхват ждёт связи; до этого контроль ОС приостановлен, подхват — не пуск. Ожидание снимается и при входе в Starting | Контракт 13.7 говорит о первом вызове; в первых циклах после перезапуска мастер Modbus ещё не прочитал слово состояния, и работающий ПЧ иначе не подхватился бы, а через `tFbStart` после появления связи сработал бы ложный UncommandedRun. `MotorVfd_PlcRestartCommLater_AdoptedWithoutFault` |
-| M-19 | В Local `eState = Fault` при любом действующем отказе (зафиксированном раньше, внешней аварии, отказе связи ПЧ), контракт называет только внешнюю аварию | Отказ, зафиксированный до перехода в Local, не снимается сменой режима (снимают Reset или вход в OOS). `Motor_ExtFaultInLocal_Latches` |
-| M-20 | FailToStop контролируется и в Fault (Auto, Manual), если двигатель отключён отказом ExtFault, FailToStart или FeedbackLost, а ОС держится дольше `tFbStop` (контракт: только Stopping). Не при UncommandedRun (ОС без команды — это и есть его причина) и не при одном отказе связи ПЧ (снимается сам по восстановлении связи, 13.7) | Сварившийся контактор после срабатывания теплового реле: команда снята, двигатель работает, а оператор видел только ExtFault (Medium). FailToStop (High) — «механизм не остановить из ПЛК». `Motor_FeedbackStaysAfterTrip_RaisesFailToStop` |
-| M-21 | Счётчики (наработка, пуски, текущая непрерывная работа) перекрывают провал ОС в Running короче `tFbLossFilter` (Auto, Manual): пока идёт фильтр FeedbackLost, двигатель для счётчиков работает (контракт: фронт `xRunning`). Выход `xRunning` и бит `MOT_STS_RUNNING` показывают ОС как есть | Дребезг блок-контакта засчитывался пуском и обнулял `CurrentRunSeconds`, по которой станция ограничивает непрерывную работу и чередует насосы (проект 02). `Motor_FeedbackDropoutWithinFilter_NotCountedAsStart` |
-| M-22 | `ReadyToStart` — «стоит»: нет ни команды работы, ни работы по ОС (контракт 13.8: `NOT xRunning`) | Интерфейс I_Motor: «Available AND стоит …». В Starting (ОС ещё нет, `tMinStop = 0`) насос был «готов к пуску», и станция считала бы запускаемый насос резервом. `Motor_ReadyToStart_FalseWhileStarting` |
-| M-23 | `xOosAllowed` — `eState` не Starting/Running/Stopping **и** `NOT xRunning` (контракт 13.8: только по `eState`) | 2.2: «принимается, только если механизм стоит». В Fault с ОС (отключён отказом, а контактор сварился) вывод из работы снимал зафиксированные отказы, в том числе FailToStop (High), и работающий двигатель уходил «в ремонт» без тревог. `Motor_OosRequestWhileRunningByFeedback_Rejected` |
-
-Фундамент (DUT, константы, интерфейсы, `FB_DeviceBase`) не менялся: защищённого API базы хватило.
+Решения реализации M-01…M-23 — [ASSUMPTIONS.md, «FB_Motor»](../ASSUMPTIONS.md#fb_motor). Изменения нормативного
+поведения контракта rc2 — M-09 (отмена отложенного пуска), M-10 (провал питания с ОС), M-18 (подхват по первой
+достоверной ОС), M-20 (FailToStop в Fault), M-21 (счётчики при дребезге ОС), M-22 (`ReadyToStart`), M-23 (вывод из
+работы) — [API.md, «Отклонения от rc2»](../API.md#отклонения-от-rc2). Фундамент семейство не меняло.
 
 ## Статанализ
 
@@ -460,5 +434,5 @@ GVL_IO.xM201_QReset := GVL_Devices.fbM201.xQReset;
 
 Числа — `tools/reference/motor.py` (сценарии `run_*`, `inhibit_*`, `starts_limit_3_*`, `maint_runtime_*`,
 `current_run_*`, `dropout_bridged_*`), сверка модели с тестами — `tools/project_checks/test_motor_reference.py`. Тесты
-`Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов) пишет основа после
-слияния семейств (F-26); тип и умолчания двигателя проверяет первый тест набора.
+`Device_DevType_ReportedInStsCommon` и `Device_DefaultCfg_PassesCheck` (все семь типов) — в наборе
+`FB_Integration_Test` (F-26); тип и умолчания двигателя проверяет и первый тест набора.
