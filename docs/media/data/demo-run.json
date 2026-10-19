@@ -1,0 +1,21 @@
+{
+  "codesys_version": "3.5.17.30",
+  "profile": "CODESYS V3.5 SP17 Patch 3",
+  "device": "CODESYS Control Win V3 (4096 / 0000 0001 / 3.5.17.30)",
+  "runtime": "CODESYS Control Win V3 (пользовательский процесс)",
+  "library": "plc-process-lib 1.0.0.0 (plc-portfolio)",
+  "task": "MainTask 10 мс, PRG_Demo",
+  "started": "2026-10-19T12:26:10",
+  "app_started": "2026-10-19T12:26:13",
+  "ended": "2026-10-19T12:29:05",
+  "wait_s": 150.6,
+  "commit": "1e0356d-dirty",
+  "counts": {
+    "alarm": 501,
+    "events": 7,
+    "loop": 751,
+    "ne43": 581
+  },
+  "exported": "2026-10-19T12:29:35",
+  "source": "python tools/demo/run_demo.py (tools/demo/src/PRG_Demo, журналы GVL_DemoLog)"
+}

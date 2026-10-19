@@ -26,12 +26,14 @@ ignore = [
 [tool.ruff.format]
 # Скрипты CODESYS форматируются вручную: форматтер ruff рассчитан на Python 3 и может
 # добавить запятую после *args/**kwargs, а это SyntaxError в IronPython 2.7.
-exclude = ["tools/codesys/*.py"]
+exclude = ["tools/codesys/*.py", "tools/demo/demo_capture.py"]
 
 [tool.ruff.lint.per-file-ignores]
 # Общее подмножество Python 2.7 и 3.x: __future__, "%"-форматирование, class X(object),
 # без f-строк, распаковки [*a], raise ... from, contextlib.suppress
 "tools/codesys/*.py" = ["UP", "SIM", "C4", "B904", "RUF005", "RUF012"]
+# Шаг demo демонстрационного прогона — тоже скрипт CODESYS (IronPython 2.7)
+"tools/demo/demo_capture.py" = ["UP", "SIM", "C4", "B904", "RUF005", "RUF012"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -44,6 +46,10 @@ warn_unreachable = true
 exclude = [
     '^tools/codesys/(?!stlayout\.py$)[^/]*\.py$',
     '^tools/tests/fixtures/',
+    # Демо для медиа README: шаг CODESYS (IronPython 2.7) и графики (matplotlib и медиакит
+    # портфолио — не зависимости репозитория)
+    '^tools/demo/demo_capture\.py$',
+    '^tools/demo/plot_demo\.py$',
 ]
 
 [tool.pytest.ini_options]

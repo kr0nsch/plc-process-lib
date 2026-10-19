@@ -1,6 +1,27 @@
-# plc-process-lib
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/media/banner-light.svg">
+    <img alt="Баннер plc-process-lib: контур регулирования расхода — расходомер, регулятор FIC в ПЛК, регулирующий клапан, задвижка с электроприводом и набор функциональных блоков" src="docs/media/banner-light.svg" width="100%">
+  </picture>
+</p>
 
-[![CI](https://github.com/<GITHUB_USER>/plc-process-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/<GITHUB_USER>/plc-process-lib/actions/workflows/ci.yml)
+<p align="center">
+  <a href="https://github.com/<GITHUB_USER>/plc-process-lib/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/<GITHUB_USER>/plc-process-lib/ci.yml?branch=main&style=flat-square&label=CI&labelColor=1B2736"></a>
+  <a href="LICENSE"><img alt="Лицензия MIT" src="https://img.shields.io/badge/license-MIT-56677D?style=flat-square&labelColor=1B2736"></a>
+  <img alt="CODESYS 3.5.17" src="https://img.shields.io/badge/CODESYS-3.5.17-C2410C?style=flat-square&labelColor=1B2736">
+  <img alt="IEC 61131-3" src="https://img.shields.io/badge/IEC%2061131--3-56677D?style=flat-square">
+  <img alt="Язык: Structured Text" src="https://img.shields.io/badge/Structured%20Text-3A4B60?style=flat-square">
+  <a href="docs/TEST_REPORT.md"><img alt="coUnit: 453 теста в CODESYS Control Win V3" src="https://img.shields.io/badge/coUnit-453%20%D1%82%D0%B5%D1%81%D1%82%D0%B0-3A4B60?style=flat-square&labelColor=1B2736"></a>
+</p>
+
+<p align="center">
+  <a href="#демонстрация">Демо</a> ·
+  <a href="#архитектура">Архитектура</a> ·
+  <a href="#быстрый-старт">Быстрый старт</a> ·
+  <a href="docs/">Документация</a> ·
+  <a href="#summary-en">Summary (EN)</a>
+</p>
 
 Библиотека технологических функциональных блоков для CODESYS V3.5 SP17 Patch 3 (целевой ПЛК — ОВЕН
 ПЛК210, пространство имён `PL`): аналоговые и дискретные входы, двигатели прямого пуска и с ПЧ,
@@ -12,10 +33,41 @@ NE 43), квитирование и обмен с HMI/SCADA через стру�
 
 ## Демонстрация
 
-> **Плейсхолдер.** Графики реальных прогонов (переходный процесс ПИД на модели объекта первого порядка с
-> запаздыванием, фильтр и подтверждение отказа AI по NE 43, ход задвижки с реверсом) и скриншоты итогов
-> `cds.py test` будут добавлены отдельным проходом по медиа. Сейчас итоги прогона — текстом в
-> [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
+Все графики ниже — журналы одного прогона демо-приложения [tools/demo/](tools/demo/README.md) на установленной
+библиотеке 1.0.0.0 в CODESYS Control Win V3 (реальное время, задача 10 мс, 19.10.2026). Объект в контуре —
+модель ёмкости на ST; данные — CSV в [docs/media/data/](docs/media/data/), графики из них не сглаживались.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/chart-level-loop-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/media/chart-level-loop-light.png">
+    <img alt="Контур уровня AI → ПИД → ПЧ в Control Win: пуск насоса без рывка, ступень задания 2,5 → 1,5 м с выходом ПИД в 100 % около 26 с и недорегулированием 0,06 м, затем ступень притока 120 → 210 м³/ч" src="docs/media/chart-level-loop-light.png" width="900">
+  </picture>
+</p>
+<p align="center"><sub><code>FB_AnalogInput</code> → <code>FB_PID</code> → <code>FB_MotorVfd</code>: слежение ПИД до пуска насоса, насыщение выхода с обратным расчётом по фактическому заданию ПЧ, отработка притока · <a href="docs/media/data/demo-level-loop.csv">CSV</a></sub></p>
+
+<p align="center">
+  <img alt="Прогон cds.py test в PowerShell: импорт исходников в новый проект, сборка без ошибок и предупреждений, 453 теста coUnit в 14 наборах пройдены в CODESYS Control Win V3" src="docs/media/demo-cds-test.gif" width="900">
+</p>
+<p align="center"><sub><code>python tools/codesys/cds.py test</code> — реальный прогон на CODESYS 3.5.17.30 и Control Win V3 (19.10.2026), снято term2gif; ожидание компиляции и тестов в GIF сжато</sub></p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/chart-ne43-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/media/chart-ne43-light.png">
+    <img alt="NAMUR NE 43 на входе FB_AnalogInput: ток 0 → 24 мА, отказ до 3,6 и от 21,0 мА, выход в защитные полосы подтверждается через 2 с, xValid снимается и возвращается с задержкой, значение удерживается" src="docs/media/chart-ne43-light.png" width="900">
+  </picture>
+</p>
+<p align="center"><sub>Мгновенная классификация <code>eSignal</code>, подтверждённый статус NE 107 и <code>xValid</code>: задержка подтверждения 2 с на появление и на возврат, насыщение на 3,8 и 20,5 мА · <a href="docs/media/data/demo-ne43.csv">CSV</a></sub></p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/chart-isa18-alarm-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/media/chart-isa18-alarm-light.png">
+    <img alt="Тревога H уровня по ISA-18.2: Normal, ActiveUnack, ActiveAck после квитирования, RtnUnack после возврата без квитирования, Shelved на 15 с и повторное оповещение по истечении срока" src="docs/media/chart-isa18-alarm-light.png" width="900">
+  </picture>
+</p>
+<p align="center"><sub>Тревога в слоте H аналогового входа: квитирование и shelve — командами <code>stCmd</code>, как кнопками HMI; по истечении shelve активная тревога снова не квитирована · <a href="docs/media/data/demo-alarm.csv">CSV</a></sub></p>
 
 ## Функциональные блоки
 
@@ -153,9 +205,9 @@ GVL_IO.xM201_QRun := GVL_Devices.fbM201.xQRun;
    Моточасы и пуски живут в `stRetain` — объект Persistent Variables создаётся вручную
    ([MANUAL_STEPS.md](docs/MANUAL_STEPS.md), раздел 10).
 
-## Быстрый старт без железа
+## Быстрый старт
 
-Нужен Python 3.11+ (в CI — 3.12). CODESYS не нужен.
+Без железа и без CODESYS: нужен только Python 3.11+ (в CI — 3.12).
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -179,6 +231,7 @@ python tools/reference/pid.py                   # эталоны тестов: c
 | `python tools/codesys/cds.py roundtrip` | импорт → экспорт → побайтное сравнение с `src/` и `tests/` |
 | `python tools/codesys/cds.py library` | сборка `.library` и проверка пула библиотеки |
 | `python tools/codesys/cds.py report` | итоги прогона → [docs/TEST_REPORT.md](docs/TEST_REPORT.md) |
+| `python tools/demo/run_demo.py` | демонстрационный прогон на установленной библиотеке 1.0.0.0 → CSV в `docs/media/data/` ([tools/demo/](tools/demo/README.md)) |
 
 Рантайм один на машину: если тесты гоняет другой репозиторий, `cds.py` ждёт блокировку. Соглашения
 тестов (наборы, регистрация, имена, `FB_FakeTime`, правило NaN) — [docs/TESTING.md](docs/TESTING.md).
@@ -229,6 +282,7 @@ coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.202
 - [MANUAL_STEPS.md](docs/MANUAL_STEPS.md) — шаги в IDE: библиотека, тесты, Persistent Variables, релиз
 - [CONSUMERS.md](docs/CONSUMERS.md) — что изменить у потребителей (iolistgen, КНС); [alarm_templates.csv](docs/alarm_templates.csv) — шаблоны текстов тревог
 - [LAYOUT.md](docs/LAYOUT.md) — раскладка исходников; правила кода — [CONTRIBUTING.md](CONTRIBUTING.md); изменения — [CHANGELOG.md](CHANGELOG.md)
+- [tools/demo/](tools/demo/README.md) — демонстрационный прогон: приложение на установленной библиотеке, сценарии, журналы [docs/media/data/](docs/media/data/)
 
 ## Ограничения и дальнейшие шаги
 
@@ -247,8 +301,10 @@ coUnit 1.2.0.0, CODESYS 3.5.17.30, CODESYS Control Win V3 (32 бит), 19.10.202
   защиты объекта дублируются аппаратно (в Local ПЛК механизм не останавливает, A-04).
 - iec_checker 0.4 и RuSTy 1.0.6 понимают не все конструкции CODESYS: что понижение скрывает —
   [tools/README.md](tools/README.md), что осталось в коде — [STATIC_ANALYSIS.md](docs/STATIC_ANALYSIS.md).
-- Дальше: графики и скриншоты прогонов (раздел «Демонстрация»), релиз v1.0.0 с `.library` и
-  `.compiled-library` ([MANUAL_STEPS.md](docs/MANUAL_STEPS.md), раздел 12), КНС на этой библиотеке (проект 02).
+- Графики раздела «Демонстрация» — прогон на модели объекта в Control Win, а не на реальной ёмкости и не на
+  ПЛК210: они показывают поведение ФБ, а не настройку контура для конкретного объекта.
+- Дальше: релиз v1.0.0 с `.library` и `.compiled-library` ([MANUAL_STEPS.md](docs/MANUAL_STEPS.md),
+  раздел 12), КНС на этой библиотеке ([kns-pump-station](https://github.com/<GITHUB_USER>/kns-pump-station)).
 
 ## Summary (EN)
 
@@ -266,3 +322,12 @@ hardware.
 ## Лицензия
 
 [MIT](LICENSE) © 2026 <ИМЯ ФАМИЛИЯ>
+
+---
+
+<p align="center"><b>Портфолио АСУ ТП</b></p>
+<table>
+<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-repo-template">01 · plc-repo-template</a><br><sub>ST в git, сборка проекта скриптом, CI</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-process-lib"><b>02 · plc-process-lib</b></a><br><sub>ФБ: AI, двигатель, ПЧ, задвижка, ПИД, тревоги</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/kns-pump-station">03 · kns-pump-station</a><br><sub>флагман: КНС, три насоса с ПЧ, модель, HMI</sub></td></tr>
+<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/kns-port-domestic">04 · kns-port-domestic</a><br><sub>перенос на Astra.IDE / MasterSCADA 4D</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-iiot-stack">05 · plc-iiot-stack</a><br><sub>OPC UA / MQTT → InfluxDB → Grafana</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/iolistgen">06 · iolistgen</a><br><sub>перечень сигналов → ST, карты Modbus, SCADA</sub></td></tr>
+<tr><td width="33%"><a href="https://github.com/<GITHUB_USER>/plc-ci-toolkit">07 · plc-ci-toolkit</a><br><sub>линтеры, сборка CODESYS, тесты, JUnit</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/s7-to-codesys">08 · s7-to-codesys</a><br><sub>конвертер SCL → ST с отчётом о переносе</sub></td><td width="33%"><a href="https://github.com/<GITHUB_USER>/sis-interlock-demo">09 · sis-interlock-demo</a><br><sub>ПАЗ: MooN, матрица причин и следствий</sub></td></tr>
+</table>
